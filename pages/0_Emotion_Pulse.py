@@ -496,7 +496,7 @@ def run():
     if not st.session_state.plot_interacted:
         st.markdown(f"""
         <div id="initial-hover-box">
-            {seed_text}<br><br><b><span style="text-decoration: underline; text-decoration-color: #ffc300; text-decoration-thickness: 3px;">Hover over</span></b> to find out 🔍
+            {seed_text}<br><br><b><span style="text-decoration: underline; text-decoration-color: #ffc300; text-decoration-thickness: 3px;">Hover over</span></b> to find out
         </div>
         """, unsafe_allow_html=True)
 
