@@ -84,15 +84,16 @@ def run():
     # Color mapping from your script to interface
     script_custom_cmap = ['#1f77b4', '#808000', '#ff7f0e', '#d62728', '#9467bd', '#8c564b', '#17becf']
     
-    # Topic mapping with colors (matching your custom_cmap order)
+    # Topic mapping with colors (matching your custom_cmap order).
+    # Icons intentionally left empty — color alone is the category anchor.
     topic_mapping = {
-        'Self-Regulation': {'color': '#1f77b4', 'icon': '🎯'},
-        'Awareness': {'color': '#84cc16', 'icon': '🌿'},  # Updated to lime for better visibility
-        'Buddhism & Spirituality': {'color': '#f59e0b', 'icon': '🕉️'},
-        'Concentration & Flow': {'color': '#ef4444', 'icon': '🎯'},
-        'Practice, Retreat, & Meta': {'color': '#a855f7', 'icon': '🏛️'},
-        'Anxiety & Mental Health': {'color': '#22c55e', 'icon': '💚'},
-        'Meditation & Mindfulness': {'color': '#17becf', 'icon': '🧘'}
+        'Self-Regulation': {'color': '#1f77b4', 'icon': ''},
+        'Awareness': {'color': '#84cc16', 'icon': ''},
+        'Buddhism & Spirituality': {'color': '#f59e0b', 'icon': ''},
+        'Concentration & Flow': {'color': '#ef4444', 'icon': ''},
+        'Practice, Retreat, & Meta': {'color': '#a855f7', 'icon': ''},
+        'Anxiety & Mental Health': {'color': '#22c55e', 'icon': ''},
+        'Meditation & Mindfulness': {'color': '#17becf', 'icon': ''}
     }
 
     def calculate_river_flow_data(df_nodes, df_edges, selected_quarter):
@@ -161,7 +162,7 @@ def run():
                 'avg_sentiment': avg_sentiment,
                 'co_occurrences': top_co_occurrences,
                 'color': topic_mapping.get(cluster, {}).get('color', '#64748b'),
-                'icon': topic_mapping.get(cluster, {}).get('icon', '📊')
+                'icon': topic_mapping.get(cluster, {}).get('icon', '')
             }
         
         return {
@@ -624,153 +625,36 @@ def run():
         return html_code
 
     def create_functional_timeline(quarter_labels, current_index):
-        """Create a timeline where the visual dots are actually functional Streamlit buttons"""
-        
+        """Clean native Streamlit select_slider for quarter navigation.
+
+        Replaces the earlier button-dot hack that rendered as ovals because
+        of unreliable !important CSS. select_slider is visually refined out
+        of the box, mobile-friendly, and has labeled discrete ticks.
+        """
         selected_label = quarter_labels[current_index]
-        first_quarter = quarter_labels[0]
-        last_quarter = quarter_labels[-1]
-        
-        # Center the timeline and make it 2/3 of screen width
-        col_left, col_center, col_right = st.columns([1, 4, 1])
-        
-        with col_center:
-            # Clean minimal timeline header: single line, no decoration, no emoji.
-            # "Time travel" matches the phrasing used on pages 1 and 3.
-            st.markdown(f"""
-            <div style="text-align: center; margin: 0.5rem 0 0.75rem 0;">
-                <span style="font-size: 13px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase;">Time travel</span>
-                <span style="font-size: 20px; font-weight: 700; color: #1e293b; margin-left: 10px;">{selected_label}</span>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Create the connecting line
-            st.markdown("""
-            <div style="position: relative; margin: 0 30px 20px 30px; height: 20px;">
-                <div style="position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: #e5e7eb; transform: translateY(-50%);"></div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Create functional timeline dots using Streamlit buttons
-            timeline_cols = st.columns(len(quarter_labels))
-            
-            for i, (col, quarter) in enumerate(zip(timeline_cols, quarter_labels)):
-                with col:
-                    # Use empty string to hide button text completely
-                    if st.button("", 
-                               key=f"q_{i}",
-                               help=f"{'Current: ' + quarter if i == current_index else 'Switch to ' + quarter}",
-                               disabled=(i == current_index)):
-                        st.session_state.slider_index = i
-                        st.rerun()
-            
-            # Add the start and end labels
-            st.markdown(f"""
-            <div style="display: flex; justify-content: space-between; margin-top: 15px; padding: 0 30px;">
-                <span style="font-size: 14px; color: #6366f1; font-weight: 600;">{first_quarter}</span>
-                <span style="font-size: 14px; color: #6366f1; font-weight: 600;">{last_quarter}</span>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        # Add aggressive CSS to override Streamlit's button styling
-        st.markdown("""
-        <style>
-        /* Target buttons by their key pattern - most specific approach */
-        button[data-testid="baseButton-secondary"][key*="q_"],
-        button[data-testid="baseButton-primary"][key*="q_"],
-        button[kind="secondary"][key*="q_"],
-        button[kind="primary"][key*="q_"],
-        div[data-testid="stButton"] button[key*="q_"],
-        .stButton button[key*="q_"] {
-            width: 20px !important;
-            height: 20px !important;
-            min-width: 20px !important;
-            min-height: 20px !important;
-            max-width: 20px !important;
-            max-height: 20px !important;
-            border-radius: 50% !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            border: 2px solid white !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
-            transition: all 0.2s ease !important;
-            font-size: 0 !important;
-            line-height: 0 !important;
-            overflow: hidden !important;
-            background: #d1d5db !important;
-            position: relative !important;
-            z-index: 10 !important;
-        }
-        
-        /* Active/Disabled button styling */
-        button[data-testid="baseButton-primary"][key*="q_"][disabled],
-        button[kind="primary"][key*="q_"][disabled],
-        div[data-testid="stButton"] button[key*="q_"][disabled],
-        .stButton button[key*="q_"][disabled] {
-            background: #6366f1 !important;
-            opacity: 1 !important;
-            cursor: default !important;
-            box-shadow: 0 3px 10px rgba(99, 102, 241, 0.4) !important;
-        }
-        
-        /* Hover effects */
-        button[data-testid="baseButton-secondary"][key*="q_"]:not([disabled]):hover,
-        button[kind="secondary"][key*="q_"]:not([disabled]):hover,
-        div[data-testid="stButton"] button[key*="q_"]:not([disabled]):hover,
-        .stButton button[key*="q_"]:not([disabled]):hover {
-            background: #9ca3af !important;
-            transform: scale(1.15) !important;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
-        }
-        
-        /* Hide all content inside buttons */
-        button[key*="q_"] * {
-            display: none !important;
-        }
-        
-        button[key*="q_"]::before,
-        button[key*="q_"]::after {
-            display: none !important;
-        }
-        
-        /* Center buttons in their containers */
-        div[data-testid="column"]:has(button[key*="q_"]) {
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-        }
-        
-        .stButton:has(button[key*="q_"]) {
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            margin: 0 !important;
-        }
-        
-        /* Alternative broader targeting */
-        div[data-testid="stButton"] button {
-            width: 20px !important;
-            height: 20px !important;
-            border-radius: 50% !important;
-            background: #d1d5db !important;
-            border: 2px solid white !important;
-            font-size: 0 !important;
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-        
-        div[data-testid="stButton"] button[disabled] {
-            background: #6366f1 !important;
-            opacity: 1 !important;
-        }
-        
-        /* Remove any text or content */
-        div[data-testid="stButton"] button > div,
-        div[data-testid="stButton"] button span,
-        div[data-testid="stButton"] button p {
-            display: none !important;
-        }
-        </style>
+
+        # Clean minimal header: eyebrow label + current quarter
+        st.markdown(f"""
+        <div style="text-align: center; margin: 0.5rem 0 0.25rem 0;">
+            <span style="font-size: 13px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase;">Time travel</span>
+            <span style="font-size: 20px; font-weight: 700; color: #1e293b; margin-left: 10px;">{selected_label}</span>
+        </div>
         """, unsafe_allow_html=True)
+
+        # Native slider, centered at 2/3 page width
+        col_l, col_c, col_r = st.columns([1, 4, 1])
+        with col_c:
+            new_label = st.select_slider(
+                label="Quarter",
+                options=quarter_labels,
+                value=selected_label,
+                label_visibility="collapsed",
+                key="tt_select_slider",
+            )
+
+        if new_label != selected_label:
+            st.session_state.slider_index = quarter_labels.index(new_label)
+            st.rerun()
     def create_professional_sidebar_html(river_data, selected_label, colors, quarter_labels, current_index):
         """Create the Professional River Flow sidebar HTML - cleaned up without time navigation"""
         
@@ -809,7 +693,7 @@ def run():
             story_tributaries_html += f"""
             <div style="background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 4px solid {stats['color']};">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <div style="font-size: 16px; font-weight: 700; color: #1e293b;">{stats['icon']} {cluster}</div>
+                    <div style="font-size: 16px; font-weight: 700; color: #1e293b;">{cluster}</div>
                     <div style="font-size: 14px; font-weight: 700; color: {stats['color']};">{stats['percentage']:.1f}%</div>
                 </div>
                 <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">{description} • {stats['count']:,} discussions</div>
