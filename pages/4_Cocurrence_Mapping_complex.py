@@ -185,7 +185,6 @@ def run():
             return f"""
             <div style="display: flex; justify-content: center; align-items: center; height: 600px; background: white; border-radius: 8px;">
                 <div style="text-align: center; color: #64748b;">
-                    <div style="font-size: 24px; margin-bottom: 8px;">📊</div>
                     <div>No data available for {selected_label}</div>
                 </div>
             </div>
@@ -338,7 +337,7 @@ def run():
         <body>
             <div class="container">
                 <div class="quarter-overlay">
-                    🌊 {selected_label}
+                    {selected_label}
                 </div>
                 <div id="plotDiv"></div>
             </div>
@@ -635,16 +634,11 @@ def run():
         col_left, col_center, col_right = st.columns([1, 4, 1])
         
         with col_center:
-            # Create the beautiful timeline header
+            # Clean minimal timeline header: single line, no decoration, no emoji
             st.markdown(f"""
-            <div style="background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 16px; padding: 30px 40px; margin: 1rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-                <div style="text-align: center; margin-bottom: 25px;">
-                    <div style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <span>⏰</span>
-                        <span>TIME NAVIGATION</span>
-                    </div>
-                    <div style="font-size: 28px; font-weight: 700; color: #6366f1; margin-bottom: 20px;">{selected_label}</div>
-                </div>
+            <div style="text-align: center; margin: 0.5rem 0 0.75rem 0;">
+                <span style="font-size: 13px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase;">Quarter</span>
+                <span style="font-size: 20px; font-weight: 700; color: #1e293b; margin-left: 10px;">{selected_label}</span>
             </div>
             """, unsafe_allow_html=True)
             
@@ -836,18 +830,14 @@ def run():
         ">
             <!-- Header -->
             <div style="margin-bottom: 25px; text-align: center;">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px;">
-                    <div style="font-size: 24px;">🧠</div>
-                    <div style="font-size: 20px; font-weight: 800; color: #1e293b;">Living Narrative Intelligence</div>
-                </div>
+                <div style="font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">Living Narrative Intelligence</div>
                 <div style="font-size: 12px; color: #64748b; line-height: 1.4;">Where meditation stories converge and flow together</div>
             </div>
-            
+
             <!-- Flow Filters -->
             <div style="margin-bottom: 25px;">
-                <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                    <span>🎚️</span>
-                    <span>FLOW FILTERS</span>
+                <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 15px; letter-spacing: 0.05em;">
+                    FLOW FILTERS
                 </div>
                 
                 <div style="margin-bottom: 15px;">
@@ -867,12 +857,10 @@ def run():
                     <div style="font-size: 13px; color: #374151; font-weight: 600; margin-bottom: 10px;">Sentiment Flow</div>
                     <div style="display: flex; gap: 12px;">
                         <div style="flex: 1; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); transition: all 0.2s ease;">
-                            <div style="font-size: 16px; margin-bottom: 4px;">😊</div>
-                            <div style="font-size: 11px; color: #16a34a; font-weight: 600;">Positive</div>
+                            <div style="font-size: 12px; color: #16a34a; font-weight: 600;">Positive</div>
                         </div>
                         <div style="flex: 1; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); transition: all 0.2s ease;">
-                            <div style="font-size: 16px; margin-bottom: 4px;">😔</div>
-                            <div style="font-size: 11px; color: #dc2626; font-weight: 600;">Negative</div>
+                            <div style="font-size: 12px; color: #dc2626; font-weight: 600;">Negative</div>
                         </div>
                     </div>
                 </div>
@@ -880,9 +868,8 @@ def run():
             
             <!-- Story Tributaries -->
             <div>
-                <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                    <span>📊</span>
-                    <span>STORY TRIBUTARIES</span>
+                <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 15px; letter-spacing: 0.05em;">
+                    STORY TRIBUTARIES
                 </div>
                 {story_tributaries_html}
             </div>
@@ -901,40 +888,14 @@ def run():
     # Display the main title
     st.markdown("""
     <div style="text-align: center; margin-bottom: 1rem;">
-        <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 0.2rem;">🌊 Professional River Flow</h1>
+        <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 0.2rem;">Professional River Flow</h1>
         <h3 style="font-size: 1.5rem; font-weight: 500; margin-top: 0;">Living Narrative Intelligence Platform</h3>
     </div>
     """, unsafe_allow_html=True)
     
     # Functional Timeline with Beautiful Dots (now actually clickable!)
     create_functional_timeline(quarter_labels, st.session_state.slider_index)
-    
-    # Backup navigation controls (hidden by default but available if needed)
-    with st.expander("🔧 Alternative Navigation (if needed)"):
-        col1, col2, col3 = st.columns([1, 8, 1])
-        
-        with col1:
-            if st.button("⋘ Previous", key="backup_prev"):
-                st.session_state.slider_index = max(0, st.session_state.slider_index - 1)
-                st.rerun()
 
-        with col3:
-            if st.button("Next ⋙", key="backup_next"):
-                st.session_state.slider_index = min(len(quarter_labels) - 1, st.session_state.slider_index + 1)
-                st.rerun()
-
-        with col2:
-            selected_index = st.select_slider(
-                label="Quarter Slider",
-                options=list(range(len(quarter_labels))),
-                value=st.session_state.slider_index,
-                format_func=lambda x: quarter_labels[x],
-                key="backup_quarter_slider"
-            )
-            if selected_index != st.session_state.slider_index:
-                st.session_state.slider_index = selected_index
-                st.rerun()
-    
     # Update selected quarter and label after potential changes
     selected_quarter = reverse_label_map[quarter_labels[st.session_state.slider_index]]
     selected_label = quarter_labels[st.session_state.slider_index]
@@ -946,7 +907,7 @@ def run():
     st.markdown(f"""
     <div style="background-color: #e3f2fd; border-left: 4px solid #2196f3; padding: 0.75rem 1rem; border-radius: 0.25rem; margin: 1rem 0;">
         <div style="font-size: 0.9rem; color: #1565c0; line-height: 1.4;">
-            📊 <strong>Quarter {selected_label}:</strong> {river_data['connected_count']:,} connected themes out of {river_data['total_nodes']:,} total 
+            <strong>Quarter {selected_label}:</strong> {river_data['connected_count']:,} connected themes out of {river_data['total_nodes']:,} total
             (<strong>{river_data['co_occurrence_rate']:.1f}%</strong> co-occurrence rate) • {river_data['total_edges']:,} narrative connections
         </div>
     </div>
