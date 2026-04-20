@@ -216,7 +216,8 @@ def run():
     reverse_label_map = {f"{q[:4]}Q{q[-1]}": q for q in quarters}
 
     if 'slider_index' not in st.session_state:
-        st.session_state.slider_index = 0
+        # Default to the latest quarter (2025Q2) for consistency across time-trend pages
+        st.session_state.slider_index = len(quarter_labels) - 1
 
     # ===== UPDATED MEDITATIVE TIME CONTROLS =====
     # Clean time controls with meditative styling - NO RED COLORS!
