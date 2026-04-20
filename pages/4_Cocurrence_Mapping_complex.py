@@ -634,10 +634,11 @@ def run():
         col_left, col_center, col_right = st.columns([1, 4, 1])
         
         with col_center:
-            # Clean minimal timeline header: single line, no decoration, no emoji
+            # Clean minimal timeline header: single line, no decoration, no emoji.
+            # "Time travel" matches the phrasing used on pages 1 and 3.
             st.markdown(f"""
             <div style="text-align: center; margin: 0.5rem 0 0.75rem 0;">
-                <span style="font-size: 13px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase;">Quarter</span>
+                <span style="font-size: 13px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase;">Time travel</span>
                 <span style="font-size: 20px; font-weight: 700; color: #1e293b; margin-left: 10px;">{selected_label}</span>
             </div>
             """, unsafe_allow_html=True)
