@@ -224,22 +224,23 @@ def run():
             if not line:
                 continue
                 
-            # Different wrapping rules based on content type
+            # Different wrapping rules based on content type.
+            # 75 chars/line keeps tooltip ~560px wide so it fits mobile viewports
+            # (Plotly doesn't auto-wrap hover text; it renders pre-formatted <br>
+            # breaks as-is).
             if line.startswith("Top Emotions:"):
-                # Keep Top Emotions on one line (up to 250 chars - increased limit)
-                if len(line) <= 300:
+                # Keep Top Emotions on one line if short; otherwise break at emotion boundaries
+                if len(line) <= 75:
                     wrapped_lines.append(line)
                 else:
-                    # If still too long, break at emotion boundaries
                     wrapped_lines.extend(wrap_emotions_line(line))
-            
+
             elif line.startswith("Post/Comment:") or line.startswith("Comment:") or line.startswith("Post:"):
-                # Wrap post/comment content at 200 characters for readability
-                wrapped_lines.extend(wrap_text_content(line, 200))
-            
+                wrapped_lines.extend(wrap_text_content(line, 75))
+
             else:
-                # Other content (metadata, etc.) - wrap at 200 characters
-                wrapped_lines.extend(wrap_text_content(line, 200))
+                # Other content (metadata, etc.)
+                wrapped_lines.extend(wrap_text_content(line, 75))
         
         return '<br>'.join(wrapped_lines)
     
@@ -258,7 +259,7 @@ def run():
             current_line = "Top Emotions: "
             
             for emotion in emotions:
-                if len(current_line + emotion + " ") > 250:  # Increased limit
+                if len(current_line + emotion + " ") > 75:
                     if current_line.strip() != "Top Emotions:":
                         lines.append(current_line.strip())
                         current_line = emotion + " "
@@ -266,14 +267,14 @@ def run():
                         current_line += emotion + " "
                 else:
                     current_line += emotion + " "
-            
+
             if current_line.strip():
                 lines.append(current_line.strip())
-            
+
             return lines
         else:
             # Fallback to regular wrapping
-            return wrap_text_content(line, 250)
+            return wrap_text_content(line, 75)
     
     def wrap_text_content(text, max_length):
         """Wrap text at specified length without breaking words, combining short lines"""
