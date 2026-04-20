@@ -23,7 +23,7 @@ def run():
     # --- Styled CSS with enhanced initial hover box from first script ---
     # Hover box size configuration (easily adjustable)
     hover_box_config = {
-        'max_width': '700px',  # 70% of previous 1000px to stay within page width
+        'max_width': '1000px',  # Increased from 400px to match first script
         'padding': '10px 14px',  # Match first script padding
         'font_size': '12px',
         'line_height': '1.4',
@@ -496,7 +496,7 @@ def run():
     if not st.session_state.plot_interacted:
         st.markdown(f"""
         <div id="initial-hover-box">
-            {seed_text}<br><br><b><span style="text-decoration: underline; text-decoration-color: #ffc300; text-decoration-thickness: 3px;">Hover over</span></b> to find out
+            {seed_text}<br><br><b><span style="text-decoration: underline; text-decoration-color: #ffc300; text-decoration-thickness: 3px;">Hover over</span></b> to find out 🔍
         </div>
         """, unsafe_allow_html=True)
 
@@ -507,20 +507,37 @@ def run():
     if not st.session_state.plot_interacted:
         st.markdown("""
         <script>
-        setTimeout(function() {
-            const plotContainer = document.querySelector('[data-testid="stPlotlyChart"]');
-            const hoverBox = document.getElementById('initial-hover-box');
-            
-            if (plotContainer && hoverBox) {
-                const hideBox = () => {
-                    hoverBox.style.opacity = '0';
-                    setTimeout(() => hoverBox.remove(), 300);
-                };
-                
-                plotContainer.addEventListener('mouseenter', hideBox, { once: true });
-                plotContainer.addEventListener('mousemove', hideBox, { once: true });
-            }
-        }, 1000);
+        // Relocate hover box into chart container so its width is bound by the
+        // chart's rendered width (not the page). Height remains auto, growing
+        // with content. Runs as soon as Plotly has mounted.
+        (function() {
+            let attempts = 0;
+            const attach = () => {
+                const plotContainer = document.querySelector('[data-testid="stPlotlyChart"]');
+                const hoverBox = document.getElementById('initial-hover-box');
+                if (plotContainer && hoverBox) {
+                    plotContainer.style.position = 'relative';
+                    if (hoverBox.parentElement !== plotContainer) {
+                        plotContainer.appendChild(hoverBox);
+                    }
+                    const hideBox = () => {
+                        hoverBox.style.opacity = '0';
+                        setTimeout(() => hoverBox.remove(), 300);
+                    };
+                    plotContainer.addEventListener('mouseenter', hideBox, { once: true });
+                    plotContainer.addEventListener('mousemove', hideBox, { once: true });
+                    return true;
+                }
+                return false;
+            };
+            // Poll briefly until Plotly has mounted (max ~3s)
+            const poll = setInterval(() => {
+                attempts += 1;
+                if (attach() || attempts > 30) {
+                    clearInterval(poll);
+                }
+            }, 100);
+        })();
         </script>
         """, unsafe_allow_html=True)
 

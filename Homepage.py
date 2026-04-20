@@ -377,7 +377,7 @@ else:
 # Theme Cards
 st.markdown(f"""
 <div class="theme-grid">
-    <a href="/Emotion_Pulse_v" style="text-decoration: none; display: block;">
+    <a href="/Emotion_Pulse" style="text-decoration: none; display: block;">
         <div class="theme-card">
             <div class="theme-title">Emotional Pulse</div>
         </div>
@@ -421,7 +421,7 @@ st.markdown(f"""
 query_params = st.query_params
 page = query_params.get("page", "home")
 
-if page == "Emotion_Pulse_v":
+if page == "Emotion_Pulse":
     module = importlib.import_module("pages.0_Emotion_Pulse")
     module.run()
 elif page == "Meditation_Weather_report":
