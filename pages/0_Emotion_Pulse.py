@@ -23,7 +23,7 @@ def run():
     # --- Styled CSS with enhanced initial hover box from first script ---
     # Hover box size configuration (easily adjustable)
     hover_box_config = {
-        'max_width': '1000px',  # Increased from 400px to match first script
+        'max_width': '700px',  # 70% of previous 1000px to stay within page width
         'padding': '10px 14px',  # Match first script padding
         'font_size': '12px',
         'line_height': '1.4',
