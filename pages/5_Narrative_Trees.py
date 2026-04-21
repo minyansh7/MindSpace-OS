@@ -767,12 +767,15 @@ def run():
     river_data = calculate_river_flow_data(df_nodes, _apply_filters(df_edges), selected_quarter)
     
     # Display the main title + relocated "Living Narrative Intelligence"
-    # block (previously in the left sidebar iframe).
+    # block (previously in the left sidebar iframe). Subtitle + description
+    # typography matches Theme Pathways (h3 subtitle, grey description p).
     st.markdown("""
     <div style="text-align: center; margin-bottom: 1rem;">
-        <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 0.4rem;">Narrative Trees</h1>
-        <div style="font-size: 20px; font-weight: 800; color: #1e293b; margin-top: 0.5rem;">Living Narrative Intelligence</div>
-        <div style="font-size: 13px; color: #64748b; line-height: 1.4; margin-top: 4px;">Where meditation stories converge and flow together</div>
+        <h1 style="font-size: 3rem; font-weight: 800;">Narrative Trees</h1>
+        <h3 style="font-size: 1.5rem; font-weight: 500;">Living Narrative Intelligence</h3>
+        <p style="font-size: 1rem; color: #888; max-width: 800px; margin: 0.75rem auto 0 auto;">
+            Where meditation stories converge and flow together.
+        </p>
     </div>
     """, unsafe_allow_html=True)
     
