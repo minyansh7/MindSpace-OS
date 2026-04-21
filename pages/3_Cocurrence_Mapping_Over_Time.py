@@ -324,15 +324,18 @@ def run():
     # Use ALL nodes in the quarter
     nodes_q_all = nodes_q.copy()
     
-    # Topic mapping with consistent colors from meditation app
+    # Topic mapping — colors synced with Cocurrence Mapping complex page chart
+    # (its script_custom_cmap indexed by alphabetical cluster order).
+    # Keeping icons for potential future use; they are not rendered on this page
+    # when the chart-label mode is active.
     topic_mapping = {
-        'Self-Regulation': {'color': '#1f77b4', 'icon': '🎯'},
-        'Awareness': {'color': '#84cc16', 'icon': '🌿'},
-        'Buddhism & Spirituality': {'color': '#f59e0b', 'icon': '🕉️'},
-        'Concentration & Flow': {'color': '#ef4444', 'icon': '🌊'},
-        'Practice, Retreat, & Meta': {'color': '#a855f7', 'icon': '🏛️'},
-        'Anxiety & Mental Health': {'color': '#22c55e', 'icon': '💚'},
-        'Meditation & Mindfulness': {'color': '#17becf', 'icon': '🧘'}
+        'Anxiety & Mental Health':   {'color': '#1f77b4', 'icon': '💚'},
+        'Awareness':                 {'color': '#808000', 'icon': '🌿'},
+        'Buddhism & Spirituality':   {'color': '#ff7f0e', 'icon': '🕉️'},
+        'Concentration & Flow':      {'color': '#d62728', 'icon': '🌊'},
+        'Meditation & Mindfulness':  {'color': '#9467bd', 'icon': '🧘'},
+        'Practice, Retreat, & Meta': {'color': '#8c564b', 'icon': '🏛️'},
+        'Self-Regulation':           {'color': '#17becf', 'icon': '🎯'},
     }
 
     # Color mapping for clusters using consistent colors

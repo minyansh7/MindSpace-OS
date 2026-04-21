@@ -387,7 +387,7 @@ st.markdown(f"""
             <div class="theme-title">Weather Report</div>
         </div>
     </a>
-    <a href="/Main_Topics_Sankey" style="text-decoration: none; display: block;">
+    <a href="/Theme_Pathways" style="text-decoration: none; display: block;">
         <div class="theme-card">
             <div class="theme-title">Main Narratives</div>
         </div>
@@ -427,8 +427,8 @@ if page == "Emotion_Pulse":
 elif page == "Meditation_Weather_report":
     module = importlib.import_module("pages.1_Meditation_Weather_Report")
     module.run()
-elif page == "Main_Topics_Sankey":
-    module = importlib.import_module("pages.2_Main_Topics_Sankey")
+elif page == "Theme_Pathways":
+    module = importlib.import_module("pages.2_Theme_Pathways")
     module.run()
 elif page == "Cocurrence_Mapping_Over_Time":
     module = importlib.import_module("pages.3_Cocurrence_Mapping_Over_Time")

@@ -6,7 +6,7 @@ import streamlit.components.v1 as components
 import json
 import datetime
 
-st.set_page_config(page_title="🌊 Professional River Flow - Living Narrative Intelligence", layout="wide")
+st.set_page_config(page_title="Narrative Trees", layout="wide")
 
 def get_time_colors(hour):
     """Dynamic color scheme based on time of day"""
@@ -97,7 +97,7 @@ def run():
     }
 
     def calculate_river_flow_data(df_nodes, df_edges, selected_quarter):
-        """Calculate comprehensive data for Professional River Flow interface"""
+        """Calculate comprehensive data for Narrative Trees interface"""
         
         # Filter data for current quarter
         nodes_q = df_nodes[df_nodes['quarter'] == selected_quarter].copy()
@@ -656,7 +656,7 @@ def run():
             st.session_state.slider_index = quarter_labels.index(new_label)
             st.rerun()
     def create_professional_sidebar_html(river_data, selected_label, colors, quarter_labels, current_index):
-        """Create the Professional River Flow sidebar HTML - cleaned up without time navigation"""
+        """Create the Narrative Trees sidebar HTML - cleaned up without time navigation"""
         
         tributary_stats = river_data['tributary_stats']
         co_occurrence_rate = river_data['co_occurrence_rate']
@@ -770,11 +770,16 @@ def run():
     # Calculate river flow data
     river_data = calculate_river_flow_data(df_nodes, df_edges, selected_quarter)
     
-    # Display the main title
-    st.markdown("""
+    # Display the main title. Subtitle uses the same eyebrow character style
+    # as the "TIME TRAVEL" label above the slider (uppercase, letter-spaced,
+    # small gray) to create a consistent typographic system.
+    st.markdown(f"""
     <div style="text-align: center; margin-bottom: 1rem;">
-        <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 0.2rem;">Professional River Flow</h1>
-        <h3 style="font-size: 1.5rem; font-weight: 500; margin-top: 0;">Living Narrative Intelligence Platform</h3>
+        <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 0.4rem;">Narrative Trees</h1>
+        <div style="font-size: 13px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase;">
+            Quarter
+            <span style="margin-left: 8px; color: #1e293b; font-weight: 700;">{selected_label}</span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     

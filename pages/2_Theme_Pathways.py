@@ -41,7 +41,7 @@ st.markdown("""
 
 # --- Page Config ---
 st.set_page_config(
-    page_title="💫 Main Topics: What People Say Most",
+    page_title="Theme Pathways — Topic Flow: How Themes Connect",
     layout="wide",
 )
 
@@ -244,11 +244,8 @@ def run():
 
     st.markdown("""
     <div style="text-align: center;">
-        <h1 style="font-size: 3rem; font-weight: 800;">💫 Main Topics</h1>
+        <h1 style="font-size: 3rem; font-weight: 800;">Topic Flow: How Themes Connect</h1>
         <h3 style="font-size: 1.5rem; font-weight: 500;">What People Say Most</h3>
-        <p style="font-size: 1rem; color: #888; max-width: 800px; margin: auto;">
-            This Sankey diagram blends top flowing themes into topic families using harmonious colors for clarity and beauty.
-        </p>
     </div>
     """, unsafe_allow_html=True)
     
