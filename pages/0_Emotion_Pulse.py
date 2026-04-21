@@ -3,6 +3,12 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 
+try:
+    from mobile import is_mobile
+except ImportError:  # pragma: no cover — defensive; mobile.py ships with the repo
+    def is_mobile() -> bool:
+        return False
+
 st.set_page_config(
     page_title="🌊 The Emotional Pulse of the Meditation Landscape",
     layout="wide"
@@ -501,8 +507,24 @@ def run():
         </div>
         """, unsafe_allow_html=True)
 
-    # Render the plot
-    st.plotly_chart(fig, use_container_width=True, config=config, key="emotion_plot")
+    # Render the plot. Desktop branch is byte-identical to the previous
+    # behavior; mobile branch tweaks Plotly config for touch legibility.
+    if not is_mobile():
+        st.plotly_chart(fig, use_container_width=True, config=config, key="emotion_plot")
+    else:
+        # Mobile: kill the modebar (cramped on 375px), bump hover font size,
+        # tighten margins, shorten height so the chart doesn't demand a full
+        # phone screen scroll. Desktop is not affected because this branch
+        # only runs when the User-Agent is mobile.
+        fig.update_layout(
+            hoverlabel=dict(font_size=13),
+            margin=dict(t=30, b=10, l=10, r=10),
+            height=700,
+        )
+        mobile_config = {**config, "displayModeBar": False}
+        st.plotly_chart(
+            fig, use_container_width=True, config=mobile_config, key="emotion_plot_mobile"
+        )
 
     # Enhanced interaction detection from first script
     if not st.session_state.plot_interacted:
