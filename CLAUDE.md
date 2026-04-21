@@ -107,8 +107,8 @@ Narrative Trees title, and any future top-of-card metadata.
 
 Plotly hover text is pre-wrapped to 75 characters per line (see
 `wrap_hover_text` in `pages/0_Emotion_Pulse.py`) so tooltips fit
-inside the chart container on mobile viewports. Plotly does not
-auto-wrap; the 75-char pre-wrap is the constraint.
+inside the chart container at typical desktop widths. Plotly does
+not auto-wrap; the 75-char pre-wrap is the constraint.
 
 ## Session state
 

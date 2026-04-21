@@ -1,61 +1,12 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
 import streamlit.components.v1 as components
 import json
-import datetime
 
 st.set_page_config(page_title="Narrative Trees", layout="wide")
 
-def get_time_colors(hour):
-    """Dynamic color scheme based on time of day"""
-    if 5 <= hour < 8:
-        return {
-            'primary': '#FF6B6B',
-            'secondary': '#FFB347',
-            'bg_gradient': 'linear-gradient(135deg, #FF6B6B 0%, #FFB347 100%)',
-            'ripple_color': 'rgba(255, 107, 107, 0.3)',
-            'text_color': 'black'
-        }
-    elif 8 <= hour < 12:
-        return {
-            'primary': '#4ECDC4',
-            'secondary': '#45B7D1',
-            'bg_gradient': 'linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%)',
-            'ripple_color': 'rgba(78, 205, 196, 0.3)',
-            'text_color': 'black'
-        }
-    elif 12 <= hour < 17:
-        return {
-            'primary': '#45B7D1',
-            'secondary': '#96CEB4',
-            'bg_gradient': 'linear-gradient(135deg, #45B7D1 0%, #96CEB4 100%)',
-            'ripple_color': 'rgba(69, 183, 209, 0.3)',
-            'text_color': 'black'
-        }
-    elif 17 <= hour < 20:
-        return {
-            'primary': '#A29BFE',
-            'secondary': '#FD79A8',
-            'bg_gradient': 'linear-gradient(135deg, #A29BFE 0%, #FD79A8 100%)',
-            'ripple_color': 'rgba(162, 155, 254, 0.3)',
-            'text_color': 'white'
-        }
-    else:
-        return {
-            'primary': '#6C5CE7',
-            'secondary': '#2D3436',
-            'bg_gradient': 'linear-gradient(135deg, #6C5CE7 0%, #2D3436 100%)',
-            'ripple_color': 'rgba(108, 92, 231, 0.3)',
-            'text_color': 'white'
-        }
-
 def run():
-    # Get current time colors
-    current_hour = datetime.datetime.now().hour
-    colors = get_time_colors(current_hour)
-    
     # --- Load Data ---
     @st.cache_data
     def load_edges_clusters():
@@ -343,24 +294,6 @@ def run():
                     border: 1px solid rgba(0,0,0,0.1);
                 }}
 
-                /* Mobile legibility. Desktop never matches this query so
-                   desktop rendering of the river-flow iframe is
-                   byte-identical. */
-                @media (max-width: 768px) {{
-                    .quarter-overlay {{
-                        top: 10px;
-                        right: 10px;
-                        padding: 6px 10px;
-                        font-size: 12px;
-                    }}
-                    #plotDiv .hovertext text {{
-                        font-size: 13px !important;
-                    }}
-                    #plotDiv .textpoint text {{
-                        font-size: 12px !important;
-                        font-weight: 700 !important;
-                    }}
-                }}
             </style>
         </head>
         <body>
@@ -657,7 +590,7 @@ def run():
 
         Replaces the earlier button-dot hack that rendered as ovals because
         of unreliable !important CSS. select_slider is visually refined out
-        of the box, mobile-friendly, and has labeled discrete ticks.
+        of the box and has labeled discrete ticks.
         """
         selected_label = quarter_labels[current_index]
 
@@ -683,7 +616,7 @@ def run():
         if new_label != selected_label:
             st.session_state.slider_index = quarter_labels.index(new_label)
             st.rerun()
-    def create_professional_sidebar_html(river_data, selected_label, colors, quarter_labels, current_index):
+    def create_professional_sidebar_html(river_data, selected_label, quarter_labels, current_index):
         """Create the Narrative Trees sidebar HTML - cleaned up without time navigation"""
         
         tributary_stats = river_data['tributary_stats']
@@ -855,7 +788,7 @@ def run():
         # Story Tributaries iframe (summary stats only; header and fake
         # filters have been moved out of this iframe).
         sidebar_html = create_professional_sidebar_html(
-            river_data, selected_label, colors, quarter_labels, st.session_state.slider_index
+            river_data, selected_label, quarter_labels, st.session_state.slider_index
         )
         components.html(sidebar_html, height=500, scrolling=False)
     

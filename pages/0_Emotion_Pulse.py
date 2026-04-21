@@ -1,13 +1,6 @@
 import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
-import numpy as np
-
-try:
-    from mobile import is_mobile
-except ImportError:  # pragma: no cover — defensive; mobile.py ships with the repo
-    def is_mobile() -> bool:
-        return False
 
 st.set_page_config(
     page_title="🌊 The Emotional Pulse of the Meditation Landscape",
@@ -88,64 +81,6 @@ def run():
         pointer-events: none;
     }}
     
-    /* Responsive design for non-hover elements */
-    /* Tablet adjustments */
-    @media (max-width: 1024px) {{
-        .main-header h1 {{
-            font-size: 2.5rem;
-        }}
-        .main-header h3 {{
-            font-size: 1.3rem;
-        }}
-    }}
-    
-    /* Mobile portrait */
-    @media (max-width: 768px) {{
-        .plot-container {{
-            max-width: 100% !important;
-            padding: 0 10px !important;
-        }}
-        
-        .main-header h1 {{
-            font-size: 2rem;
-        }}
-        .main-header h3 {{
-            font-size: 1.2rem;
-        }}
-        
-        .description, .info-section p {{
-            font-size: 0.9rem;
-        }}
-    }}
-    
-    /* Small mobile */
-    @media (max-width: 480px) {{
-        .main-header h1 {{
-            font-size: 1.8rem;
-        }}
-        .main-header h3 {{
-            font-size: 1.1rem;
-        }}
-        
-        .description, .info-section p {{
-            font-size: 0.85rem;
-        }}
-        
-        #initial-hover-box {{
-            font-size: 10px;
-            padding: 8px 10px;
-        }}
-    }}
-    
-    /* Extra small screens */
-    @media (max-width: 320px) {{
-        .main-header h1 {{
-            font-size: 1.5rem;
-        }}
-        .main-header h3 {{
-            font-size: 1rem;
-        }}
-    }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -231,9 +166,8 @@ def run():
                 continue
                 
             # Different wrapping rules based on content type.
-            # 75 chars/line keeps tooltip ~560px wide so it fits mobile viewports
-            # (Plotly doesn't auto-wrap hover text; it renders pre-formatted <br>
-            # breaks as-is).
+            # 75 chars/line keeps tooltips a reasonable width (Plotly doesn't
+            # auto-wrap hover text; it renders pre-formatted <br> breaks as-is).
             if line.startswith("Top Emotions:"):
                 # Keep Top Emotions on one line if short; otherwise break at emotion boundaries
                 if len(line) <= 75:
@@ -509,24 +443,8 @@ def run():
         </div>
         """, unsafe_allow_html=True)
 
-    # Render the plot. Desktop branch is byte-identical to the previous
-    # behavior; mobile branch tweaks Plotly config for touch legibility.
-    if not is_mobile():
-        st.plotly_chart(fig, use_container_width=True, config=config, key="emotion_plot")
-    else:
-        # Mobile: kill the modebar (cramped on 375px), bump hover font size,
-        # tighten margins, shorten height so the chart doesn't demand a full
-        # phone screen scroll. Desktop is not affected because this branch
-        # only runs when the User-Agent is mobile.
-        fig.update_layout(
-            hoverlabel=dict(font_size=13),
-            margin=dict(t=30, b=10, l=10, r=10),
-            height=700,
-        )
-        mobile_config = {**config, "displayModeBar": False}
-        st.plotly_chart(
-            fig, use_container_width=True, config=mobile_config, key="emotion_plot_mobile"
-        )
+    # Render the plot.
+    st.plotly_chart(fig, use_container_width=True, config=config, key="emotion_plot")
 
     # Enhanced interaction detection from first script
     if not st.session_state.plot_interacted:

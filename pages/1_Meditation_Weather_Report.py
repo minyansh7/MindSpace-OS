@@ -314,46 +314,6 @@ def run():
         background-clip: text;
     }}
     
-    /* MOBILE RESPONSIVE ADJUSTMENTS */
-    @media (max-width: 768px) {{
-        .stSidebar .stRadio {{
-            padding: 20px 25px 40px 25px !important;
-            margin: 5px 0 !important;
-        }}
-        
-        .stSidebar .stRadio > div {{
-            padding: 15px 3px 12px 3px !important;
-            padding-bottom: 30px !important;
-            min-height: 45px !important;
-        }}
-        
-        .stSidebar .stRadio > div::before {{
-            left: 3% !important;
-            right: 3% !important;
-        }}
-        
-        .stSidebar .stRadio::before {{
-            left: 2% !important;
-            font-size: 8px !important;
-        }}
-        
-        .stSidebar .stRadio::after {{
-            right: 2% !important;
-            font-size: 8px !important;
-        }}
-        
-        .stSidebar .stRadio > div > label {{
-            width: 14px !important;
-            height: 14px !important;
-            min-width: 14px !important;
-        }}
-        
-        .quarter-header-bottom {{
-            bottom: -10px !important;
-            font-size: 14px !important;
-            padding: 5px 12px !important;
-        }}
-    }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -912,24 +872,6 @@ def run():
                 overflow: hidden;
                 margin: -2px 0 2px 0;
                 box-sizing: border-box;
-            }}
-
-            /* Mobile legibility bumps — animations and keyframes are NOT
-               touched per the animation-hold constraint. This block only
-               enlarges region titles, description text, and the emoji so
-               phone viewers can read the weather regions. Desktop never
-               matches (>768px), so desktop rendering is byte-identical. */
-            @media (max-width: 768px) {{
-                .region-title {{
-                    font-size: 13px !important;
-                    line-height: 1.25 !important;
-                }}
-                .weather-desc {{
-                    font-size: 10px !important;
-                }}
-                .weather-emoji {{
-                    font-size: 22px !important;
-                }}
             }}
 
             /* WEATHER-CONDITION-BASED ANIMATIONS */
@@ -2151,46 +2093,6 @@ def run():
                     color: #64748b;
                 }}
                 
-                /* MOBILE RESPONSIVE */
-                @media (max-width: 768px) {{
-                    .page-header {{
-                        padding: 24px;
-                    }}
-                    
-                    .page-title {{
-                        font-size: 1.5rem;
-                    }}
-                    
-                    .timeline-quarters {{
-                        padding: 0 20px;
-                    }}
-                    
-                    .topic-flow {{
-                        padding: 16px;
-                    }}
-                    
-                    .metrics-glass-bar {{
-                        flex-direction: column;
-                        gap: 12px;
-                        align-items: flex-start;
-                    }}
-                    
-                    .metrics-section {{
-                        width: 100%;
-                        justify-content: space-between;
-                    }}
-                    
-                    .challenge-legend {{
-                        flex-direction: column;
-                        gap: 12px;
-                        align-items: center;
-                    }}
-                    
-                    .challenge-tooltip {{
-                        max-width: 280px;
-                        font-size: 0.75rem;
-                    }}
-                }}
             </style>
         </head>
         <body>

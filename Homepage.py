@@ -1,6 +1,5 @@
 import streamlit as st
 import datetime
-import importlib
 import base64
 
 # Function to encode image to base64
@@ -215,14 +214,6 @@ st.markdown(f"""
         }}
     }}
 
-    @media (max-width: 768px) {{
-        .theme-grid {{
-            grid-template-columns: 1fr;
-            gap: 1.5rem;  /* Increased gap */
-            padding: 0 1.5rem;
-        }}
-    }}
-
     .theme-card {{
         position: relative;
         background: rgba(255, 255, 255, 0.1);
@@ -416,20 +407,3 @@ st.markdown(f"""
     Powered By MinyanLabs ©2026
 </div>
 """, unsafe_allow_html=True)
-
-# Routing logic
-query_params = st.query_params
-page = query_params.get("page", "home")
-
-if page == "Emotion_Pulse":
-    module = importlib.import_module("pages.0_Emotion_Pulse")
-    module.run()
-elif page == "Meditation_Weather_report":
-    module = importlib.import_module("pages.1_Meditation_Weather_Report")
-    module.run()
-elif page == "Theme_Pathways":
-    module = importlib.import_module("pages.2_Theme_Pathways")
-    module.run()
-elif page == "Theme_Currents":
-    module = importlib.import_module("pages.3_Theme_Currents")
-    module.run()

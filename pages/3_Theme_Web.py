@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
 import streamlit.components.v1 as components
 import json
 
@@ -76,47 +75,9 @@ def run():
         padding: 0 200px;
     }
     
-    /* Mobile responsive breakpoints */
     @media (max-width: 1200px) {
         .annotation-container {
             padding: 0 100px;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .main-title {
-            font-size: 2rem !important;
-        }
-        .sub-title {
-            font-size: 1.2rem !important;
-        }
-        .description {
-            font-size: 0.9rem !important;
-        }
-        .annotation-container {
-            padding: 0 20px;
-        }
-        .annotation-container .flex-container {
-            flex-direction: column !important;
-            gap: 20px !important;
-        }
-        .footer-text {
-            font-size: 0.9rem;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .main-title {
-            font-size: 1.5rem !important;
-        }
-        .sub-title {
-            font-size: 1rem !important;
-        }
-        .description {
-            font-size: 0.8rem !important;
-        }
-        .annotation-container {
-            padding: 0 10px;
         }
     }
     </style>
@@ -134,7 +95,7 @@ def run():
     """, unsafe_allow_html=True)
     
     # Top-N node cap with opt-out toggle. Default is capped (40 nodes)
-    # because the full network hairballs on small viewports. Toggle state
+    # because the full network hairballs in narrow windows. Toggle state
     # persists via st.session_state under key "web_show_all_nodes".
     show_all_nodes = st.toggle(
         "Show all nodes (uncheck for top-40 by engagement)",
@@ -310,19 +271,6 @@ def run():
                 height: 100%;
             }}
 
-            /* Mobile legibility: bump hover tooltip font + label weight so
-               node/edge tooltips are readable on 375px viewports. Desktop
-               never matches this media query, so desktop rendering is
-               byte-identical to the pre-change iframe. */
-            @media (max-width: 768px) {{
-                #plotDiv .hovertext text {{
-                    font-size: 13px !important;
-                }}
-                #plotDiv .textpoint text {{
-                    font-size: 12px !important;
-                    font-weight: 700 !important;
-                }}
-            }}
         </style>
     </head>
     <body>

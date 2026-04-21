@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
 import streamlit.components.v1 as components
 import json
 
@@ -74,46 +73,12 @@ def run():
         padding: 0 200px;
     }
     
-    /* Mobile responsive breakpoints */
     @media (max-width: 1200px) {
         .annotation-container {
             padding: 0 100px;
         }
     }
-    
-    @media (max-width: 768px) {
-        .main-title {
-            font-size: 2rem !important;
-        }
-        .sub-title {
-            font-size: 1.2rem !important;
-        }
-        .description {
-            font-size: 0.9rem !important;
-        }
-        .annotation-container {
-            padding: 0 20px;
-        }
-        .footer-text {
-            font-size: 0.9rem;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .main-title {
-            font-size: 1.5rem !important;
-        }
-        .sub-title {
-            font-size: 1rem !important;
-        }
-        .description {
-            font-size: 0.8rem !important;
-        }
-        .annotation-container {
-            padding: 0 10px;
-        }
-    }
-    
+
     /* Enhanced Streamlit controls styling - FIXED: No more red colors! */
     .stSelectbox > label {
         font-family: "Inter", sans-serif !important;
@@ -479,21 +444,6 @@ def run():
                 backdrop-filter: blur(10px);
             }}
             
-            @media (max-width: 768px) {{
-                .quarter-overlay {{
-                    top: 10px;
-                    left: 10px;
-                    padding: 6px 12px;
-                    font-size: 12px;
-                }}
-                #plotDiv .hovertext text {{
-                    font-size: 13px !important;
-                }}
-                #plotDiv .textpoint text {{
-                    font-size: 12px !important;
-                    font-weight: 700 !important;
-                }}
-            }}
         </style>
     </head>
     <body>
