@@ -74,19 +74,20 @@ Sidebar order (derived from the leading numeric prefix in `pages/*.py`):
 1. Emotion Pulse          — `0_Emotion_Pulse.py`
 2. Meditation Weather Report — `1_Meditation_Weather_Report.py`
 3. Theme Pathways         — `2_Theme_Pathways.py` (Sankey)
-4. Theme Currents         — `3_Theme_Currents.py` (temporal network)
-5. Narrative Trees        — `4_Narrative_Trees.py` (river-flow / detailed)
-6. Theme Web              — `5_Theme_Web.py` (static co-occurrence, last)
+4. Narrative Trees        — `3_Narrative_Trees.py` (river-flow / detailed)
+5. Theme Web              — `4_Theme_Web.py` (static co-occurrence network)
+6. Theme Currents         — `5_Theme_Currents.py` (temporal network, last)
 
 The three network-style pages (4–6) all visualize relationships between
-theme clusters but from different angles:
-- **Theme Currents**: how connections flow and change across quarters
+theme clusters but from different angles, and are ordered from
+most-structured to most-temporal:
 - **Narrative Trees**: deep branching view with filters + sidebar analytics
-- **Theme Web**: who connects to whom overall (static summary, ships last
-  as the "everything at once" wrap-up view)
+- **Theme Web**: who connects to whom overall (static summary)
+- **Theme Currents**: how connections flow and change across quarters
+  (time-series culmination, shipping as the final page)
 
 Together with "Theme Pathways" (Sankey), the four form a metaphor family
-— pathways, currents, trees, web — each a tangible natural form.
+— pathways, trees, web, currents — each a tangible natural form.
 
 Archived (kept in repo but hidden from sidebar): `archive/0_Emotion_Pulse_v.py`
 
