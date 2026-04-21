@@ -913,7 +913,25 @@ def run():
                 margin: -2px 0 2px 0;
                 box-sizing: border-box;
             }}
-            
+
+            /* Mobile legibility bumps — animations and keyframes are NOT
+               touched per the animation-hold constraint. This block only
+               enlarges region titles, description text, and the emoji so
+               phone viewers can read the weather regions. Desktop never
+               matches (>768px), so desktop rendering is byte-identical. */
+            @media (max-width: 768px) {{
+                .region-title {{
+                    font-size: 13px !important;
+                    line-height: 1.25 !important;
+                }}
+                .weather-desc {{
+                    font-size: 10px !important;
+                }}
+                .weather-emoji {{
+                    font-size: 22px !important;
+                }}
+            }}
+
             /* WEATHER-CONDITION-BASED ANIMATIONS */
             .sunny {{
                 animation: sunny-pulse 3s ease-in-out infinite !important;
