@@ -133,6 +133,16 @@ def run():
     </div>
     """, unsafe_allow_html=True)
     
+    # Top-N node cap with opt-out toggle. Default is capped (40 nodes)
+    # because the full network hairballs on small viewports. Toggle state
+    # persists via st.session_state under key "web_show_all_nodes".
+    show_all_nodes = st.toggle(
+        "Show all nodes (uncheck for top-40 by engagement)",
+        value=False,
+        key="web_show_all_nodes",
+        help="Default view shows the 40 most-engaged theme nodes. Toggle on to see the full network.",
+    )
+
     @st.cache_data
     def load_edges_clusters():
         return pd.read_parquet("precomputed/timeseries/df_edges.parquet")
@@ -179,6 +189,14 @@ def run():
         return node_coord in node_coords
     
     df_nodes_connected = df_nodes[df_nodes.apply(has_edge, axis=1)].copy()
+
+    # Apply the top-N cap unless the user has toggled "Show all". Engagement
+    # proxy: `scaled_size`, already the visual-weight field used for
+    # centroid calculations. Nodes dropped here also remove any edges whose
+    # endpoints no longer have a surviving node (handled downstream because
+    # hover matching is coord-based).
+    if not show_all_nodes and len(df_nodes_connected) > 40:
+        df_nodes_connected = df_nodes_connected.nlargest(40, "scaled_size").copy()
     
     total_nodes = len(df_nodes)
     connected_nodes = len(df_nodes_connected)
@@ -287,9 +305,23 @@ def run():
                 min-height: 434px;
             }}
             
-            #plotDiv {{ 
-                width: 100%; 
-                height: 100%; 
+            #plotDiv {{
+                width: 100%;
+                height: 100%;
+            }}
+
+            /* Mobile legibility: bump hover tooltip font + label weight so
+               node/edge tooltips are readable on 375px viewports. Desktop
+               never matches this media query, so desktop rendering is
+               byte-identical to the pre-change iframe. */
+            @media (max-width: 768px) {{
+                #plotDiv .hovertext text {{
+                    font-size: 13px !important;
+                }}
+                #plotDiv .textpoint text {{
+                    font-size: 12px !important;
+                    font-weight: 700 !important;
+                }}
             }}
         </style>
     </head>

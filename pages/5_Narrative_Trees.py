@@ -342,6 +342,25 @@ def run():
                     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                     border: 1px solid rgba(0,0,0,0.1);
                 }}
+
+                /* Mobile legibility. Desktop never matches this query so
+                   desktop rendering of the river-flow iframe is
+                   byte-identical. */
+                @media (max-width: 768px) {{
+                    .quarter-overlay {{
+                        top: 10px;
+                        right: 10px;
+                        padding: 6px 10px;
+                        font-size: 12px;
+                    }}
+                    #plotDiv .hovertext text {{
+                        font-size: 13px !important;
+                    }}
+                    #plotDiv .textpoint text {{
+                        font-size: 12px !important;
+                        font-weight: 700 !important;
+                    }}
+                }}
             </style>
         </head>
         <body>

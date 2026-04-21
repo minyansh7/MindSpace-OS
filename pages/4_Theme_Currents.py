@@ -369,7 +369,19 @@ def run():
             'hover_text': f"<b>Topics:</b> {start_cluster} ↔ {end_cluster}<br><b>Themes:</b> {edge['theme_1']} ↔ {edge['theme_2']}<br><b>Engagement Score:</b> {int(edge['weight'])}<br><b>Sentiment:</b> {edge['sentiment']:.2f}"
         })
 
-    # Prepare node data for JavaScript
+    # Prepare node data for JavaScript.
+    # Top-10 labeling: mark the 10 highest-scaled_size nodes in this quarter
+    # as is_top10 = True. The JS side renders a text label for those only;
+    # the rest are hover-only (Knaflic preattentive focus — fewer on-screen
+    # labels, rest available on demand).
+    top10_coords = set()
+    if not nodes_q_all.empty:
+        top10_nodes = nodes_q_all.nlargest(
+            min(10, len(nodes_q_all)), "scaled_size"
+        )
+        top10_coords = {
+            (float(r["x_rot"]), float(r["y_rot"])) for _, r in top10_nodes.iterrows()
+        }
     node_data = []
     for cluster in unique_clusters:
         cluster_data = nodes_q_all[nodes_q_all['cluster_name'] == cluster]
@@ -378,18 +390,21 @@ def run():
                 avg_score_display = int(next(iter(node['avg_score'])))
             else:
                 avg_score_display = int(float(node['avg_score']))
-            
+
             try:
                 sentiment_value = float(node['sentiment']) if pd.notna(node['sentiment']) else 0.0
             except:
                 sentiment_value = 0.0
-            
+
+            node_coord = (float(node['x_rot']), float(node['y_rot']))
             node_data.append({
                 'x': float(node['x_rot']),
                 'y': float(node['y_rot']),
                 'size': float(node['scaled_size']),
                 'color': cluster_color_map[cluster],
                 'cluster': cluster,
+                'is_top10': node_coord in top10_coords,
+                'node_label': node['cluster_name'],
                 'hover_text': f"<b>Topic:</b> {node['cluster_name']}<br><b>Theme:</b> {node['theme']}<br><b>Engagement Score:</b> {avg_score_display}<br><b>Sentiment:</b> {sentiment_value:.2f}"
             })
 
@@ -470,6 +485,13 @@ def run():
                     left: 10px;
                     padding: 6px 12px;
                     font-size: 12px;
+                }}
+                #plotDiv .hovertext text {{
+                    font-size: 13px !important;
+                }}
+                #plotDiv .textpoint text {{
+                    font-size: 12px !important;
+                    font-weight: 700 !important;
                 }}
             }}
         </style>
@@ -739,17 +761,40 @@ def run():
                             y: [label.y],
                             mode: 'text',
                             text: [`<b>${{label.text}}</b>`],
-                            textfont: {{ 
-                                size: layout.labelFontSize, 
-                                color: label.color, 
-                                family: 'sans-serif' 
+                            textfont: {{
+                                size: layout.labelFontSize,
+                                color: label.color,
+                                family: 'sans-serif'
                             }},
                             showlegend: false,
                             hoverinfo: 'none',
                             name: `label_${{index}}`
                         }});
                     }});
-                    
+
+                    // Top-10 node labels only. Rest of the nodes remain
+                    // hover-only (their hover tooltip still reveals the
+                    // same label text). Without the cap ~100 labels
+                    // overlap and become unreadable.
+                    const top10 = nodeData.filter(n => n.is_top10);
+                    if (top10.length > 0) {{
+                        traces.push({{
+                            x: top10.map(n => n.x),
+                            y: top10.map(n => n.y),
+                            mode: 'text',
+                            text: top10.map(n => n.node_label),
+                            textposition: 'top center',
+                            textfont: {{
+                                size: Math.max(9, layout.labelFontSize - 2),
+                                color: '#334155',
+                                family: 'DM Sans, sans-serif'
+                            }},
+                            showlegend: false,
+                            hoverinfo: 'skip',
+                            name: 'top10_node_labels'
+                        }});
+                    }}
+
                     return traces;
                     
                 }} catch (error) {{
