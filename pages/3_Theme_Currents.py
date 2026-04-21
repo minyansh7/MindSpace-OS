@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import streamlit.components.v1 as components
 import json
 
-st.set_page_config(page_title="🎐 The Connected narratives Change Over Time", layout="wide")
+st.set_page_config(page_title="Theme Currents", layout="wide")
 
 def run():
     # --- Enhanced Styled CSS with Meditative Theme ---
@@ -174,7 +174,7 @@ def run():
     # Header section
     st.markdown("""
     <div style="text-align: center; padding: 1rem;">
-        <h1 class="main-title">🎐 The Connected Narrative</h1>
+        <h1 class="main-title">Theme Currents</h1>
         <h3 class="sub-title">Where Narratives Converge — And How They Evolve</h3>
         <p class="description">
             This map reveals a dynamic view of how narratives intersect — and how their connections evolve over time, drawn from thousands of reddit posts and comments shared between January 2024 and June 2025.
@@ -324,7 +324,7 @@ def run():
     # Use ALL nodes in the quarter
     nodes_q_all = nodes_q.copy()
     
-    # Topic mapping — colors synced with Cocurrence Mapping complex page chart
+    # Topic mapping — colors synced with the Narrative Trees page chart
     # (its script_custom_cmap indexed by alphabetical cluster order).
     # Keeping icons for potential future use; they are not rendered on this page
     # when the chart-label mode is active.
@@ -494,7 +494,7 @@ def run():
     <body>
         <div class="container">
             <div class="quarter-overlay">
-                🎐 {quarter_labels[st.session_state.slider_index]}
+                {quarter_labels[st.session_state.slider_index]}
             </div>
             <div id="plotDiv"></div>
         </div>

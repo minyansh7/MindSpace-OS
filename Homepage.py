@@ -392,7 +392,7 @@ st.markdown(f"""
             <div class="theme-title">Main Narratives</div>
         </div>
     </a>
-    <a href="/Cocurrence_Mapping_Over_Time" style="text-decoration: none; display: block;">
+    <a href="/Theme_Currents" style="text-decoration: none; display: block;">
         <div class="theme-card">
             <div class="theme-title">Narrative Connections</div>
         </div>
@@ -430,6 +430,6 @@ elif page == "Meditation_Weather_report":
 elif page == "Theme_Pathways":
     module = importlib.import_module("pages.2_Theme_Pathways")
     module.run()
-elif page == "Cocurrence_Mapping_Over_Time":
-    module = importlib.import_module("pages.3_Cocurrence_Mapping_Over_Time")
+elif page == "Theme_Currents":
+    module = importlib.import_module("pages.3_Theme_Currents")
     module.run()

@@ -19,9 +19,10 @@ decision to let the chart speak for itself (data-ink ratio / Tufte):
 Kept here for reference in case the description is wanted back or needed
 as alt text / meta description.
 
-### Narrative Trees (`pages/5_Cocurrence_Mapping_complex.py`)
+### Narrative Trees (`pages/5_Narrative_Trees.py`)
 
-Previously titled "Professional River Flow".
+Previously titled "Professional River Flow" (h1) and "Cocurrence Mapping complex"
+(sidebar). File renamed from `5_Cocurrence_Mapping_complex.py` on 2026-04-21.
 
 Removed subtitle on 2026-04-21:
 
@@ -34,14 +35,25 @@ actually needs before scrolling: which quarter of data they're looking at.
 Character style matches the "TIME TRAVEL" eyebrow above the slider for
 typographic consistency.
 
+### Theme Currents (`pages/3_Theme_Currents.py`)
+
+Previously titled "The Connected Narrative" (h1) and "Cocurrence Mapping
+Over Time" (sidebar). File renamed on 2026-04-21. Shows how theme
+co-occurrences evolve quarter by quarter via the shared quarter slider.
+
+### Theme Web (`pages/4_Theme_Web.py`)
+
+Previously titled "The Narrative Web" (h1) and "Cocurrence Mapping"
+(sidebar). File renamed on 2026-04-21. Shows the static co-occurrence
+network across all data (no time axis).
+
 ## Color palette (canonical cluster→color mapping)
 
-Both page 3 (Cocurrence Mapping Over Time) and page 5 (Cocurrence Mapping
-complex) render the same 7 theme clusters. They must use identical colors
-so the site reads as one visual language.
+Both Theme Currents and Narrative Trees render the same 7 theme clusters.
+They must use identical colors so the site reads as one visual language.
 
-The reference is page 5's chart rendering, which feeds clusters through
-`script_custom_cmap` indexed by alphabetically sorted cluster name:
+The reference is the Narrative Trees chart rendering, which feeds clusters
+through `script_custom_cmap` indexed by alphabetically sorted cluster name:
 
 | Cluster                      | Hex       | Name   |
 |------------------------------|-----------|--------|
@@ -53,22 +65,27 @@ The reference is page 5's chart rendering, which feeds clusters through
 | Practice, Retreat, & Meta    | `#8c564b` | brown  |
 | Self-Regulation              | `#17becf` | cyan   |
 
-Page 3's `topic_mapping` dict was synced to match on 2026-04-21.
+Theme Currents' `topic_mapping` dict was synced to match on 2026-04-21.
 
-## Page ordering
+## Page ordering and naming family
 
 Sidebar order (derived from the leading numeric prefix in `pages/*.py`):
 
-1. Emotion Pulse            — `0_Emotion_Pulse.py`
+1. Emotion Pulse          — `0_Emotion_Pulse.py`
 2. Meditation Weather Report — `1_Meditation_Weather_Report.py`
-3. Theme Pathways           — `2_Theme_Pathways.py`
-4. Cocurrence Mapping Over Time — `3_Cocurrence_Mapping_Over_Time.py`
-5. Cocurrence Mapping       — `4_Cocurrence_Mapping.py`
-6. Cocurrence Mapping complex — `5_Cocurrence_Mapping_complex.py` (last)
+3. Theme Pathways         — `2_Theme_Pathways.py` (Sankey)
+4. Theme Currents         — `3_Theme_Currents.py` (temporal network)
+5. Theme Web              — `4_Theme_Web.py` (static network)
+6. Narrative Trees        — `5_Narrative_Trees.py` (river-flow / detailed, last)
 
-"Cocurrence Mapping" was moved ahead of "complex" on 2026-04-21 so the
-simpler view reads first and the more detailed analytical view sits at
-the end of the flow.
+The three network-style pages (4–6) all visualize relationships between
+theme clusters but from different angles:
+- **Theme Currents**: how connections flow and change across quarters
+- **Theme Web**: who connects to whom, overall
+- **Narrative Trees**: deep branching view with filters + sidebar analytics
+
+Together with "Theme Pathways" (Sankey), the four form a metaphor family
+— pathways, currents, web, trees — each a tangible natural form.
 
 Archived (kept in repo but hidden from sidebar): `archive/0_Emotion_Pulse_v.py`
 

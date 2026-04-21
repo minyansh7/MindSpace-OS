@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import streamlit.components.v1 as components
 import json
 
-st.set_page_config(page_title="🕸️ Narratives & Co-occurrence Mapping", layout="wide")
+st.set_page_config(page_title="Theme Web", layout="wide")
 
 
 
@@ -125,7 +125,7 @@ def run():
     # Header section
     st.markdown("""
     <div style="text-align: center; padding: 1rem;">
-        <h1 class="main-title">🕸️ The Narrative Web</h1>
+        <h1 class="main-title">Theme Web</h1>
         <h3 class="sub-title">Where Narratives Collide</h3>
         <p class="description">
             Explore meditation topics and their interconnections through engagement score weighted and sentiment-infused narratives, drawn from thousands of reddit posts and comments shared between January 2024 and June 2025.
