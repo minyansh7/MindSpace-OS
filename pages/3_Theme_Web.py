@@ -126,7 +126,7 @@ def run():
     st.markdown("""
     <div style="text-align: center; padding: 1rem;">
         <h1 class="main-title">Theme Web</h1>
-        <h3 class="sub-title">Where Narratives Collide</h3>
+        <h3 class="sub-title">Which meditation topics appear together across the full archive</h3>
         <p class="description">
             Explore meditation topics and their interconnections through engagement score weighted and sentiment-infused narratives, drawn from thousands of reddit posts and comments shared between January 2024 and June 2025.
         </p>

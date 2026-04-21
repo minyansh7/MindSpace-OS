@@ -158,21 +158,21 @@ feed_item(
 )
 feed_item(
     "04",
-    "Narrative Trees",
-    "A river of meditation stories with filters to dig into any branch.",
-    href="/Narrative_Trees",
-)
-feed_item(
-    "05",
     "Theme Web",
     "Which topics keep showing up together? A connection map of the archive.",
     href="/Theme_Web",
 )
 feed_item(
-    "06",
+    "05",
     "Theme Currents",
     "How the conversation drifts. Watch theme connections shift quarter by quarter.",
     href="/Theme_Currents",
+)
+feed_item(
+    "06",
+    "Narrative Trees",
+    "A river of meditation stories with filters to dig into any branch.",
+    href="/Narrative_Trees",
 )
 
 # --- Footer -------------------------------------------------------------

@@ -242,7 +242,15 @@ def run():
                 'hover_text': f"<b>Topics:</b> {start_cluster} ↔ {end_cluster}<br><b>Themes:</b> {edge['theme_1']} ↔ {edge['theme_2']}<br><b>Engagement Score:</b> {int(edge['weight'])}<br><b>Sentiment:</b> {edge['sentiment']:.2f}"
             })
 
-        # Prepare node data for JavaScript
+        # Prepare node data for JavaScript.
+        # Focal / non-focal streams: the top 3 clusters by total volume for
+        # this quarter are "focal" — they keep current alpha. Non-focal
+        # clusters drop to 0.25 alpha so the eye locks onto the dominant
+        # streams. Colors themselves are unchanged (Knaflic preattentive
+        # focus — emphasize via intensity, not hue shift).
+        cluster_volumes = nodes_q_all.groupby('cluster_name')['scaled_size'].sum()
+        focal_clusters = set(cluster_volumes.nlargest(3).index)
+
         node_data = []
         for cluster in unique_clusters:
             cluster_data = nodes_q_all[nodes_q_all['cluster_name'] == cluster]
@@ -251,18 +259,19 @@ def run():
                     avg_score_display = int(next(iter(node['avg_score'])))
                 else:
                     avg_score_display = int(float(node['avg_score']))
-                
+
                 try:
                     sentiment_value = float(node['sentiment']) if pd.notna(node['sentiment']) else 0.0
                 except:
                     sentiment_value = 0.0
-                
+
                 node_data.append({
                     'x': float(node['x_rot']),
                     'y': float(node['y_rot']),
                     'size': float(node['scaled_size']),
                     'color': cluster_color_map[cluster],
                     'cluster': cluster,
+                    'is_focal': cluster in focal_clusters,
                     'hover_text': f"<b>Topic:</b> {node['cluster_name']}<br><b>Theme:</b> {node['theme']}<br><b>Engagement Score:</b> {avg_score_display}<br><b>Sentiment:</b> {sentiment_value:.2f}"
                 })
 
@@ -510,7 +519,7 @@ def run():
                                 marker: {{
                                     size: clusterNodes.map(n => window.innerWidth <= 768 ? n.size * 0.8 : n.size),
                                     color: clusterNodes[0].color,
-                                    opacity: 0.7,
+                                    opacity: clusterNodes[0].is_focal ? 0.7 : 0.25,
                                     line: {{ width: 0.5, color: 'white' }}
                                 }},
                                 hoverinfo: 'text',
@@ -770,16 +779,11 @@ def run():
     # Calculate river flow data
     river_data = calculate_river_flow_data(df_nodes, df_edges, selected_quarter)
     
-    # Display the main title. Subtitle uses the same eyebrow character style
-    # as the "TIME TRAVEL" label above the slider (uppercase, letter-spaced,
-    # small gray) to create a consistent typographic system.
-    st.markdown(f"""
+    # Display the main title. No subtitle/eyebrow — the current quarter is
+    # already shown by the "TIME TRAVEL" slider below and the stats block.
+    st.markdown("""
     <div style="text-align: center; margin-bottom: 1rem;">
         <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 0.4rem;">Narrative Trees</h1>
-        <div style="font-size: 13px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase;">
-            Quarter
-            <span style="margin-left: 8px; color: #1e293b; font-weight: 700;">{selected_label}</span>
-        </div>
     </div>
     """, unsafe_allow_html=True)
     

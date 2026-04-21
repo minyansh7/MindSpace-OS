@@ -565,7 +565,7 @@ def run():
     <div style="text-align: center; color: white; margin-bottom: 2rem;">
         <h1 style="font-size: 3rem; font-weight: 800; background: linear-gradient(45deg, #ffd700, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
             🌦️ Meditation Weather Map</h1>
-        <h3 style="font-size: 1.5rem; font-weight: 500; color:#333">How people feel</h3>
+        <h3 style="font-size: 1.5rem; font-weight: 500; color:#333">How the mood on each meditation topic shifts across six quarters.</h3>
         <p style="font-size: 1rem; color: #888; max-width: 800px; margin: auto;">
             This weather map shows how people's sentiment change over time across topics of meditations.
         </p>

@@ -153,7 +153,7 @@ def run():
     st.markdown("""
     <div class="main-header" style="text-align: center; padding: 0.8rem;">
         <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 0.1rem;">🌊 Emotion Pulse</h1>
-        <h3 style="font-size: 1.5rem; font-weight: 500; margin-top: 0; margin-bottom: 0.5rem;">What people feel</h3>
+        <h3 style="font-size: 1.5rem; font-weight: 500; margin-top: 0; margin-bottom: 0.5rem;">48K meditation posts, each colored by its dominant emotion</h3>
         <p class="description" style="
             font-size: 1rem;
             margin: 0;
