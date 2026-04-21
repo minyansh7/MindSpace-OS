@@ -713,6 +713,13 @@ def run():
             </div>
             """
 
+        # Header and fake filter controls moved out of the iframe:
+        #   - "Living Narrative Intelligence" now renders above the chart
+        #     (relocated so the sidebar can focus on scannable data).
+        #   - Engagement Level + Sentiment Flow are now real Streamlit
+        #     widgets rendered above this iframe in col_sidebar, so they
+        #     actually filter the graph.
+        # This iframe now only holds the Story Tributaries summary.
         html_template = f"""
         <div style="
             background: rgba(248, 250, 252, 0.95);
@@ -722,44 +729,6 @@ def run():
             overflow-y: auto;
             font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         ">
-            <!-- Header -->
-            <div style="margin-bottom: 25px; text-align: center;">
-                <div style="font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">Living Narrative Intelligence</div>
-                <div style="font-size: 12px; color: #64748b; line-height: 1.4;">Where meditation stories converge and flow together</div>
-            </div>
-
-            <!-- Flow Filters -->
-            <div style="margin-bottom: 25px;">
-                <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 15px; letter-spacing: 0.05em;">
-                    FLOW FILTERS
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <div style="font-size: 13px; color: #374151; font-weight: 600; margin-bottom: 10px;">Engagement Level</div>
-                    <div style="position: relative; height: 6px; background: #e5e7eb; border-radius: 3px; margin-bottom: 8px;">
-                        <div style="width: 70%; height: 100%; background: #6366f1; border-radius: 3px; position: relative;">
-                            <div style="position: absolute; right: -6px; top: 50%; width: 12px; height: 12px; background: #6366f1; border: 2px solid white; border-radius: 50%; transform: translateY(-50%); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
-                        </div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748b;">
-                        <span>Low</span>
-                        <span>High</span>
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <div style="font-size: 13px; color: #374151; font-weight: 600; margin-bottom: 10px;">Sentiment Flow</div>
-                    <div style="display: flex; gap: 12px;">
-                        <div style="flex: 1; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); transition: all 0.2s ease;">
-                            <div style="font-size: 12px; color: #16a34a; font-weight: 600;">Positive</div>
-                        </div>
-                        <div style="flex: 1; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); transition: all 0.2s ease;">
-                            <div style="font-size: 12px; color: #dc2626; font-weight: 600;">Negative</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
             <!-- Story Tributaries -->
             <div>
                 <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 15px; letter-spacing: 0.05em;">
@@ -775,15 +744,35 @@ def run():
     # Main execution starts here
     selected_quarter = reverse_label_map[quarter_labels[st.session_state.slider_index]]
     selected_label = quarter_labels[st.session_state.slider_index]
+
+    # Read filter state from session. Widgets that write these keys render
+    # in col_sidebar below; on the very first load there's no value, so
+    # default to "no filter" (engagement_min=0, sentiment=All). On subsequent
+    # reruns Streamlit has already persisted the user's picks.
+    engagement_min = st.session_state.get("nt_engagement_min", 0)
+    sentiment_filter = st.session_state.get("nt_sentiment", "All")
+
+    def _apply_filters(edges_df):
+        """Filter the edges DataFrame by engagement weight and sentiment
+        polarity. Nodes are not filtered directly; nodes with no surviving
+        edges will naturally drop out of the co-occurrence view."""
+        out = edges_df[edges_df["weight"] >= engagement_min].copy()
+        if sentiment_filter == "Positive":
+            out = out[out["sentiment"] > 0]
+        elif sentiment_filter == "Negative":
+            out = out[out["sentiment"] < 0]
+        return out
+
+    # Calculate river flow data on filtered edges
+    river_data = calculate_river_flow_data(df_nodes, _apply_filters(df_edges), selected_quarter)
     
-    # Calculate river flow data
-    river_data = calculate_river_flow_data(df_nodes, df_edges, selected_quarter)
-    
-    # Display the main title. No subtitle/eyebrow — the current quarter is
-    # already shown by the "TIME TRAVEL" slider below and the stats block.
+    # Display the main title + relocated "Living Narrative Intelligence"
+    # block (previously in the left sidebar iframe).
     st.markdown("""
     <div style="text-align: center; margin-bottom: 1rem;">
         <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 0.4rem;">Narrative Trees</h1>
+        <div style="font-size: 20px; font-weight: 800; color: #1e293b; margin-top: 0.5rem;">Living Narrative Intelligence</div>
+        <div style="font-size: 13px; color: #64748b; line-height: 1.4; margin-top: 4px;">Where meditation stories converge and flow together</div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -794,8 +783,8 @@ def run():
     selected_quarter = reverse_label_map[quarter_labels[st.session_state.slider_index]]
     selected_label = quarter_labels[st.session_state.slider_index]
     
-    # Recalculate river flow data with updated quarter
-    river_data = calculate_river_flow_data(df_nodes, df_edges, selected_quarter)
+    # Recalculate river flow data with updated quarter (filters still apply)
+    river_data = calculate_river_flow_data(df_nodes, _apply_filters(df_edges), selected_quarter)
     
     # Display current statistics
     st.markdown(f"""
@@ -811,9 +800,37 @@ def run():
     col_sidebar, col_plot = st.columns([1, 2])
     
     with col_sidebar:
-        # Create and display the cleaned-up sidebar (no time navigation)
-        sidebar_html = create_professional_sidebar_html(river_data, selected_label, colors, quarter_labels, st.session_state.slider_index)
-        components.html(sidebar_html, height=600, scrolling=False)
+        # Real, functional filter widgets. Their keys drive `engagement_min`
+        # and `sentiment_filter` above; changing either triggers a Streamlit
+        # rerun, which recomputes river_data through _apply_filters().
+        st.markdown(
+            "<div style=\"font-size: 14px; font-weight: 700; color: #1e293b; "
+            "margin: 0.25rem 0 0.5rem 0; letter-spacing: 0.05em;\">FLOW FILTERS</div>",
+            unsafe_allow_html=True,
+        )
+        st.slider(
+            "Engagement Level",
+            min_value=0,
+            max_value=100,
+            value=int(st.session_state.get("nt_engagement_min", 0)),
+            step=5,
+            key="nt_engagement_min",
+            help="Hide edges with engagement weight below this threshold.",
+        )
+        st.radio(
+            "Sentiment Flow",
+            options=["All", "Positive", "Negative"],
+            horizontal=True,
+            key="nt_sentiment",
+            help="Show only edges with the selected sentiment polarity.",
+        )
+
+        # Story Tributaries iframe (summary stats only; header and fake
+        # filters have been moved out of this iframe).
+        sidebar_html = create_professional_sidebar_html(
+            river_data, selected_label, colors, quarter_labels, st.session_state.slider_index
+        )
+        components.html(sidebar_html, height=500, scrolling=False)
     
     with col_plot:
         # Create and display the dynamic HTML visualization

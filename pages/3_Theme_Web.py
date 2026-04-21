@@ -133,33 +133,6 @@ def run():
     </div>
     """, unsafe_allow_html=True)
     
-    # Plot annotation with responsive design
-    st.markdown("""
-    <div class="annotation-container">
-        <div style="display: flex; justify-content: center;">
-            <div style="max-width: 600px; text-align: center;">
-                <h4 style="font-size: 24px; color: #333; margin: 0 0 15px 0; font-weight: 600;">
-                    👁️ Hover Over to Discover the Narratives
-                </h4>
-                <div style="text-align: left; margin: 0 auto;">
-                    <p style="font-size: 18px; color: #444; margin: 5px 0; line-height: 1.5;">
-                        • <strong>Dots</strong> represent Reddit posts or comments about meditation
-                    </p>
-                    <p style="font-size: 18px; color: #444; margin: 5px 0; line-height: 1.5;">
-                        • <strong>Lines</strong> connect dots when their topics appear together
-                    </p>
-                    <p style="font-size: 18px; color: #444; margin: 5px 0; line-height: 1.5;">
-                        • <strong>Size & thickness</strong> reflect community engagement
-                    </p>
-                    <p style="font-size: 18px; color: #444; margin: 5px 0; line-height: 1.5;">
-                        • <strong>Line color</strong> shows sentiment: green (positive), red (negative)
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
     @st.cache_data
     def load_edges_clusters():
         return pd.read_parquet("precomputed/timeseries/df_edges.parquet")

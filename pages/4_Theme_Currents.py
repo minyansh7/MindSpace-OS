@@ -182,23 +182,6 @@ def run():
     </div>
     """, unsafe_allow_html=True)
     
-    # Poetic invitation section
-    st.markdown("""
-    <div class="annotation-container">
-        <div style="display: flex; justify-content: center;">
-            <div style="max-width: 500px; text-align: center;">
-                <p style="font-size: 16px; color: #718096; margin: 0; line-height: 1.8; font-weight: 300; opacity: 0.9;">
-                    flow over the narratives change over time<br>
-                    let the connections of topics reveal themselves<br> 
-                    more engaed discussions are connected by bolder lines<br>
-                    watch for green tone on positive, and red for negative sentiment<br>
-                       <br> 
-                </p>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
     # Load data
     @st.cache_data
     def load_edges_clusters():
