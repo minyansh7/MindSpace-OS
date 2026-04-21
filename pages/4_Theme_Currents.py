@@ -867,11 +867,17 @@ def run():
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    with st.expander("How to read this"):
-        st.markdown(
-            "Bolder lines = more-engaged discussions; green = positive sentiment, "
-            "red = negative. Scrub the Time Travel slider to watch connections shift."
-        )
+    st.markdown("""
+    <div style="background: #f8fafc; border-left: 3px solid #6366f1;
+                padding: 12px 16px; margin: 12px 0;
+                border-radius: 0 6px 6px 0; font-size: 0.9rem; color: #334155;">
+        <div style="font-size: 10px; color: #64748b; letter-spacing: 0.12em;
+                    text-transform: uppercase; font-weight: 700;
+                    margin-bottom: 6px;">How to read</div>
+        Bolder lines = more-engaged discussions; green = positive sentiment,
+        red = negative. <b>Scrub the Time Travel slider</b> to watch connections shift.
+    </div>
+    """, unsafe_allow_html=True)
 
     # Footer
     st.markdown("""

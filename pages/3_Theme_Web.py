@@ -745,11 +745,17 @@ def run():
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    with st.expander("How to read this"):
-        st.markdown(
-            "Dots = posts; lines = shared topics; size and thickness = engagement; "
-            "green/red lines = positive/negative sentiment. Hover to discover."
-        )
+    st.markdown("""
+    <div style="background: #f8fafc; border-left: 3px solid #6366f1;
+                padding: 12px 16px; margin: 12px 0;
+                border-radius: 0 6px 6px 0; font-size: 0.9rem; color: #334155;">
+        <div style="font-size: 10px; color: #64748b; letter-spacing: 0.12em;
+                    text-transform: uppercase; font-weight: 700;
+                    margin-bottom: 6px;">How to read</div>
+        Dots = posts; lines = shared topics; size and thickness = engagement;
+        green/red lines = positive/negative sentiment. <b>Hover to discover</b>.
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("""
     <div class="footer-text">

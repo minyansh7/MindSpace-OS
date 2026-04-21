@@ -2264,11 +2264,21 @@ def run():
         </html>
         """
     
+    # "How to read" block — rendered above "Regional Topic Trends..."
+    # (which is emitted as a side-effect of create_river_flow_html).
+    st.markdown("""
+    <div style="background: #f8fafc; border-left: 3px solid #6366f1;
+                padding: 12px 16px; margin: 12px 0;
+                border-radius: 0 6px 6px 0; font-size: 0.9rem; color: #334155;">
+        <div style="font-size: 10px; color: #64748b; letter-spacing: 0.12em;
+                    text-transform: uppercase; font-weight: 700;
+                    margin-bottom: 6px;">How to read</div>
+        Region size = discussion volume.
+    </div>
+    """, unsafe_allow_html=True)
+
     # Render the River Flow component with 4800px height
     st.components.v1.html(create_river_flow_html(), height=4800, width=None)
-
-    with st.expander("How to read this"):
-        st.markdown("Region size = discussion volume.")
 
     # Footer
     st.markdown("""
