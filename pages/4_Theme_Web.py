@@ -742,8 +742,14 @@ def run():
     component_height = base_height
     
     components.html(html_code, height=component_height, scrolling=False)
-    
+
     st.markdown('</div>', unsafe_allow_html=True)
+
+    with st.expander("How to read this"):
+        st.markdown(
+            "Dots = posts; lines = shared topics; size and thickness = engagement; "
+            "green/red lines = positive/negative sentiment. Hover to discover."
+        )
 
     st.markdown("""
     <div class="footer-text">

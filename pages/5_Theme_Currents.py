@@ -864,8 +864,14 @@ def run():
     component_height = base_height
     
     components.html(html_code, height=component_height, scrolling=False)
-    
+
     st.markdown('</div>', unsafe_allow_html=True)
+
+    with st.expander("How to read this"):
+        st.markdown(
+            "Bolder lines = more-engaged discussions; green = positive sentiment, "
+            "red = negative. Scrub the Time Travel slider to watch connections shift."
+        )
 
     # Footer
     st.markdown("""

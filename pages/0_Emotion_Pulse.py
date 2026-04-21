@@ -557,6 +557,12 @@ def run():
 
     st.markdown('</div>', unsafe_allow_html=True)
 
+    with st.expander("How to read this"):
+        st.markdown(
+            "Each point is a post; color shows its emotional pulse. "
+            "Hover any dot to see the message behind it."
+        )
+
     st.markdown("""
         <div class="footer-text">
             Powered By Terramare ᛘ𓇳     ©2025

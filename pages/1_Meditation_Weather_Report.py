@@ -2267,6 +2267,9 @@ def run():
     # Render the River Flow component with 4800px height
     st.components.v1.html(create_river_flow_html(), height=4800, width=None)
 
+    with st.expander("How to read this"):
+        st.markdown("Region size = discussion volume.")
+
     # Footer
     st.markdown("""
     <div class="footer-text">
