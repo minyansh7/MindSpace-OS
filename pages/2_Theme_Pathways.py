@@ -246,6 +246,9 @@ def run():
     <div style="text-align: center;">
         <h1 style="font-size: 3rem; font-weight: 800;">Topic Flow: How Themes Connect</h1>
         <h3 style="font-size: 1.5rem; font-weight: 500;">What People Say Most</h3>
+        <p style="font-size: 1rem; color: #888; max-width: 800px; margin: 0.75rem auto 0 auto;">
+            Hover over to discover theme details.
+        </p>
     </div>
     """, unsafe_allow_html=True)
     

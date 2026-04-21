@@ -191,7 +191,7 @@ def run():
             <div style="max-width: 500px; text-align: center;">
                 <p style="font-size: 16px; color: #718096; margin: 0; line-height: 1.8; font-weight: 300; opacity: 0.9;">
                     <strong>Each point</strong> marks a message shared on Reddit about meditation.<br>
-                    <strong>Color</strong> reflects the emotional pulses uncovered for each.
+                    <strong>Color</strong> reflects the dominant emotional underneath each message.
                        <br> 
                 </p>
             </div>
@@ -578,18 +578,6 @@ def run():
         """, unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown("""
-    <div style="background: #f8fafc; border-left: 3px solid #6366f1;
-                padding: 12px 16px; margin: 12px 0;
-                border-radius: 0 6px 6px 0; font-size: 0.9rem; color: #334155;">
-        <div style="font-size: 10px; color: #64748b; letter-spacing: 0.12em;
-                    text-transform: uppercase; font-weight: 700;
-                    margin-bottom: 6px;">How to read</div>
-        Each point is a post; color shows its emotional pulse.
-        <b>Hover any dot</b> to see the message behind it.
-    </div>
-    """, unsafe_allow_html=True)
 
     st.markdown("""
         <div class="footer-text">

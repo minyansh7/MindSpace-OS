@@ -1326,7 +1326,7 @@ def run():
 
             # Render the styled subtitle
             st.markdown(f"""
-            <h4 class="custom-subtitle" style="text-align: center; margin-top: -40px;">
+            <h4 class="custom-subtitle" style="text-align: center; margin-top: 1rem;">
                 Regional Topic Trends and Active Challenges – {selected_quarter}
             </h4>
             """, unsafe_allow_html=True)
@@ -1474,7 +1474,7 @@ def run():
 
             # Render the styled subtitle
             st.markdown(f"""
-            <h4 class="custom-subtitle" style="text-align: center; margin-top: -40px;">
+            <h4 class="custom-subtitle" style="text-align: center; margin-top: 1rem;">
                 Regional Topic Trends and Active Challenges – {selected_quarter}
             </h4>
             """, unsafe_allow_html=True)
@@ -2266,9 +2266,11 @@ def run():
     
     # "How to read" block — rendered above "Regional Topic Trends..."
     # (which is emitted as a side-effect of create_river_flow_html).
+    # Generous bottom margin leaves breathing room before the subtitle that
+    # renders inside create_river_flow_html().
     st.markdown("""
     <div style="background: #f8fafc; border-left: 3px solid #6366f1;
-                padding: 12px 16px; margin: 12px 0;
+                padding: 12px 16px; margin: 12px 0 2.5rem 0;
                 border-radius: 0 6px 6px 0; font-size: 0.9rem; color: #334155;">
         <div style="font-size: 10px; color: #64748b; letter-spacing: 0.12em;
                     text-transform: uppercase; font-weight: 700;
