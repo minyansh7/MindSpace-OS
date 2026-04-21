@@ -745,12 +745,17 @@ def run():
     selected_quarter = reverse_label_map[quarter_labels[st.session_state.slider_index]]
     selected_label = quarter_labels[st.session_state.slider_index]
 
-    # Read filter state from session. Widgets that write these keys render
-    # in col_sidebar below; on the very first load there's no value, so
-    # default to "no filter" (engagement_min=0, sentiment=All). On subsequent
-    # reruns Streamlit has already persisted the user's picks.
-    engagement_min = st.session_state.get("nt_engagement_min", 0)
-    sentiment_filter = st.session_state.get("nt_sentiment", "All")
+    # Seed defaults BEFORE reading so the first paint already filters.
+    # Engagement Level defaults to 80 (user preference — surface only the
+    # strongly-engaged connections on landing). Sentiment defaults to "All"
+    # (no polarity filter). Subsequent reruns preserve the user's picks.
+    if "nt_engagement_min" not in st.session_state:
+        st.session_state["nt_engagement_min"] = 80
+    if "nt_sentiment" not in st.session_state:
+        st.session_state["nt_sentiment"] = "All"
+
+    engagement_min = st.session_state["nt_engagement_min"]
+    sentiment_filter = st.session_state["nt_sentiment"]
 
     def _apply_filters(edges_df):
         """Filter the edges DataFrame by engagement weight and sentiment
