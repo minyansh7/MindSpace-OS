@@ -454,6 +454,7 @@ def run():
             showgrid=False,
             zeroline=False,
             showticklabels=False,
+            ticks='',
             scaleanchor="y",
             scaleratio=1,
             fixedrange=True
@@ -462,6 +463,7 @@ def run():
             showgrid=False,
             zeroline=False,
             showticklabels=False,
+            ticks='',
             range=[y_min - y_buffer_bottom, y_max + y_buffer_top],
             fixedrange=True
         ),
@@ -475,7 +477,7 @@ def run():
     
     # Configure the plot - keep hover functionality enabled
     config = {
-        'displayModeBar': True,
+        'displayModeBar': False,
         'displaylogo': False,
         'modeBarButtonsToRemove': [
             'zoom2d', 'pan2d', 'select2d', 'lasso2d',

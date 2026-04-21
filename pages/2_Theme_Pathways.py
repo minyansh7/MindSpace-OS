@@ -6,6 +6,12 @@ import numpy as np
 from pathlib import Path
 from plotly.colors import hex_to_rgb
 
+try:
+    from mobile import is_mobile
+except ImportError:  # pragma: no cover — defensive; mobile.py ships with the repo
+    def is_mobile() -> bool:
+        return False
+
 # --- Custom Font ---
 st.markdown("""
     <style>
@@ -255,8 +261,8 @@ def run():
     # Enhanced chart display with export configuration
     fig = create_sankey_custom(main_topics)
     
-    st.plotly_chart(fig, use_container_width=True, config={
-        'displayModeBar': True,
+    sankey_config = {
+        'displayModeBar': False,
         'displaylogo': False,
         'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d'],
         'toImageButtonOptions': {
@@ -266,7 +272,21 @@ def run():
             'width': 1400,
             'scale': 2
         }
-    })
+    }
+
+    # Render. Desktop path is structurally identical to the original call
+    # (same fig object, same container width); mobile branch bumps hover font
+    # so tooltips are legible at 375px viewports and shortens height so the
+    # Sankey doesn't demand a full phone scroll.
+    if not is_mobile():
+        st.plotly_chart(fig, use_container_width=True, config=sankey_config)
+    else:
+        fig.update_layout(
+            hoverlabel=dict(font=dict(size=14)),
+            margin=dict(t=30, b=10, l=10, r=10),
+            height=700,
+        )
+        st.plotly_chart(fig, use_container_width=True, config=sankey_config)
 
     st.markdown("""
     <div class="footer-text">
