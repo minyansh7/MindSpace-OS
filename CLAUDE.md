@@ -71,23 +71,31 @@ Theme Currents' `topic_mapping` dict was synced to match on 2026-04-21.
 
 Sidebar order (derived from the leading numeric prefix in `pages/*.py`):
 
-1. Emotion Pulse          — `0_Emotion_Pulse.py`
+1. Emotion Pulse            — `0_Emotion_Pulse.py`
 2. Meditation Weather Report — `1_Meditation_Weather_Report.py`
-3. Theme Pathways         — `2_Theme_Pathways.py` (Sankey)
-4. Narrative Trees        — `3_Narrative_Trees.py` (river-flow / detailed)
-5. Theme Web              — `4_Theme_Web.py` (static co-occurrence network)
-6. Theme Currents         — `5_Theme_Currents.py` (temporal network, last)
+3. Theme Pathways           — `2_Theme_Pathways.py` (Sankey)
+4. Theme Web                — `3_Theme_Web.py` (static co-occurrence network)
+5. Theme Currents           — `4_Theme_Currents.py` (temporal network)
+6. Narrative Trees          — `5_Narrative_Trees.py` (river-flow, filterable, last)
 
-The three network-style pages (4–6) all visualize relationships between
-theme clusters but from different angles, and are ordered from
-most-structured to most-temporal:
-- **Narrative Trees**: deep branching view with filters + sidebar analytics
-- **Theme Web**: who connects to whom overall (static summary)
-- **Theme Currents**: how connections flow and change across quarters
-  (time-series culmination, shipping as the final page)
+The four relationship-oriented pages (3–6) visualize theme connections
+from progressively more dynamic angles:
 
-Together with "Theme Pathways" (Sankey), the four form a metaphor family
-— pathways, trees, web, currents — each a tangible natural form.
+- **Theme Pathways**: Sankey of how top themes flow into topic clusters
+  (broad, read-once overview)
+- **Theme Web**: static co-occurrence graph — who connects to whom
+  across the full archive
+- **Theme Currents**: the same connections rendered as a temporal
+  network, quarter by quarter
+- **Narrative Trees**: deep branching view with engagement-level
+  filters, sentiment filters, quarter slider, and a sidebar analytics
+  panel — the most interactive page, and the final stop in the tour
+
+So the progression is: *flow → static snapshot → temporal motion → deep
+filterable drill-down*. The last page is the most interactive by design.
+
+Together, the four form a metaphor family — pathways, trees, web,
+currents — each a tangible natural form.
 
 Archived (kept in repo but hidden from sidebar): `archive/0_Emotion_Pulse_v.py`
 
