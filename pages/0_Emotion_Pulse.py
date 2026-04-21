@@ -581,7 +581,7 @@ def run():
 
     st.markdown("""
         <div class="footer-text">
-            Powered By Terramare ᛘ𓇳     ©2025
+            Powered By MinyanLabs ©2026
         </div>
         """, unsafe_allow_html=True)
 

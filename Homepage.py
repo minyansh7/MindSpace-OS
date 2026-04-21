@@ -341,8 +341,8 @@ st.markdown(f"""
 st.markdown(f"""
 <div class="nav-bar">
     <div class="nav-right">
-        <a href="https://terramare.substack.com/subscribe?params=%5Bobject%20Object%5D">Join Newsletter</a>
-        <a href="mailto:contact@meditation-pain-map.com">Contact</a>
+        <a href="https://open.substack.com/pub/minyansh">Join Newsletter</a>
+        <a href="mailto:minyanshi@proton.me">Contact</a>
         <a href="https://www.linkedin.com/in/minyanshi/" target="_blank">LinkedIn</a>
     </div>
 </div>
@@ -413,7 +413,7 @@ st.markdown(f"""
     background-clip: text;
     color: transparent;
 ">
-    Powered By Terramare ᛘ𓇳 ©2025
+    Powered By MinyanLabs ©2026
 </div>
 """, unsafe_allow_html=True)
 

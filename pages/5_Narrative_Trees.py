@@ -849,7 +849,7 @@ def run():
     # Footer
     st.markdown("""
     <div style="text-align: center; font-size: 1rem; font-weight: 600; color: #666; margin-top: 3rem; padding: 1rem; border-top: 1px solid #eee; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-        Powered by Terramare ᛘ𓇳     ©2025
+        Powered By MinyanLabs ©2026
     </div>
     """, unsafe_allow_html=True)
 

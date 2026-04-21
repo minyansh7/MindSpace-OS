@@ -181,7 +181,7 @@ st.markdown(
     <div style="border-top: 1px solid #e2e8f0; padding: 2.5rem 0 0.5rem 0;
                 text-align: center; font-size: 12px; color: #94a3b8;
                 letter-spacing: 0.05em;">
-        Powered by Terramare ᛘ𓇳 · Demo preview
+        Powered By MinyanLabs ©2026 · Demo preview
     </div>
     """,
     unsafe_allow_html=True,
