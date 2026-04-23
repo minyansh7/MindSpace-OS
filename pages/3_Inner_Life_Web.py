@@ -143,12 +143,19 @@ def run():
             })
         ).reset_index()
 
-        angle_offset = np.linspace(0, 2.2 * np.pi, len(centroids), endpoint=False)
+        # Full 2π spread. The previous 2.2π compressed 7 labels into an
+        # arc that wrapped back on itself — the last label landed ~20°
+        # from the first, causing Buddhism/Awareness/Self-Regulation
+        # overlap at the top of the plot.
+        angle_offset = np.linspace(0, 2 * np.pi, len(centroids), endpoint=False)
         angle_offset += np.pi / len(centroids)
         radius_offset = 0.4
 
         centroids['x'] += radius_offset * np.cos(angle_offset)
         centroids['y'] += radius_offset * np.sin(angle_offset)
+        # Anchor text toward the centroid so side labels (Concentration &
+        # Flow, Anxiety & Mental Health) render inward instead of clipping.
+        centroids['cos'] = np.cos(angle_offset)
 
         label_data = [
             {
@@ -156,6 +163,7 @@ def run():
                 'y': float(row['y']),
                 'text': row['cluster_name'],
                 'color': cluster_color_map[row['cluster_name']],
+                'textposition': 'middle right' if row['cos'] < -0.15 else ('middle left' if row['cos'] > 0.15 else 'middle center'),
             }
             for row in centroids.to_dict('records')
         ]
@@ -481,17 +489,20 @@ def run():
                     }});
                 }});
 
-                // Add cluster labels
+                // Add cluster labels. textposition is per-label (computed
+                // from centroid angle) so side labels render inward rather
+                // than clipping off the canvas edge.
                 labelData.forEach((label, index) => {{
                     traces.push({{
                         x: [label.x],
                         y: [label.y],
                         mode: 'text',
                         text: [`<b>${{label.text}}</b>`],
-                        textfont: {{ 
-                            size: layout.labelFontSize, 
-                            color: label.color, 
-                            family: 'sans-serif' 
+                        textposition: label.textposition || 'middle center',
+                        textfont: {{
+                            size: layout.labelFontSize,
+                            color: label.color,
+                            family: 'sans-serif'
                         }},
                         showlegend: false,
                         hoverinfo: 'none',
