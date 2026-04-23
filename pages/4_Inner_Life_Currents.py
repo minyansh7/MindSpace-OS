@@ -209,7 +209,7 @@ def run():
         top_edge_cutoff = None
         if not edges_q.empty:
             top_k = min(10, len(edges_q))
-            top_edge_cutoff = edges_q['weight'].nlargest(top_k).min()
+            top_edge_cutoff = float(edges_q['weight'].nlargest(top_k).min())
 
         edge_data = []
         for rec in edges_q.to_dict('records'):
@@ -223,7 +223,7 @@ def run():
                 'y1': float(rec['y1_rot']),
                 'weight': weight,
                 'color': rec['color'],
-                'is_top': top_edge_cutoff is not None and weight >= top_edge_cutoff,
+                'is_top': bool(top_edge_cutoff is not None and weight >= top_edge_cutoff),
                 'hover_text': f"<b>Topics:</b> {start_cluster} ↔ {end_cluster}<br><b>Themes:</b> {rec['theme_1']} ↔ {rec['theme_2']}<br><b>Engagement Score:</b> {int(weight)}<br><b>Sentiment:</b> {rec['sentiment']:.2f}"
             })
 
