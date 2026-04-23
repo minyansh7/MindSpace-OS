@@ -103,6 +103,27 @@ currents — each a tangible natural form grouped under "Inner Life".
 
 Archived (kept in repo but hidden from sidebar): `archive/0_Emotion_Pulse_v.py`
 
+## Precomputed artifacts (perf tier-3)
+
+`scripts/build_precomputed.py` produces two artifacts under `precomputed/`
+that the site loads directly, so the runtime never rebuilds them:
+
+- **`precomputed/emotion_clusters_slim.parquet`** — the 4 columns the
+  Emotion Pulse page actually reads (`umap_x`, `umap_y`, `hover_text`,
+  `archetype_label`) with `hover_text` already wrapped to the 75-char
+  tooltip width. Shrinks the source parquet from 3.7 MB to ~420 KB and
+  removes the 2,977-row Python wrap loop from cold-start cost.
+- **`precomputed/figures/themes_sankey.json`** — the full Plotly figure
+  JSON for the Inner Life Themes Sankey. The page calls
+  `plotly.io.from_json()` to load it, skipping ~140 lines of Python
+  (groupby, palette assignment, hover-text formatting) that used to
+  run on every cold start.
+
+Run `python3 scripts/build_precomputed.py` whenever the source parquets
+(`precomputed/emotion_clusters.parquet`, `precomputed/main_topics.parquet`)
+change, or the wrap rules / Sankey palette in the build script change.
+The source parquets are kept in the repo for reproducibility.
+
 ## Typographic conventions
 
 **Eyebrow labels** (small uppercase metadata above a value):

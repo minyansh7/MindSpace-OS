@@ -125,157 +125,19 @@ def run():
 </div>
 """, unsafe_allow_html=True)
 
+    # Load the slim, pre-wrapped parquet produced by
+    # ``scripts/build_precomputed.py``. That build step selects only the
+    # four columns this page reads (~2 MB savings) and pre-wraps
+    # ``hover_text`` to the same 75-char tooltip width the old runtime
+    # wrap_hover_text() produced \u2014 so the page no longer pays a 2,977-row
+    # Python wrap pass on cold start.
     @st.cache_data
     def load_emotion_clusters():
-        return pd.read_parquet("precomputed/emotion_clusters.parquet")
+        return pd.read_parquet("precomputed/emotion_clusters_slim.parquet")
 
-    emotion_df = load_emotion_clusters()
-
-    # Format hover text with different line lengths for different content types
-    def wrap_hover_text(text):
-        """Smart wrapping with different lengths for different content types"""
-        if pd.isna(text):
-            return ""
-        
-        text = str(text).strip()
-        
-        # Thoroughly clean hidden characters first
-        text = text.replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
-        text = text.replace('\u00a0', ' ')  # Non-breaking space
-        text = text.replace('\u2009', ' ')  # Thin space
-        text = text.replace('\u200b', '')   # Zero-width space
-        text = ' '.join(text.split())  # Normalize all whitespace
-        
-        # Split into lines if already formatted with <br>
-        lines = text.split('<br>')
-        wrapped_lines = []
-        
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-                
-            # Different wrapping rules based on content type.
-            # 75 chars/line keeps tooltips a reasonable width (Plotly doesn't
-            # auto-wrap hover text; it renders pre-formatted <br> breaks as-is).
-            if line.startswith("Top Emotions:"):
-                # Keep Top Emotions on one line if short; otherwise break at emotion boundaries
-                if len(line) <= 75:
-                    wrapped_lines.append(line)
-                else:
-                    wrapped_lines.extend(wrap_emotions_line(line))
-
-            elif line.startswith("Post/Comment:") or line.startswith("Comment:") or line.startswith("Post:"):
-                wrapped_lines.extend(wrap_text_content(line, 75))
-
-            else:
-                # Other content (metadata, etc.)
-                wrapped_lines.extend(wrap_text_content(line, 75))
-        
-        return '<br>'.join(wrapped_lines)
-    
-    def wrap_emotions_line(line):
-        """Special handling for Top Emotions line"""
-        import re
-        # Clean the line thoroughly first
-        line = ' '.join(line.split())  # Remove extra spaces
-        
-        # Try to break at emotion boundaries
-        emotion_pattern = r'(\w+:\s*\d+%)'
-        emotions = re.findall(emotion_pattern, line)
-        
-        if emotions:
-            lines = []
-            current_line = "Top Emotions: "
-            
-            for emotion in emotions:
-                if len(current_line + emotion + " ") > 75:
-                    if current_line.strip() != "Top Emotions:":
-                        lines.append(current_line.strip())
-                        current_line = emotion + " "
-                    else:
-                        current_line += emotion + " "
-                else:
-                    current_line += emotion + " "
-
-            if current_line.strip():
-                lines.append(current_line.strip())
-
-            return lines
-        else:
-            # Fallback to regular wrapping
-            return wrap_text_content(line, 75)
-    
-    def wrap_text_content(text, max_length):
-        """Wrap text at specified length without breaking words, combining short lines"""
-        # Clean text first
-        text = ' '.join(text.split())
-        
-        if len(text) <= max_length:
-            return [text]
-        
-        words = text.split()
-        lines = []
-        current_line = []
-        current_length = 0
-        
-        for word in words:
-            word_length = len(word)
-            space_length = 1 if current_line else 0
-            
-            if current_length + space_length + word_length > max_length:
-                if current_line:
-                    lines.append(' '.join(current_line))
-                    current_line = [word]
-                    current_length = word_length
-                else:
-                    lines.append(word)
-                    current_length = 0
-            else:
-                current_line.append(word)
-                current_length += space_length + word_length
-        
-        if current_line:
-            lines.append(' '.join(current_line))
-        
-        # Combine short consecutive lines if they fit together
-        combined_lines = []
-        i = 0
-        while i < len(lines):
-            current = lines[i]
-            
-            # Try to combine with next line if both are short
-            if i + 1 < len(lines):
-                next_line = lines[i + 1]
-                combined = current + ' ' + next_line
-                
-                # If combined length is within limit and both lines are short, combine them
-                if len(combined) <= max_length and len(current.split()) <= 4 and len(next_line.split()) <= 4:
-                    combined_lines.append(combined)
-                    i += 2  # Skip next line since we combined it
-                    continue
-            
-            combined_lines.append(current)
-            i += 1
-        
-        return combined_lines
-
-    # Wrap all hover strings once per session. The previous implementation
-    # ran wrap_hover_text via .apply() on every rerun, which was the
-    # dominant cost on this page. We memoize on the source parquet (which
-    # is load-cached) by object id via session_state so subsequent reruns
-    # skip the Python-loop wrap entirely.
-    cache_key = "_emotion_formatted_hover_v1"
-    if (
-        cache_key not in st.session_state
-        or st.session_state[cache_key].get("id") != id(emotion_df)
-    ):
-        with st.spinner("Rendering 2,977 emotions..."):
-            formatted = emotion_df['hover_text'].map(wrap_hover_text)
-            st.session_state[cache_key] = {"id": id(emotion_df), "data": formatted}
-
-    df = emotion_df.copy()
-    df['formatted_hover_text'] = st.session_state[cache_key]["data"].values
+    df = load_emotion_clusters()
+    # Alias for downstream code that references the wrapped text.
+    df = df.rename(columns={"hover_text": "formatted_hover_text"})
 
     cluster_colors = {
         'Reflective Caring': '#ff5e78',
