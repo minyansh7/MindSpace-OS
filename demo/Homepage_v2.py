@@ -152,27 +152,27 @@ section_eyebrow("The Themes")
 
 feed_item(
     "03",
-    "Theme Pathways",
+    "Inner Life Themes",
     "Themes flow into topics. Trace what leads where.",
-    href="/Theme_Pathways",
+    href="/Inner_Life_Themes",
 )
 feed_item(
     "04",
-    "Theme Web",
+    "Inner Life Web",
     "Which topics keep showing up together? A connection map of the archive.",
-    href="/Theme_Web",
+    href="/Inner_Life_Web",
 )
 feed_item(
     "05",
-    "Theme Currents",
+    "Inner Life Currents",
     "How the conversation drifts. Watch theme connections shift quarter by quarter.",
-    href="/Theme_Currents",
+    href="/Inner_Life_Currents",
 )
 feed_item(
     "06",
-    "Narrative Trees",
+    "Inner Life Trees",
     "A river of meditation stories with filters to dig into any branch.",
-    href="/Narrative_Trees",
+    href="/Inner_Life_Trees",
 )
 
 # --- Footer -------------------------------------------------------------

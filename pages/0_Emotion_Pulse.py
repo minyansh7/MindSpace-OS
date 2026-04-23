@@ -5,7 +5,7 @@ import pandas as pd
 from shared_ui import inject_inner_life_css, render_hero
 
 st.set_page_config(
-    page_title="🌊 The Emotional Pulse of the Meditation Landscape",
+    page_title="Emotion Pulse",
     layout="wide"
 )
 
@@ -454,7 +454,7 @@ def run():
     st.markdown('<div class="plot-container">', unsafe_allow_html=True)
     
     # Use specific seed text from first script (capped with 3 words fewer)
-    seed_text = """<b>Emotional Pulse: Tender Uncertainty</b><br><b>Top Emotions:</b> caring: 75% annoying: 71% desire: 70% disapproval: 62% realization: 60% remorse: 60% curiosity: 59% approval: 56% excitement: 54% confusion: 53%<br><b>Post/Comment:</b> Insight Timer used to be amazing. While the community content is a nice-to-have, I mostly used it for the timer feature. However in the past few months the number of disruptive..."""
+    seed_text = """<b>Emotion Pulse: Tender Uncertainty</b><br><b>Top Emotions:</b> caring: 75% annoying: 71% desire: 70% disapproval: 62% realization: 60% remorse: 60% curiosity: 59% approval: 56% excitement: 54% confusion: 53%<br><b>Post/Comment:</b> Insight Timer used to be amazing. While the community content is a nice-to-have, I mostly used it for the timer feature. However in the past few months the number of disruptive..."""
 
     # Show initial hover box only if no interaction detected yet
     if not st.session_state.plot_interacted:
