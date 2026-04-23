@@ -217,15 +217,6 @@ def run():
                 'hover_text': f"<b>Topics:</b> {start_cluster} ↔ {end_cluster}<br><b>Themes:</b> {rec['theme_1']} ↔ {rec['theme_2']}<br><b>Engagement Score:</b> {int(rec['weight'])}<br><b>Sentiment:</b> {rec['sentiment']:.2f}"
             })
 
-        # Top-10 labeling
-        top10_coords = set()
-        if not nodes_q.empty:
-            top10_nodes = nodes_q.nlargest(min(10, len(nodes_q)), "scaled_size")
-            top10_coords = set(zip(
-                top10_nodes['x_rot'].astype(float).to_numpy(),
-                top10_nodes['y_rot'].astype(float).to_numpy(),
-            ))
-
         node_data = []
         for cluster in unique_clusters:
             cluster_slice = nodes_q[nodes_q['cluster_name'] == cluster]
@@ -240,15 +231,12 @@ def run():
                     sentiment_value = float(rec['sentiment']) if pd.notna(rec['sentiment']) else 0.0
                 except (TypeError, ValueError):
                     sentiment_value = 0.0
-                node_coord = (float(rec['x_rot']), float(rec['y_rot']))
                 node_data.append({
                     'x': float(rec['x_rot']),
                     'y': float(rec['y_rot']),
                     'size': float(rec['scaled_size']),
                     'color': color,
                     'cluster': cluster,
-                    'is_top10': node_coord in top10_coords,
-                    'node_label': rec['cluster_name'],
                     'hover_text': f"<b>Topic:</b> {rec['cluster_name']}<br><b>Theme:</b> {rec['theme']}<br><b>Engagement Score:</b> {avg_score_display}<br><b>Sentiment:</b> {sentiment_value:.2f}"
                 })
 
@@ -634,29 +622,6 @@ def run():
                             name: `label_${{index}}`
                         }});
                     }});
-
-                    // Top-10 node labels only. Rest of the nodes remain
-                    // hover-only (their hover tooltip still reveals the
-                    // same label text). Without the cap ~100 labels
-                    // overlap and become unreadable.
-                    const top10 = nodeData.filter(n => n.is_top10);
-                    if (top10.length > 0) {{
-                        traces.push({{
-                            x: top10.map(n => n.x),
-                            y: top10.map(n => n.y),
-                            mode: 'text',
-                            text: top10.map(n => n.node_label),
-                            textposition: 'top center',
-                            textfont: {{
-                                size: Math.max(9, layout.labelFontSize - 2),
-                                color: '#334155',
-                                family: 'DM Sans, sans-serif'
-                            }},
-                            showlegend: false,
-                            hoverinfo: 'skip',
-                            name: 'top10_node_labels'
-                        }});
-                    }}
 
                     return traces;
                     
