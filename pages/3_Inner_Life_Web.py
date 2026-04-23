@@ -16,7 +16,7 @@ def run():
         eyebrow="WEB",
         title="Inner Life Web",
         subtitle="Which meditation topics appear together across the full archive",
-        description="Explore meditation topics and their interconnections through engagement-weighted, sentiment-infused narratives, drawn from thousands of Reddit posts and comments shared between January 2024 and June 2025.",
+        description="Explore meditation topics and their interconnections through engagement-weighted, sentiment-infused narratives, drawn from 2,977 Reddit posts and comments shared between January 2024 and June 2025.",
     )
     
     # Top-N node cap with opt-out toggle. Default is capped (40 nodes)
