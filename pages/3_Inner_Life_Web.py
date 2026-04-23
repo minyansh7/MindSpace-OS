@@ -179,7 +179,7 @@ def run():
     total_nodes = payload['total_nodes']
     connected_nodes = payload['connected_nodes']
 
-    st.info(f"📊 Showing {connected_nodes} co-current themes out of total {total_nodes} themes({connected_nodes/total_nodes*100:.1f}%), among high-engagement, strong-sentiment posts or comments (engagement > 30, intensity > 0.3). One post may link to multiple themes.")
+    st.info(f"Showing {connected_nodes} co-current themes out of total {total_nodes} themes ({connected_nodes/total_nodes*100:.1f}%), among high-engagement, strong-sentiment posts or comments (engagement > 30, intensity > 0.3). One post may link to multiple themes.")
 
     # Create the HTML with WORKING EDGE HOVER using scatter points
     html_code = f"""
