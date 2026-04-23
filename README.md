@@ -2,7 +2,7 @@
 
 > A visual field guide to how people actually talk about meditation.
 
-MindSpace OS is an interactive Streamlit site that turns **48,000+ posts from r/meditation** (Jan 2024 – Jun 2025) into six navigable views — emotional maps, sentiment weather, theme networks, and quarterly shifts. Built to see what a practice community sounds like when nobody's selling anything.
+MindSpace OS is an interactive Streamlit site that turns **2,977 posts from r/meditation** (Jan 2024 – Jun 2025) into six navigable views — emotional maps, sentiment weather, theme networks, and quarterly shifts. Built to see what a practice community sounds like when nobody's selling anything.
 
 **Live site:** https://mindfulness-space-x.streamlit.app
 
@@ -109,7 +109,7 @@ The design pass that produced the current naming family (Inner Life Themes, Tree
 ## Data
 
 - **Source**: r/meditation public posts & comments, Jan 2024 – Jun 2025
-- **Count**: 48,000+ posts processed
+- **Count**: 2,977 posts processed
 - **Processing**: emotion classification → UMAP clustering → theme grouping → temporal binning by quarter
 - **Storage**: DuckDB for raw, Parquet aggregates for app runtime
 

@@ -31,7 +31,7 @@ Pick one per page, edit, or tell me to redraft.
 Current H1: **Emotion Pulse** · subtitle: *What people feel*
 Data: UMAP of posts colored by dominant emotion (GoEmotions 27-category model).
 
-- **A** — "48K r/meditation posts, each colored by its dominant emotion."
+- **A** — "2,977 r/meditation posts, each colored by its dominant emotion."
 - **B** — "Posts using similar emotional language sit close together on this map."
 - **C** — "Where the conversation's emotional vocabulary lands — one dot per post."
 

@@ -260,7 +260,7 @@ def run():
         
         return combined_lines
 
-    # Wrap ~48k hover strings once per session. The previous implementation
+    # Wrap all hover strings once per session. The previous implementation
     # ran wrap_hover_text via .apply() on every rerun, which was the
     # dominant cost on this page. We memoize on the source parquet (which
     # is load-cached) by object id via session_state so subsequent reruns
@@ -270,7 +270,7 @@ def run():
         cache_key not in st.session_state
         or st.session_state[cache_key].get("id") != id(emotion_df)
     ):
-        with st.spinner("Rendering 48K emotions..."):
+        with st.spinner("Rendering 2,977 emotions..."):
             formatted = emotion_df['hover_text'].map(wrap_hover_text)
             st.session_state[cache_key] = {"id": id(emotion_df), "data": formatted}
 
@@ -296,7 +296,7 @@ def run():
     # Build the full figure once per session; reruns triggered by widget
     # state (e.g. the hover-once interaction flag) no longer rebuild any of
     # the traces. Cached by the source-df object id via session_state so
-    # we don't need to hash 48k rows as a cache key.
+    # we don't need to hash every row as a cache key.
     fig_cache_key = "_emotion_fig_v1"
     if (
         fig_cache_key not in st.session_state

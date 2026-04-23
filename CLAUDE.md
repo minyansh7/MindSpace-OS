@@ -181,5 +181,5 @@ runs — log in once, reuse indefinitely.
   UX pass that produced the Themes/Trees/Web/Currents naming family
   (later unified as "Inner Life Themes/Trees/Web/Currents"),
   the one-H1 header convergence, and the (now-removed) mobile rollout.
-  Planned as a follow-up post to the 48k-Reddit intro in
+  Planned as a follow-up post to the r/meditation intro in
   `drafts/launch-post.md`.
