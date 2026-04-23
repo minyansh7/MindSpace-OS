@@ -438,26 +438,11 @@ def run():
                         
                         clusters.forEach(cluster => {{
                             const clusterNodes = nodeData.filter(n => n.cluster === cluster);
-                            
+
                             if (clusterNodes.length === 0) return;
-                            
-                            const hoverBgColors = clusterNodes.map(n => {{
-                                try {{
-                                    const hex = n.color || '#1f77b4';
-                                    const r = parseInt(hex.slice(1, 3), 16);
-                                    const g = parseInt(hex.slice(3, 5), 16);
-                                    const b = parseInt(hex.slice(5, 7), 16);
-                                    return `rgba(${{r}}, ${{g}}, ${{b}}, 0.9)`;
-                                }} catch (e) {{
-                                    return 'rgba(31, 119, 180, 0.9)';
-                                }}
-                            }});
-                            
-                            const hoverTextColors = clusterNodes.map(n => {{
-                                const bgColor = n.color || '#1f77b4';
-                                return getContrastingTextColor(bgColor);
-                            }});
-                            
+
+                            // Node dots are visual texture only — no hover.
+                            // Edge hover still carries the theme-level detail.
                             traces.push({{
                                 x: clusterNodes.map(n => n.x),
                                 y: clusterNodes.map(n => n.y),
@@ -468,17 +453,7 @@ def run():
                                     opacity: clusterNodes[0].is_focal ? 0.7 : 0.25,
                                     line: {{ width: 0.5, color: 'white' }}
                                 }},
-                                hoverinfo: 'text',
-                                hovertext: clusterNodes.map(n => n.hover_text),
-                                hoverlabel: {{
-                                    bgcolor: hoverBgColors,
-                                    bordercolor: clusterNodes.map(n => n.color || '#1f77b4'),
-                                    font: {{
-                                        family: "DM Sans, sans-serif",
-                                        color: hoverTextColors,
-                                        size: layout.hoverlabel.font.size
-                                    }}
-                                }},
+                                hoverinfo: 'skip',
                                 showlegend: false,
                                 name: `cluster_${{cluster}}`
                             }});
