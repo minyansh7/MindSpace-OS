@@ -6,9 +6,11 @@ and conventions that are not obvious from the code alone.
 
 ## Page-by-page editorial notes
 
-### Theme Pathways (`pages/2_Theme_Pathways.py`)
+### Inner Life Themes (`pages/2_Inner_Life_Themes.py`)
 
-Previously titled "Main Topics Sankey" / "Main Topics" on the page header.
+Previously titled "Main Topics Sankey" / "Main Topics", then "Theme Pathways".
+Renamed to "Inner Life Themes" on 2026-04-23 as part of the unified
+"Inner Life" naming family across pages 2–5.
 
 Removed descriptive line from the page header on 2026-04-21 per editorial
 decision to let the chart speak for itself (data-ink ratio / Tufte):
@@ -19,10 +21,11 @@ decision to let the chart speak for itself (data-ink ratio / Tufte):
 Kept here for reference in case the description is wanted back or needed
 as alt text / meta description.
 
-### Narrative Trees (`pages/5_Narrative_Trees.py`)
+### Inner Life Trees (`pages/5_Inner_Life_Trees.py`)
 
 Previously titled "Professional River Flow" (h1) and "Cocurrence Mapping complex"
-(sidebar). File renamed from `5_Cocurrence_Mapping_complex.py` on 2026-04-21.
+(sidebar), then "Narrative Trees". File renamed from `5_Cocurrence_Mapping_complex.py`
+on 2026-04-21 and to `5_Inner_Life_Trees.py` on 2026-04-23.
 
 Removed subtitle on 2026-04-21:
 
@@ -35,24 +38,25 @@ actually needs before scrolling: which quarter of data they're looking at.
 Character style matches the "TIME TRAVEL" eyebrow above the slider for
 typographic consistency.
 
-### Theme Currents (`pages/3_Theme_Currents.py`)
+### Inner Life Currents (`pages/4_Inner_Life_Currents.py`)
 
 Previously titled "The Connected Narrative" (h1) and "Cocurrence Mapping
-Over Time" (sidebar). File renamed on 2026-04-21. Shows how theme
-co-occurrences evolve quarter by quarter via the shared quarter slider.
+Over Time" (sidebar), then "Theme Currents". Renamed to "Inner Life
+Currents" on 2026-04-23. Shows how theme co-occurrences evolve quarter
+by quarter via the shared quarter slider.
 
-### Theme Web (`pages/4_Theme_Web.py`)
+### Inner Life Web (`pages/3_Inner_Life_Web.py`)
 
 Previously titled "The Narrative Web" (h1) and "Cocurrence Mapping"
-(sidebar). File renamed on 2026-04-21. Shows the static co-occurrence
-network across all data (no time axis).
+(sidebar), then "Theme Web". Renamed to "Inner Life Web" on 2026-04-23.
+Shows the static co-occurrence network across all data (no time axis).
 
 ## Color palette (canonical cluster→color mapping)
 
-Both Theme Currents and Narrative Trees render the same 7 theme clusters.
+Both Inner Life Currents and Inner Life Trees render the same 7 theme clusters.
 They must use identical colors so the site reads as one visual language.
 
-The reference is the Narrative Trees chart rendering, which feeds clusters
+The reference is the Inner Life Trees chart rendering, which feeds clusters
 through `script_custom_cmap` indexed by alphabetically sorted cluster name:
 
 | Cluster                      | Hex       | Name   |
@@ -65,37 +69,37 @@ through `script_custom_cmap` indexed by alphabetically sorted cluster name:
 | Practice, Retreat, & Meta    | `#8c564b` | brown  |
 | Self-Regulation              | `#17becf` | cyan   |
 
-Theme Currents' `topic_mapping` dict was synced to match on 2026-04-21.
+Inner Life Currents' `topic_mapping` dict was synced to match on 2026-04-21.
 
 ## Page ordering and naming family
 
 Sidebar order (derived from the leading numeric prefix in `pages/*.py`):
 
-1. Emotion Pulse            — `0_Emotion_Pulse.py`
-2. Meditation Weather Report — `1_Meditation_Weather_Report.py`
-3. Theme Pathways           — `2_Theme_Pathways.py` (Sankey)
-4. Theme Web                — `3_Theme_Web.py` (static co-occurrence network)
-5. Theme Currents           — `4_Theme_Currents.py` (temporal network)
-6. Narrative Trees          — `5_Narrative_Trees.py` (river-flow, filterable, last)
+1. Emotion Pulse              — `0_Emotion_Pulse.py`
+2. Meditation Weather Report  — `1_Meditation_Weather_Report.py`
+3. Inner Life Themes          — `2_Inner_Life_Themes.py` (Sankey)
+4. Inner Life Web             — `3_Inner_Life_Web.py` (static co-occurrence network)
+5. Inner Life Currents        — `4_Inner_Life_Currents.py` (temporal network)
+6. Inner Life Trees           — `5_Inner_Life_Trees.py` (river-flow, filterable, last)
 
 The four relationship-oriented pages (3–6) visualize theme connections
-from progressively more dynamic angles:
+from progressively more dynamic angles under the shared "Inner Life" family:
 
-- **Theme Pathways**: Sankey of how top themes flow into topic clusters
+- **Inner Life Themes**: Sankey of how top themes flow into topic clusters
   (broad, read-once overview)
-- **Theme Web**: static co-occurrence graph — who connects to whom
+- **Inner Life Web**: static co-occurrence graph — who connects to whom
   across the full archive
-- **Theme Currents**: the same connections rendered as a temporal
+- **Inner Life Currents**: the same connections rendered as a temporal
   network, quarter by quarter
-- **Narrative Trees**: deep branching view with engagement-level
+- **Inner Life Trees**: deep branching view with engagement-level
   filters, sentiment filters, quarter slider, and a sidebar analytics
   panel — the most interactive page, and the final stop in the tour
 
 So the progression is: *flow → static snapshot → temporal motion → deep
 filterable drill-down*. The last page is the most interactive by design.
 
-Together, the four form a metaphor family — pathways, trees, web,
-currents — each a tangible natural form.
+Together, the four form a metaphor family — themes, trees, web,
+currents — each a tangible natural form grouped under "Inner Life".
 
 Archived (kept in repo but hidden from sidebar): `archive/0_Emotion_Pulse_v.py`
 
@@ -105,7 +109,7 @@ Archived (kept in repo but hidden from sidebar): `archive/0_Emotion_Pulse_v.py`
 `font-size: 13px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase;`
 
 Used for: "TIME TRAVEL" above the quarter slider, "QUARTER" below the
-Narrative Trees title, and any future top-of-card metadata.
+Inner Life Trees title, and any future top-of-card metadata.
 
 **Page title h1**: `font-size: 3rem; font-weight: 800`.
 
@@ -174,7 +178,8 @@ runs — log in once, reuse indefinitely.
 ## Related writeups (`docs/`)
 
 - **`docs/publish_draft.md`** — long-form retrospective on the 13-hour
-  UX pass that produced the Pathways/Trees/Web/Currents naming family,
+  UX pass that produced the Themes/Trees/Web/Currents naming family
+  (later unified as "Inner Life Themes/Trees/Web/Currents"),
   the one-H1 header convergence, and the (now-removed) mobile rollout.
   Planned as a follow-up post to the 48k-Reddit intro in
   `drafts/launch-post.md`.

@@ -475,12 +475,28 @@ def run():
             """, unsafe_allow_html=True)
 
     # --- MAIN CONTENT AREA ---
-    
-    # Process data for all quarters
-    all_quarter_data = {}
-    for quarter in available_quarters:
-        quarter_data = data[data['quarter'] == quarter].copy() if quarter != 'All' else data.copy()
-        all_quarter_data[quarter] = process_weather_data(quarter_data, sentiment_col)
+
+    # Process data for all quarters. The source `data` is load-cached, so
+    # all_quarter_data only needs to be built once per session. Keying on
+    # id(data) + the quarter list invalidates if the cache ever does.
+    _aqd_key = "_mwr_all_quarter_data_v1"
+    if (
+        _aqd_key not in st.session_state
+        or st.session_state[_aqd_key].get("data_id") != id(data)
+        or st.session_state[_aqd_key].get("quarters") != tuple(available_quarters)
+        or st.session_state[_aqd_key].get("sentiment_col") != sentiment_col
+    ):
+        _aqd = {}
+        for quarter in available_quarters:
+            _qslice = data[data['quarter'] == quarter].copy() if quarter != 'All' else data.copy()
+            _aqd[quarter] = process_weather_data(_qslice, sentiment_col)
+        st.session_state[_aqd_key] = {
+            "data_id": id(data),
+            "quarters": tuple(available_quarters),
+            "sentiment_col": sentiment_col,
+            "value": _aqd,
+        }
+    all_quarter_data = st.session_state[_aqd_key]["value"]
 
     # Get current quarter data
     current_weather_data = all_quarter_data[selected_quarter]
@@ -521,16 +537,13 @@ def run():
     else: weather_emoji_main, weather_desc_main = "⛈️", "Stormy"
 
     # Title Section
-    st.markdown("""
-    <div style="text-align: center; color: white; margin-bottom: 2rem;">
-        <h1 style="font-size: 3rem; font-weight: 800; background: linear-gradient(45deg, #ffd700, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-            🌦️ Meditation Weather Map</h1>
-        <h3 style="font-size: 1.5rem; font-weight: 500; color:#333">How the mood on each meditation topic shifts across six quarters.</h3>
-        <p style="font-size: 1rem; color: #888; max-width: 800px; margin: auto;">
-            This weather map shows how people's sentiment change over time across topics of meditations.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    inject_inner_life_css()
+    render_hero(
+        eyebrow="WEATHER REPORT",
+        title="Meditation Weather Report",
+        subtitle="How the mood on each meditation topic shifts across six quarters.",
+        description="This weather map shows how people's sentiment changes over time across topics of meditation.",
+    )
 
     # Calculate quarterly sentiment journey for trend visualization
     quarterly_sentiments = []
@@ -1250,11 +1263,17 @@ def run():
         
         return rising_stars, declining_regions, comparison_df, current_index > 0
 
-    # Get challenge data for current quarter    
-    # --- SENTIMENT RIVER FLOW ANALYSIS (Replacing Trend Momentum) ---
-    
     # Get challenge data for current quarter
-    region_challenges = get_top_challenges_by_region(data, selected_quarter)
+    # --- SENTIMENT RIVER FLOW ANALYSIS (Replacing Trend Momentum) ---
+
+    # Cache challenge-per-region per quarter. Same data input every rerun,
+    # so this just avoids the per-region value_counts loop when you re-hit
+    # a previously visited quarter.
+    _rc_cache = st.session_state.setdefault("_mwr_region_challenges_v1", {})
+    _rc_key = (id(data), selected_quarter)
+    if _rc_key not in _rc_cache:
+        _rc_cache[_rc_key] = get_top_challenges_by_region(data, selected_quarter)
+    region_challenges = _rc_cache[_rc_key]
     
     # Calculate trend momentum for river flow
     rising_stars, declining_regions, comparison_df, has_previous = calculate_trend_momentum(

@@ -2,6 +2,8 @@ import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
 
+from shared_ui import inject_inner_life_css, render_hero
+
 st.set_page_config(
     page_title="🌊 The Emotional Pulse of the Meditation Landscape",
     layout="wide"
@@ -84,24 +86,13 @@ def run():
     </style>
     """, unsafe_allow_html=True)
 
-    # Header with enhanced styling from first script
-    st.markdown("""
-    <div class="main-header" style="text-align: center; padding: 0.8rem;">
-        <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 0.1rem;">🌊 Emotion Pulse</h1>
-        <h3 style="font-size: 1.5rem; font-weight: 500; margin-top: 0; margin-bottom: 0.5rem;">48K meditation posts, each colored by its dominant emotion</h3>
-        <p class="description" style="
-            font-size: 1rem;
-            margin: 0;
-            color: #888;
-            max-width: 1400px;
-            width: 95%;
-            line-height: 1.5;
-            text-wrap: pretty;
-        ">
-            This emotional map reveals how people express their emotions through meditation practices, drawn from thousands of reddit posts and comments shared between January 2024 and June 2025.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    inject_inner_life_css()
+    render_hero(
+        eyebrow="PULSE",
+        title="Emotion Pulse",
+        subtitle="48K meditation posts, each colored by its dominant emotion",
+        description="This emotional map reveals how people express their emotions through meditation practices, drawn from thousands of Reddit posts and comments shared between January 2024 and June 2025.",
+    )
     
     # Info sections with enhanced styling
     st.markdown("""
@@ -139,7 +130,6 @@ def run():
         return pd.read_parquet("precomputed/emotion_clusters.parquet")
 
     emotion_df = load_emotion_clusters()
-    df = emotion_df.copy()
 
     # Format hover text with different line lengths for different content types
     def wrap_hover_text(text):
@@ -270,8 +260,22 @@ def run():
         
         return combined_lines
 
-    # Apply wrapping to hover text
-    df['formatted_hover_text'] = df['hover_text'].apply(wrap_hover_text)
+    # Wrap ~48k hover strings once per session. The previous implementation
+    # ran wrap_hover_text via .apply() on every rerun, which was the
+    # dominant cost on this page. We memoize on the source parquet (which
+    # is load-cached) by object id via session_state so subsequent reruns
+    # skip the Python-loop wrap entirely.
+    cache_key = "_emotion_formatted_hover_v1"
+    if (
+        cache_key not in st.session_state
+        or st.session_state[cache_key].get("id") != id(emotion_df)
+    ):
+        with st.spinner("Rendering 48K emotions..."):
+            formatted = emotion_df['hover_text'].map(wrap_hover_text)
+            st.session_state[cache_key] = {"id": id(emotion_df), "data": formatted}
+
+    df = emotion_df.copy()
+    df['formatted_hover_text'] = st.session_state[cache_key]["data"].values
 
     cluster_colors = {
         'Reflective Caring': '#ff5e78',
@@ -289,95 +293,112 @@ def run():
         'Anxious Concern': dict(symbol='star-triangle-up', size=8)
     }
 
-    # Calculate the 95% width boundaries for hover detection
-    x_min = df['umap_x'].min()
-    x_max = df['umap_x'].max()
-    x_range = x_max - x_min
-    x_center = (x_min + x_max) / 2
-    hover_width = x_range * 0.95
-    hover_x_min = x_center - hover_width / 2
-    hover_x_max = x_center + hover_width / 2
+    # Build the full figure once per session; reruns triggered by widget
+    # state (e.g. the hover-once interaction flag) no longer rebuild any of
+    # the traces. Cached by the source-df object id via session_state so
+    # we don't need to hash 48k rows as a cache key.
+    fig_cache_key = "_emotion_fig_v1"
+    if (
+        fig_cache_key not in st.session_state
+        or st.session_state[fig_cache_key].get("id") != id(df)
+    ):
+        # Calculate the 95% width boundaries for hover detection
+        x_min = df['umap_x'].min()
+        x_max = df['umap_x'].max()
+        x_range = x_max - x_min
+        x_center = (x_min + x_max) / 2
+        hover_width = x_range * 0.95
+        hover_x_min = x_center - hover_width / 2
+        hover_x_max = x_center + hover_width / 2
 
-    traces = []
-    for label, color in cluster_colors.items():
-        text_color = ideal_text_color(color)
-        cluster_df = df[df['archetype_label'] == label]
-        
-        # Filter points to only include those within the 95% hover area
-        hover_cluster_df = cluster_df[
-            (cluster_df['umap_x'] >= hover_x_min) & 
-            (cluster_df['umap_x'] <= hover_x_max)
-        ]
-        
-        # Points outside hover area (no hover)
-        no_hover_cluster_df = cluster_df[
-            (cluster_df['umap_x'] < hover_x_min) | 
-            (cluster_df['umap_x'] > hover_x_max)
-        ]
-        
-        # Convert hex color to rgba with 60% opacity for hover background
-        color_hex = color.lstrip('#')
-        r, g, b = tuple(int(color_hex[i:i+2], 16) for i in (0, 2, 4))
-        hover_bg_color = f'rgba({r}, {g}, {b}, 0.9)'
-        
-        # Add trace for points with hover
-        if not hover_cluster_df.empty:
+        traces = []
+        for label, color in cluster_colors.items():
+            text_color = ideal_text_color(color)
+            cluster_df = df[df['archetype_label'] == label]
+
+            # Filter points to only include those within the 95% hover area
+            in_range = (cluster_df['umap_x'] >= hover_x_min) & (cluster_df['umap_x'] <= hover_x_max)
+            hover_cluster_df = cluster_df[in_range]
+            no_hover_cluster_df = cluster_df[~in_range]
+
+            # Convert hex color to rgba with 60% opacity for hover background
+            color_hex = color.lstrip('#')
+            r, g, b = tuple(int(color_hex[i:i+2], 16) for i in (0, 2, 4))
+            hover_bg_color = f'rgba({r}, {g}, {b}, 0.9)'
+
+            # Add trace for points with hover
+            if not hover_cluster_df.empty:
+                traces.append(go.Scatter(
+                    x=hover_cluster_df['umap_x'],
+                    y=hover_cluster_df['umap_y'],
+                    mode='markers',
+                    name=label,
+                    marker=dict(color=color, opacity=0.7, **cluster_styles[label]),
+                    text=hover_cluster_df['formatted_hover_text'],
+                    hoverinfo='text',
+                    hoverlabel=dict(
+                        bgcolor=hover_bg_color,
+                        font=dict(color=text_color, size=12),
+                        align='left',
+                        bordercolor='rgba(0,0,0,0.2)',
+                        namelength=-1
+                    ),
+                    hovertemplate='%{text}<extra></extra>',
+                    showlegend=False  # Disabled legend for hover points
+                ))
+
+            # Add trace for points without hover
+            if not no_hover_cluster_df.empty:
+                traces.append(go.Scatter(
+                    x=no_hover_cluster_df['umap_x'],
+                    y=no_hover_cluster_df['umap_y'],
+                    mode='markers',
+                    name=label,
+                    marker=dict(color=color, opacity=0.7, **cluster_styles[label]),
+                    hoverinfo='skip',
+                    showlegend=False  # Disabled legend for non-hover points
+                ))
+
+        # Cluster centroids + label offsets
+        offsets = {
+            'Reflective Caring': (3.9, 1.2),
+            'Soothing Empathy': (1.5, 4),
+            'Tender Uncertainty': (-4.1, -2.5),
+            'Melancholic Confusion': (0.5, -1.5),
+            'Anxious Concern': (2.4, -0.3)
+        }
+        centroids = df.groupby('archetype_label')[['umap_x', 'umap_y']].mean()
+        for archetype, (x, y) in centroids.iterrows():
+            dx, dy = offsets.get(archetype, (0, 0))
             traces.append(go.Scatter(
-                x=hover_cluster_df['umap_x'],
-                y=hover_cluster_df['umap_y'],
-                mode='markers',
-                name=label,
-                marker=dict(color=color, opacity=0.7, **cluster_styles[label]),
-                text=hover_cluster_df['formatted_hover_text'],
-                hoverinfo='text',
-                hoverlabel=dict(
-                    bgcolor=hover_bg_color,
-                    font=dict(color=text_color, size=12),
-                    align='left',
-                    bordercolor='rgba(0,0,0,0.2)',
-                    namelength=-1
-                ),
-                hovertemplate='%{text}<extra></extra>',
-                showlegend=False  # Disabled legend for hover points
-            ))
-        
-        # Add trace for points without hover
-        if not no_hover_cluster_df.empty:
-            traces.append(go.Scatter(
-                x=no_hover_cluster_df['umap_x'],
-                y=no_hover_cluster_df['umap_y'],
-                mode='markers',
-                name=label,
-                marker=dict(color=color, opacity=0.7, **cluster_styles[label]),
-                hoverinfo='skip',
-                showlegend=False  # Disabled legend for non-hover points
+                x=[x + dx],
+                y=[y + dy],
+                mode='text',
+                text=[f"<b>{archetype}</b>"],
+                textfont=dict(size=20, color=cluster_colors[archetype], family='sans-serif'),
+                showlegend=False,
+                hoverinfo='skip'
             ))
 
-    # Cluster centroids + label offsets
-    offsets = {
-        'Reflective Caring': (3.9, 1.2),
-        'Soothing Empathy': (1.5, 4),
-        'Tender Uncertainty': (-4.1, -2.5),
-        'Melancholic Confusion': (0.5, -1.5),
-        'Anxious Concern': (2.4, -0.3)
-    }
-    centroids = df.groupby('archetype_label')[['umap_x', 'umap_y']].mean()
-    for archetype, (x, y) in centroids.iterrows():
-        dx, dy = offsets.get(archetype, (0, 0))
-        traces.append(go.Scatter(
-            x=[x + dx],
-            y=[y + dy],
-            mode='text',
-            text=[f"<b>{archetype}</b>"],
-            textfont=dict(size=20, color=cluster_colors[archetype], family='sans-serif'),
-            showlegend=False,
-            hoverinfo='skip'
-        ))
+        y_min = df['umap_y'].min()
+        y_max = df['umap_y'].max()
+        y_buffer_bottom = 0.01 * (y_max - y_min)  # Small padding
+        y_buffer_top = 0.13 * (y_max - y_min)     # Keep a bit more top room for labels
+        st.session_state[fig_cache_key] = {
+            "id": id(df),
+            "traces": traces,
+            "y_min": y_min,
+            "y_max": y_max,
+            "y_buffer_bottom": y_buffer_bottom,
+            "y_buffer_top": y_buffer_top,
+        }
 
-    y_min = df['umap_y'].min()
-    y_max = df['umap_y'].max()
-    y_buffer_bottom = 0.01 * (y_max - y_min)  # Small padding
-    y_buffer_top = 0.13 * (y_max - y_min)     # Keep a bit more top room for labels
+    _cached = st.session_state[fig_cache_key]
+    traces = _cached["traces"]
+    y_min = _cached["y_min"]
+    y_max = _cached["y_max"]
+    y_buffer_bottom = _cached["y_buffer_bottom"]
+    y_buffer_top = _cached["y_buffer_top"]
 
     layout = go.Layout(
         plot_bgcolor='white',

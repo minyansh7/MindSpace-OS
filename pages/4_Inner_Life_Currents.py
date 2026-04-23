@@ -4,82 +4,16 @@ import numpy as np
 import streamlit.components.v1 as components
 import json
 
-st.set_page_config(page_title="Theme Currents", layout="wide")
+from shared_ui import inject_inner_life_css, render_footer, render_hero
+
+st.set_page_config(page_title="Inner Life Currents", layout="wide")
 
 def run():
-    # --- Enhanced Styled CSS with Meditative Theme ---
+    inject_inner_life_css()
+    # Page-specific control styling (buttons + selectbox) layered on top
+    # of the shared Inner Life CSS above.
     st.markdown("""
     <style>
-    /* Global responsive styles */
-    .main .block-container {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-        max-width: none;
-    }
-    
-    .footer-text {
-        text-align: center;
-        font-size: 1rem;
-        font-weight: 600;
-        color: #666;
-        margin-top: 2rem;
-        padding: 1rem;
-        border-top: 1px solid #eee;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    @supports not (-webkit-background-clip: text) {
-        .footer-text {
-            color: #667eea !important;
-            background: none !important;
-        }
-    }
-    
-    /* Responsive plot container */
-    .plot-container {
-        width: 100%;
-        margin: auto;
-        position: relative;
-    }
-    
-    /* Responsive text and layout */
-    .main-title {
-        font-size: 3rem;
-        font-weight: 800;
-        margin-bottom: 0.2rem;
-    }
-    
-    .sub-title {
-        font-size: 1.5rem;
-        font-weight: 500;
-        margin-top: 0;
-    }
-    
-    .description {
-        font-size: 1rem;
-        margin: 0.05rem auto 0;
-        color: #888;
-        max-width: 1400px;
-        width: 95%;
-        line-height: 1.5;
-        text-wrap: pretty;
-    }
-    
-    .annotation-container {
-        text-align: left;
-        margin: 0;
-        padding: 0 200px;
-    }
-    
-    @media (max-width: 1200px) {
-        .annotation-container {
-            padding: 0 100px;
-        }
-    }
-
-    /* Enhanced Streamlit controls styling - FIXED: No more red colors! */
     .stSelectbox > label {
         font-family: "Inter", sans-serif !important;
         font-size: 0.9rem !important;
@@ -136,16 +70,12 @@ def run():
     </style>
     """, unsafe_allow_html=True)
 
-    # Header section
-    st.markdown("""
-    <div style="text-align: center; padding: 1rem;">
-        <h1 class="main-title">Theme Currents</h1>
-        <h3 class="sub-title">Where Narratives Converge — And How They Evolve</h3>
-        <p class="description">
-            This map reveals a dynamic view of how narratives intersect — and how their connections evolve over time, drawn from thousands of reddit posts and comments shared between January 2024 and June 2025.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    render_hero(
+        eyebrow="CURRENTS",
+        title="Inner Life Currents",
+        subtitle="Where Narratives Converge — And How They Evolve",
+        description="A dynamic view of how narratives intersect — and how their connections evolve over time, drawn from thousands of Reddit posts and comments shared between January 2024 and June 2025.",
+    )
     
     # Load data
     @st.cache_data
@@ -219,63 +149,8 @@ def run():
 
     selected_quarter = reverse_label_map[quarter_labels[st.session_state.slider_index]]
 
-    # Prepare data for current quarter
-    nodes_q = df_nodes[df_nodes['quarter'] == selected_quarter].copy()
-    edges_q = df_edges[df_edges['quarter'] == selected_quarter].copy()
-
-    # Calculate statistics for the current quarter
-    total_nodes_q = len(nodes_q)
-    total_edges_q = len(edges_q)
-    
-    all_nodes_quarter = nodes_q.copy()
-    
-    # Count connected themes
-    node_coords_q = set()
-    for _, edge in edges_q.iterrows():
-        node_coords_q.add((edge['x0'], edge['y0']))
-        node_coords_q.add((edge['x1'], edge['y1']))
-    
-    def has_edge_q(row):
-        node_coord = (row['x'], row['y'])
-        return node_coord in node_coords_q
-    
-    connected_nodes_q = all_nodes_quarter[all_nodes_quarter.apply(has_edge_q, axis=1)]
-    connected_count = len(connected_nodes_q)
-    connected_percentage = (connected_count / total_nodes_q * 100) if total_nodes_q > 0 else 0
-
-    # Dynamic statistics display
-    st.markdown(f"""
-    <div style="margin: 0.5rem 0; padding: 0;">
-        <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); 
-                    border-left: 4px solid #667eea; 
-                    padding: 0.75rem 1rem; 
-                    border-radius: 0.5rem; 
-                    margin: 0;
-                    backdrop-filter: blur(5px);">
-            <div style="font-size: 0.9rem; color: #4A5568; margin: 0; line-height: 1.4; letter-spacing: 0.3px;">
-                <strong>{connected_count} meditation topics</strong> are connected to each other out of <strong>{total_nodes_q} total topics</strong> 
-                (<strong>{connected_percentage:.1f}%</strong>). These come from popular Reddit posts with lots of discussion.<br>
-                <span style="color: #4A5568; border-bottom: 4px solid #FFD700; padding-bottom: 1px;"><strong>Hover Over</strong></span> for more details.
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Rotate coordinates 90 degrees counterclockwise
-    nodes_q['x_rot'] = -nodes_q['y']
-    nodes_q['y_rot'] = nodes_q['x']
-    edges_q['x0_rot'] = -edges_q['y0']
-    edges_q['y0_rot'] = edges_q['x0']
-    edges_q['x1_rot'] = -edges_q['y1']
-    edges_q['y1_rot'] = edges_q['x1']
-
-    # Use ALL nodes in the quarter
-    nodes_q_all = nodes_q.copy()
-    
-    # Topic mapping — colors synced with the Narrative Trees page chart
+    # Topic mapping — colors synced with the Inner Life Trees page chart
     # (its script_custom_cmap indexed by alphabetical cluster order).
-    # Keeping icons for potential future use; they are not rendered on this page
-    # when the chart-label mode is active.
     topic_mapping = {
         'Anxiety & Mental Health':   {'color': '#1f77b4', 'icon': '💚'},
         'Awareness':                 {'color': '#808000', 'icon': '🌿'},
@@ -286,117 +161,155 @@ def run():
         'Self-Regulation':           {'color': '#17becf', 'icon': '🎯'},
     }
 
-    # Color mapping for clusters using consistent colors
-    unique_clusters = sorted(nodes_q_all['cluster_name'].dropna().unique())
-    cluster_color_map = {}
-    for cluster in unique_clusters:
-        if cluster in topic_mapping:
-            cluster_color_map[cluster] = topic_mapping[cluster]['color']
-        else:
-            # Fallback color for any clusters not in mapping
-            cluster_color_map[cluster] = '#808080'  # Gray fallback
+    # Cached per-quarter prep. Previously the code did O(E) iterrows for
+    # connected-node flagging, then an O(E*N) nested iterrows to resolve
+    # each edge's endpoints' cluster names. With ~7 quarters cached once,
+    # slider scrubbing back/forth is effectively instant after first pass.
+    @st.cache_data(show_spinner=False)
+    def build_currents_payload(quarter: str, _edges_id: int, _nodes_id: int):
+        nodes_q = df_nodes[df_nodes['quarter'] == quarter].copy()
+        edges_q = df_edges[df_edges['quarter'] == quarter].copy()
 
-    # Keep track of which nodes are connected for edge calculations
-    node_coords = set()
-    for _, edge in edges_q.iterrows():
-        node_coords.add((edge['x0_rot'], edge['y0_rot']))
-        node_coords.add((edge['x1_rot'], edge['y1_rot']))
-    
-    def has_edge(row):
-        node_coord = (row['x_rot'], row['y_rot'])
-        return node_coord in node_coords
+        total_nodes_q = len(nodes_q)
+        total_edges_q = len(edges_q)
 
-    # Prepare edge data for JavaScript
-    edge_data = []
-    for _, edge in edges_q.iterrows():
-        # Get cluster names for start and end nodes
-        start_coord = (edge['x0_rot'], edge['y0_rot'])
-        end_coord = (edge['x1_rot'], edge['y1_rot'])
-        
-        # Find cluster names for the coordinates
-        start_cluster = "Unknown"
-        end_cluster = "Unknown"
-        
-        for _, node in nodes_q_all.iterrows():
-            node_coord = (node['x_rot'], node['y_rot'])
-            if node_coord == start_coord:
-                start_cluster = node['cluster_name']
-            elif node_coord == end_coord:
-                end_cluster = node['cluster_name']
-        
-        edge_data.append({
-            'x0': float(edge['x0_rot']),
-            'y0': float(edge['y0_rot']),
-            'x1': float(edge['x1_rot']),
-            'y1': float(edge['y1_rot']),
-            'weight': float(edge['weight']),
-            'color': edge['color'],
-            'hover_text': f"<b>Topics:</b> {start_cluster} ↔ {end_cluster}<br><b>Themes:</b> {edge['theme_1']} ↔ {edge['theme_2']}<br><b>Engagement Score:</b> {int(edge['weight'])}<br><b>Sentiment:</b> {edge['sentiment']:.2f}"
-        })
+        # Connected-node flag (vectorized).
+        edge_coord_set = set(zip(edges_q['x0'].to_numpy(), edges_q['y0'].to_numpy()))
+        edge_coord_set.update(zip(edges_q['x1'].to_numpy(), edges_q['y1'].to_numpy()))
+        node_coord_tuples = list(zip(nodes_q['x'].to_numpy(), nodes_q['y'].to_numpy()))
+        connected_mask = [c in edge_coord_set for c in node_coord_tuples]
+        connected_count = int(sum(connected_mask))
 
-    # Prepare node data for JavaScript.
-    # Top-10 labeling: mark the 10 highest-scaled_size nodes in this quarter
-    # as is_top10 = True. The JS side renders a text label for those only;
-    # the rest are hover-only (Knaflic preattentive focus — fewer on-screen
-    # labels, rest available on demand).
-    top10_coords = set()
-    if not nodes_q_all.empty:
-        top10_nodes = nodes_q_all.nlargest(
-            min(10, len(nodes_q_all)), "scaled_size"
-        )
-        top10_coords = {
-            (float(r["x_rot"]), float(r["y_rot"])) for _, r in top10_nodes.iterrows()
+        # Rotate coordinates (vectorized)
+        nodes_q['x_rot'] = -nodes_q['y']
+        nodes_q['y_rot'] = nodes_q['x']
+        edges_q['x0_rot'] = -edges_q['y0']
+        edges_q['y0_rot'] = edges_q['x0']
+        edges_q['x1_rot'] = -edges_q['y1']
+        edges_q['y1_rot'] = edges_q['x1']
+
+        unique_clusters = sorted(nodes_q['cluster_name'].dropna().unique())
+        cluster_color_map = {
+            c: topic_mapping.get(c, {'color': '#808080'})['color']
+            for c in unique_clusters
         }
-    node_data = []
-    for cluster in unique_clusters:
-        cluster_data = nodes_q_all[nodes_q_all['cluster_name'] == cluster]
-        for _, node in cluster_data.iterrows():
-            if isinstance(node['avg_score'], set):
-                avg_score_display = int(next(iter(node['avg_score'])))
-            else:
-                avg_score_display = int(float(node['avg_score']))
 
-            try:
-                sentiment_value = float(node['sentiment']) if pd.notna(node['sentiment']) else 0.0
-            except:
-                sentiment_value = 0.0
+        # Build coord→cluster lookup once (O(N)); then one O(E) pass over
+        # edges. Replaces the previous O(E*N) nested iterrows.
+        coord_to_cluster = dict(zip(
+            zip(nodes_q['x_rot'].to_numpy(), nodes_q['y_rot'].to_numpy()),
+            nodes_q['cluster_name'].to_numpy(),
+        ))
 
-            node_coord = (float(node['x_rot']), float(node['y_rot']))
-            node_data.append({
-                'x': float(node['x_rot']),
-                'y': float(node['y_rot']),
-                'size': float(node['scaled_size']),
-                'color': cluster_color_map[cluster],
-                'cluster': cluster,
-                'is_top10': node_coord in top10_coords,
-                'node_label': node['cluster_name'],
-                'hover_text': f"<b>Topic:</b> {node['cluster_name']}<br><b>Theme:</b> {node['theme']}<br><b>Engagement Score:</b> {avg_score_display}<br><b>Sentiment:</b> {sentiment_value:.2f}"
+        edge_data = []
+        for rec in edges_q.to_dict('records'):
+            start_cluster = coord_to_cluster.get((rec['x0_rot'], rec['y0_rot']), "Unknown")
+            end_cluster = coord_to_cluster.get((rec['x1_rot'], rec['y1_rot']), "Unknown")
+            edge_data.append({
+                'x0': float(rec['x0_rot']),
+                'y0': float(rec['y0_rot']),
+                'x1': float(rec['x1_rot']),
+                'y1': float(rec['y1_rot']),
+                'weight': float(rec['weight']),
+                'color': rec['color'],
+                'hover_text': f"<b>Topics:</b> {start_cluster} ↔ {end_cluster}<br><b>Themes:</b> {rec['theme_1']} ↔ {rec['theme_2']}<br><b>Engagement Score:</b> {int(rec['weight'])}<br><b>Sentiment:</b> {rec['sentiment']:.2f}"
             })
 
-    # Calculate centroids for labels
-    centroids = nodes_q_all.groupby('cluster_name').apply(
-        lambda g: pd.Series({
-            'x': np.average(g['x_rot'], weights=g['scaled_size']),
-            'y': np.average(g['y_rot'], weights=g['scaled_size'])
-        })
-    ).reset_index()
+        # Top-10 labeling
+        top10_coords = set()
+        if not nodes_q.empty:
+            top10_nodes = nodes_q.nlargest(min(10, len(nodes_q)), "scaled_size")
+            top10_coords = set(zip(
+                top10_nodes['x_rot'].astype(float).to_numpy(),
+                top10_nodes['y_rot'].astype(float).to_numpy(),
+            ))
 
-    # Add offset for labels
-    angle_offset = np.linspace(0, 1.2 * np.pi, len(centroids), endpoint=False)
-    angle_offset += np.pi / len(centroids)
-    radius_offset = 0.27
+        node_data = []
+        for cluster in unique_clusters:
+            cluster_slice = nodes_q[nodes_q['cluster_name'] == cluster]
+            color = cluster_color_map[cluster]
+            for rec in cluster_slice.to_dict('records'):
+                raw = rec['avg_score']
+                if isinstance(raw, set):
+                    avg_score_display = int(next(iter(raw)))
+                else:
+                    avg_score_display = int(float(raw))
+                try:
+                    sentiment_value = float(rec['sentiment']) if pd.notna(rec['sentiment']) else 0.0
+                except (TypeError, ValueError):
+                    sentiment_value = 0.0
+                node_coord = (float(rec['x_rot']), float(rec['y_rot']))
+                node_data.append({
+                    'x': float(rec['x_rot']),
+                    'y': float(rec['y_rot']),
+                    'size': float(rec['scaled_size']),
+                    'color': color,
+                    'cluster': cluster,
+                    'is_top10': node_coord in top10_coords,
+                    'node_label': rec['cluster_name'],
+                    'hover_text': f"<b>Topic:</b> {rec['cluster_name']}<br><b>Theme:</b> {rec['theme']}<br><b>Engagement Score:</b> {avg_score_display}<br><b>Sentiment:</b> {sentiment_value:.2f}"
+                })
 
-    centroids['x'] += radius_offset * np.cos(angle_offset)
-    centroids['y'] += radius_offset * np.sin(angle_offset)
+        # Centroids for labels
+        centroids = nodes_q.groupby('cluster_name').apply(
+            lambda g: pd.Series({
+                'x': np.average(g['x_rot'], weights=g['scaled_size']),
+                'y': np.average(g['y_rot'], weights=g['scaled_size'])
+            })
+        ).reset_index()
+        angle_offset = np.linspace(0, 1.2 * np.pi, len(centroids), endpoint=False)
+        angle_offset += np.pi / len(centroids)
+        radius_offset = 0.27
+        centroids['x'] += radius_offset * np.cos(angle_offset)
+        centroids['y'] += radius_offset * np.sin(angle_offset)
+        label_data = [
+            {
+                'x': float(row['x']),
+                'y': float(row['y']),
+                'text': row['cluster_name'],
+                'color': cluster_color_map[row['cluster_name']],
+            }
+            for row in centroids.to_dict('records')
+        ]
 
-    label_data = []
-    for _, row in centroids.iterrows():
-        label_data.append({
-            'x': float(row['x']),
-            'y': float(row['y']),
-            'text': row['cluster_name'],
-            'color': cluster_color_map[row['cluster_name']]
-        })
+        return {
+            'edge_data': edge_data,
+            'node_data': node_data,
+            'label_data': label_data,
+            'cluster_color_map': cluster_color_map,
+            'total_nodes_q': total_nodes_q,
+            'total_edges_q': total_edges_q,
+            'connected_count': connected_count,
+        }
+
+    with st.spinner("Computing quarter..."):
+        payload = build_currents_payload(selected_quarter, id(df_edges), id(df_nodes))
+
+    edge_data = payload['edge_data']
+    node_data = payload['node_data']
+    label_data = payload['label_data']
+    cluster_color_map = payload['cluster_color_map']
+    total_nodes_q = payload['total_nodes_q']
+    connected_count = payload['connected_count']
+    connected_percentage = (connected_count / total_nodes_q * 100) if total_nodes_q > 0 else 0
+
+    # Dynamic statistics display
+    st.markdown(f"""
+    <div style="margin: 0.5rem 0; padding: 0;">
+        <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+                    border-left: 4px solid #667eea;
+                    padding: 0.75rem 1rem;
+                    border-radius: 0.5rem;
+                    margin: 0;
+                    backdrop-filter: blur(5px);">
+            <div style="font-size: 0.9rem; color: #4A5568; margin: 0; line-height: 1.4; letter-spacing: 0.3px;">
+                <strong>{connected_count} meditation topics</strong> are connected to each other out of <strong>{total_nodes_q} total topics</strong>
+                (<strong>{connected_percentage:.1f}%</strong>). These come from popular Reddit posts with lots of discussion.<br>
+                <span style="color: #4A5568; border-bottom: 4px solid #FFD700; padding-bottom: 1px;"><strong>Hover Over</strong></span> for more details.
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Create HTML with embedded plot
     html_code = f"""
@@ -602,23 +515,21 @@ def run():
                     const edgeHoverX = [];
                     const edgeHoverY = [];
                     const edgeHoverTexts = [];
-                    const edgeHoverColors = [];
-                    
-                    edgeData.forEach((edge, edgeIndex) => {{
+
+                    edgeData.forEach((edge) => {{
                         const dx = edge.x1 - edge.x0;
                         const dy = edge.y1 - edge.y0;
                         const edgeLength = Math.sqrt(dx * dx + dy * dy);
                         const numPoints = Math.max(5, Math.floor(edgeLength * 20));
-                        
+
                         for (let i = 0; i < numPoints; i++) {{
                             const t = i / (numPoints - 1);
                             const x = edge.x0 + t * dx;
                             const y = edge.y0 + t * dy;
-                            
+
                             edgeHoverX.push(x);
                             edgeHoverY.push(y);
                             edgeHoverTexts.push(edge.hover_text);
-                            edgeHoverColors.push(edge.color);
                         }}
                     }});
                     
@@ -784,17 +695,14 @@ def run():
                 
                 try {{
                     Plotly.newPlot('plotDiv', currentTraces, currentLayout, config)
-                        .then(function() {{
-                            setupEventListeners();
-                        }})
                         .catch(function(error) {{
-                            console.error('❌ Plot creation failed:', error);
+                            console.error('Plot creation failed:', error);
                         }});
                 }} catch (error) {{
-                    console.error('❌ Plot creation error:', error);
+                    console.error('Plot creation error:', error);
                 }}
             }}
-            
+
             function resizePlot() {{
                 if (plotDiv && plotDiv._fullLayout) {{
                     const newLayout = getResponsiveLayout();
@@ -802,16 +710,7 @@ def run():
                     Plotly.react('plotDiv', newTraces, newLayout);
                 }}
             }}
-            
-            function setupEventListeners() {{
-                plotDiv.on('plotly_hover', function(data) {{
-                    const traceName = data.points[0].data.name;
-                }});
-                
-                plotDiv.on('plotly_unhover', function(data) {{}});
-                plotDiv.on('plotly_click', function(data) {{}});
-            }}
-            
+
             let resizeTimeout;
             function debouncedResize() {{
                 clearTimeout(resizeTimeout);
@@ -835,14 +734,8 @@ def run():
     </html>
     """
 
-    # Render plot
     st.markdown('<div class="plot-container" style="margin: 0; padding: 0;">', unsafe_allow_html=True)
-    
-    base_height = 824  # Increased from 549 to 824 (1.5x)
-    component_height = base_height
-    
-    components.html(html_code, height=component_height, scrolling=False)
-
+    components.html(html_code, height=824, scrolling=False)
     st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("""
@@ -857,15 +750,6 @@ def run():
     </div>
     """, unsafe_allow_html=True)
 
-    # Footer
-    st.markdown("""
-    <div class="footer-text">
-        Powered By MinyanLabs ©2026
-    </div>
-    """, unsafe_allow_html=True)
-
-# Initialize session state
-if 'plot_resized' not in st.session_state:
-    st.session_state.plot_resized = False
+    render_footer()
 
 run()

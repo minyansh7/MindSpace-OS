@@ -2,7 +2,10 @@ import streamlit as st
 import datetime
 import base64
 
-# Function to encode image to base64
+# Function to encode image to base64. Cached so we don't re-read and
+# re-encode the narrative_web PNG on every rerun (e.g. when the time-of-day
+# rerun fires or someone bounces off a nav link).
+@st.cache_data
 def get_base64_image(image_path):
     try:
         with open(image_path, "rb") as img_file:
@@ -375,17 +378,17 @@ st.markdown(f"""
     </a>
     <a href="/Meditation_Weather_Report" style="text-decoration: none; display: block;">
         <div class="theme-card">
-            <div class="theme-title">Weather Report</div>
+            <div class="theme-title">Meditation Weather Report</div>
         </div>
     </a>
-    <a href="/Theme_Pathways" style="text-decoration: none; display: block;">
+    <a href="/Inner_Life_Themes" style="text-decoration: none; display: block;">
         <div class="theme-card">
-            <div class="theme-title">Main Narratives</div>
+            <div class="theme-title">Inner Life Themes</div>
         </div>
     </a>
-    <a href="/Theme_Currents" style="text-decoration: none; display: block;">
+    <a href="/Inner_Life_Currents" style="text-decoration: none; display: block;">
         <div class="theme-card">
-            <div class="theme-title">Narrative Connections</div>
+            <div class="theme-title">Inner Life Currents</div>
         </div>
     </a>
 </div>
