@@ -90,7 +90,7 @@ def run():
     render_hero(
         eyebrow="PULSE",
         title="Emotion Pulse",
-        subtitle="48K meditation posts, each colored by its dominant emotion",
+        subtitle="2,977 meditation posts, each colored by its dominant emotion",
         description="This emotional map reveals how people express their emotions through meditation practices, drawn from thousands of Reddit posts and comments shared between January 2024 and June 2025.",
     )
     
