@@ -4,7 +4,7 @@
 
 MindSpace OS is an interactive Streamlit site that turns **2,977 posts from r/meditation** (Jan 2024 – Jun 2025) into six navigable views — emotional maps, sentiment weather, theme networks, and quarterly shifts. Built to see what a practice community sounds like when nobody's selling anything.
 
-**Live site:** https://mindfulness-space-x.streamlit.app
+**Live site:** [https://mindspaceos.streamlit.app]
 
 ---
 
