@@ -344,7 +344,7 @@ st.markdown(f"""
 
 # Hero section
 st.markdown("""
-<div class="hero-title">🧭 MindSpace OS</div>
+<div class="hero-title">MindSpace OS</div>
 <div class="hero-subtitle">
     Explore interlinked visualizations revealing emotions felt, themes emerged & intertwined, and challenges shared 
     across online meditation communities.
@@ -361,10 +361,10 @@ if image_base64:
     </div>
     """, unsafe_allow_html=True)
 else:
-    # Fallback to emoji if image not found
-    st.markdown(f"""
+    # Fallback to an empty pulsing circle when the icon image is missing.
+    st.markdown("""
     <div class="meditation-container">
-        <div class="meditation-circle">🧘‍♀️</div>
+        <div class="meditation-circle"></div>
     </div>
     """, unsafe_allow_html=True)
 

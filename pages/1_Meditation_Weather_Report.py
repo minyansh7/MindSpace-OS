@@ -445,7 +445,7 @@ def run():
         
         with radio_container:
             selected_quarter = st.radio(
-                "🌤️ Time Travel",
+                "Time Travel",
                 options=available_quarters,
                 index=available_quarters.index(default_q) if default_q in available_quarters else -1,
                 key="enhanced_quarter_selector",
@@ -1111,7 +1111,7 @@ def run():
             
             <!-- Enhanced Legend -->
             <div class="weather-legend">
-                <div class="legend-title">🌦️ Weather Legend</div>
+                <div class="legend-title">Weather Legend</div>
                 <div class="legend-item">
                     <span class="legend-emoji">☀️</span>
                     <span class="legend-text">Sunny and Positive (0.4+)</span>
@@ -1133,7 +1133,7 @@ def run():
                     <span class="legend-text">Storm Warning (-0.6+)</span>
                 </div>
                 <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 9px; color: #ffffff;">
-                    📅 <strong>{selected_quarter}</strong><br>
+                    <strong>{selected_quarter}</strong><br>
                     <em><strong>Region Size = Discussion Volume</strong><br><strong>>>Hover for more details</strong></em><br>
                 </div>
             </div>
@@ -1313,7 +1313,7 @@ def run():
             """, unsafe_allow_html=True)
 
             # Define baseline variables for first quarter
-            trend_emoji = "📍"
+            trend_emoji = ""
             trend_text = "Establishing baseline. QoQ trends available from next quarter.."
             trend_color = "#64748b"  # Grey for baseline
 
@@ -1412,7 +1412,6 @@ def run():
                     
                     <div class="challenge-insights">
                         <div class="insights-header">
-                            <span>⚡</span>
                             <span>Active Challenge Analysis</span>
                         </div>
                         <div class="challenge-list">
@@ -1428,15 +1427,15 @@ def run():
             overall_change = comparison_df['sentiment_change'].mean()
             
             if overall_change > 0.02:
-                trend_emoji = "📈"
+                trend_emoji = ""
                 trend_text = f"Rising (+{overall_change:.2f}) vs {prev_quarter}"
                 trend_color = "#10b981"
             elif overall_change < -0.02:
-                trend_emoji = "📉" 
+                trend_emoji = ""
                 trend_text = f"Declining ({overall_change:.2f}) vs {prev_quarter}"
                 trend_color = "#f97316"
             else:
-                trend_emoji = "➡️" 
+                trend_emoji = ""
                 trend_text = f"Steady ({overall_change:+.2f}) vs {prev_quarter}"
                 trend_color = "#64748b"
             
@@ -1639,7 +1638,7 @@ def run():
                                 {volume_change_pct:+.0f}% discussions
                             </div>
                             <div class="status-badge" style="background: linear-gradient(135deg, {flow_color}, {flow_color}DD);">
-                                <span>{'🚀 Strong Growth' if flow_type == 'rising' and volume_change_pct > 30 else '🤝 Support Needed' if flow_type == 'declining' else '📈 Growing' if flow_type == 'rising' else '⚠️ Monitor Closely' if flow_type == 'declining' else '➡️ Stable'}</span>
+                                <span>{'Strong Growth' if flow_type == 'rising' and volume_change_pct > 30 else 'Support Needed' if flow_type == 'declining' else 'Growing' if flow_type == 'rising' else 'Monitor Closely' if flow_type == 'declining' else 'Stable'}</span>
                             </div>
                         </div>
                         <div class="metrics-section">
@@ -1652,7 +1651,6 @@ def run():
                     
                     <div class="challenge-insights">
                         <div class="insights-header">
-                            <span>⚡</span>
                             <span>Top Challenges</span>
                         </div>
                         <div class="challenge-list">

@@ -151,14 +151,16 @@ def run():
 
     # Topic mapping — colors synced with the Inner Life Trees page chart
     # (its script_custom_cmap indexed by alphabetical cluster order).
+    # Icons intentionally left empty — color alone is the category anchor,
+    # matching the Inner Life Trees page.
     topic_mapping = {
-        'Anxiety & Mental Health':   {'color': '#1f77b4', 'icon': '💚'},
-        'Awareness':                 {'color': '#808000', 'icon': '🌿'},
-        'Buddhism & Spirituality':   {'color': '#ff7f0e', 'icon': '🕉️'},
-        'Concentration & Flow':      {'color': '#d62728', 'icon': '🌊'},
-        'Meditation & Mindfulness':  {'color': '#9467bd', 'icon': '🧘'},
-        'Practice, Retreat, & Meta': {'color': '#8c564b', 'icon': '🏛️'},
-        'Self-Regulation':           {'color': '#17becf', 'icon': '🎯'},
+        'Anxiety & Mental Health':   {'color': '#1f77b4', 'icon': ''},
+        'Awareness':                 {'color': '#808000', 'icon': ''},
+        'Buddhism & Spirituality':   {'color': '#ff7f0e', 'icon': ''},
+        'Concentration & Flow':      {'color': '#d62728', 'icon': ''},
+        'Meditation & Mindfulness':  {'color': '#9467bd', 'icon': ''},
+        'Practice, Retreat, & Meta': {'color': '#8c564b', 'icon': ''},
+        'Self-Regulation':           {'color': '#17becf', 'icon': ''},
     }
 
     # Cached per-quarter prep. Previously the code did O(E) iterrows for
