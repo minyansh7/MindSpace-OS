@@ -4,7 +4,7 @@ import numpy as np
 import streamlit.components.v1 as components
 import json
 
-from shared_ui import inject_inner_life_css, render_footer, render_hero
+from shared_ui import PLOTLY_CDN_URL, inject_inner_life_css, render_footer, render_hero
 
 st.set_page_config(page_title="Inner Life Web", layout="wide")
 
@@ -187,7 +187,7 @@ def run():
     <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script src="{PLOTLY_CDN_URL}"></script>
         <style>
             body {{ 
                 margin: 0; 
