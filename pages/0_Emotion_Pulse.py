@@ -91,7 +91,7 @@ def run():
         eyebrow="PULSE",
         title="Emotion Pulse",
         subtitle="2,977 meditation posts, each colored by its dominant emotion",
-        description="This emotional map reveals how people express their emotions through meditation practices, drawn from thousands of Reddit posts and comments shared between January 2024 and June 2025.",
+        description="This emotional map reveals how people express their emotions through meditation practices, drawn from 2,977 Reddit posts and comments shared between January 2024 and June 2025.",
     )
     
     # Info sections with enhanced styling
