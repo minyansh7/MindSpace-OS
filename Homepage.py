@@ -373,7 +373,7 @@ st.markdown(f"""
 <div class="theme-grid">
     <a href="/Emotion_Pulse" style="text-decoration: none; display: block;">
         <div class="theme-card">
-            <div class="theme-title">Emotional Pulse</div>
+            <div class="theme-title">Emotion Pulse</div>
         </div>
     </a>
     <a href="/Meditation_Weather_Report" style="text-decoration: none; display: block;">
