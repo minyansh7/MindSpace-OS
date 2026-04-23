@@ -74,7 +74,7 @@ def run():
         eyebrow="CURRENTS",
         title="Inner Life Currents",
         subtitle="Where Narratives Converge — And How They Evolve",
-        description="A dynamic view of how narratives intersect — and how their connections evolve over time, drawn from thousands of Reddit posts and comments shared between January 2024 and June 2025.",
+        description="A dynamic view of how narratives intersect — and how their connections evolve over time, drawn from 2,977 Reddit posts and comments shared between January 2024 and June 2025.",
     )
     
     # Load data
