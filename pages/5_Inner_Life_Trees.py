@@ -594,39 +594,20 @@ def run():
         # Generate story tributaries with enhanced styling
         story_tributaries_html = ""
         sorted_tributaries = sorted(tributary_stats.items(), key=lambda x: x[1]['percentage'], reverse=True)
-        
-        tributary_descriptions = {
-            'Meditation & Mindfulness': 'Main river',
-            'Anxiety & Mental Health': 'Growing tributary', 
-            'Buddhism & Spirituality': 'Mountain spring',
-            'Concentration & Flow': 'Fast current',
-            'Practice, Retreat, & Meta': 'Deep wellspring',
-            'Awareness': 'Clear stream',
-            'Self-Regulation': 'Steady flow'
-        }
-        
+
         for cluster, stats in sorted_tributaries:
-            description = tributary_descriptions.get(cluster, 'Flow pattern')
-            
-            # Calculate co-occurrence percentages
-            co_occur_text = ""
             if stats['co_occurrences']:
-                co_occur_list = []
-                for name, weight in stats['co_occurrences'][:2]:  # Top 2
-                    # Calculate percentage roughly
-                    percentage = min(99, int((weight / stats['count']) * 100)) if stats['count'] > 0 else 0
-                    co_occur_list.append(f"{name.split(' ')[0]} ({percentage}%)")
-                co_occur_text = f"Co-occurs with: {', '.join(co_occur_list)}"
+                co_occur_names = [name.split(' ')[0] for name, _weight in stats['co_occurrences'][:2]]
+                co_occur_text = f"Co-occurs with: {', '.join(co_occur_names)}"
             else:
                 co_occur_text = "Independent flow"
-            
+
             story_tributaries_html += f"""
             <div style="background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 4px solid {stats['color']};">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <div style="font-size: 16px; font-weight: 700; color: #1e293b;">{cluster}</div>
                     <div style="font-size: 14px; font-weight: 700; color: {stats['color']};">{stats['percentage']:.1f}%</div>
                 </div>
-                <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">{description} • {stats['count']:,} discussions</div>
                 <div style="font-size: 11px; color: #64748b; display: flex; align-items: center; gap: 6px;">
                     <div style="width: 6px; height: 6px; background: {stats['color']}; border-radius: 50%;"></div>
                     <span>{co_occur_text}</span>
