@@ -14,6 +14,17 @@ Typographic and color contracts (see ``CLAUDE.md``):
 """
 import streamlit as st
 
+# Pinned Plotly.js CDN URL for the three ``components.html`` network-graph
+# iframes (Inner Life Web / Currents / Trees). Pinned (not ``-latest``) so
+# the browser can cache the asset across site deploys and across page
+# navigation — ``-latest`` cache-busts whenever the CDN updates.
+#
+# Version 2.35.2 is the plotly.js that ships with the Python plotly 5.24
+# series and is compatible back to plotly>=5.16 (our requirements.txt
+# lower bound). The iframes only call stable APIs (newPlot, react,
+# restyle, relayout) so minor version drift here is safe.
+PLOTLY_CDN_URL = "https://cdn.plot.ly/plotly-2.35.2.min.js"
+
 
 # CSS shared by the "Inner Life" family (Web, Currents, and any page using
 # .main-title / .sub-title / .description / .footer-text / .plot-container).
