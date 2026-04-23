@@ -4,7 +4,9 @@ import numpy as np
 import streamlit.components.v1 as components
 import json
 
-st.set_page_config(page_title="Narrative Trees", layout="wide")
+from shared_ui import inject_inner_life_css, render_footer, render_hero
+
+st.set_page_config(page_title="Inner Life Trees", layout="wide")
 
 def run():
     # --- Load Data ---
@@ -48,65 +50,69 @@ def run():
     }
 
     def calculate_river_flow_data(df_nodes, df_edges, selected_quarter):
-        """Calculate comprehensive data for Narrative Trees interface"""
-        
+        """Calculate comprehensive data for Inner Life Trees interface.
+
+        Previously the per-cluster co-occurrence step ran a nested
+        iterrows over (clusters × edges) with two DataFrame filter scans
+        per edge. That was O(C × E × N). This version builds one
+        coord→cluster dict up front and does a single O(E) pass, then
+        aggregates per-cluster via .groupby.
+        """
+
         # Filter data for current quarter
         nodes_q = df_nodes[df_nodes['quarter'] == selected_quarter].copy()
         edges_q = df_edges[df_edges['quarter'] == selected_quarter].copy()
-        
+
         # Calculate total statistics
         total_nodes = len(nodes_q)
         total_edges = len(edges_q)
-        
-        # Calculate co-occurrence rate (percentage of themes that have connections)
-        node_coords_q = set()
-        for _, edge in edges_q.iterrows():
-            node_coords_q.add((edge['x0'], edge['y0']))
-            node_coords_q.add((edge['x1'], edge['y1']))
-        
-        def has_edge_q(row):
-            return (row['x'], row['y']) in node_coords_q
-        
-        connected_nodes = nodes_q[nodes_q.apply(has_edge_q, axis=1)]
+
+        # Co-occurrence rate (connected-node flag via set membership — O(E+N))
+        edge_coord_set = set(zip(edges_q['x0'].to_numpy(), edges_q['y0'].to_numpy()))
+        edge_coord_set.update(zip(edges_q['x1'].to_numpy(), edges_q['y1'].to_numpy()))
+        node_tuples = list(zip(nodes_q['x'].to_numpy(), nodes_q['y'].to_numpy()))
+        connected_mask = pd.Series(
+            [c in edge_coord_set for c in node_tuples], index=nodes_q.index
+        )
+        connected_nodes = nodes_q[connected_mask]
         connected_count = len(connected_nodes)
         co_occurrence_rate = (connected_count / total_nodes * 100) if total_nodes > 0 else 0
-        
+
+        # Build coord→cluster once, then resolve every edge's endpoints
+        # in O(1). Single O(E) pass replaces the O(C × E × N) nested loop.
+        coord_to_cluster = dict(zip(
+            zip(nodes_q['x'].to_numpy(), nodes_q['y'].to_numpy()),
+            nodes_q['cluster_name'].to_numpy(),
+        ))
+        start_clusters = [coord_to_cluster.get((x, y)) for x, y in zip(edges_q['x0'], edges_q['y0'])]
+        end_clusters = [coord_to_cluster.get((x, y)) for x, y in zip(edges_q['x1'], edges_q['y1'])]
+        weights = edges_q['weight'].to_numpy()
+
+        # Aggregate per-cluster co-occurrences: for each edge, attribute
+        # weight to both endpoints' clusters (against the opposite cluster).
+        from collections import defaultdict
+        per_cluster_cooc = defaultdict(lambda: defaultdict(float))
+        for sc, ec, w in zip(start_clusters, end_clusters, weights):
+            if sc is None or ec is None or sc == ec:
+                continue
+            per_cluster_cooc[sc][ec] += float(w)
+            per_cluster_cooc[ec][sc] += float(w)
+
         # Calculate tributary statistics
-        tributary_stats = {}
         unique_clusters = sorted(nodes_q['cluster_name'].dropna().unique())
-        
+        cluster_counts = nodes_q['cluster_name'].value_counts()
+        cluster_sentiment = nodes_q.groupby('cluster_name')['sentiment'].mean()
+
+        tributary_stats = {}
         for cluster in unique_clusters:
-            cluster_nodes = nodes_q[nodes_q['cluster_name'] == cluster]
-            cluster_count = len(cluster_nodes)
-            percentage = (cluster_count / total_nodes) * 100
-            
-            # Calculate average sentiment for cluster
-            avg_sentiment = cluster_nodes['sentiment'].mean()
-            
-            # Calculate co-occurrences with other clusters
-            cluster_edges = []
-            for _, edge in edges_q.iterrows():
-                # Find nodes at edge endpoints
-                start_nodes = nodes_q[(nodes_q['x'] == edge['x0']) & (nodes_q['y'] == edge['y0'])]
-                end_nodes = nodes_q[(nodes_q['x'] == edge['x1']) & (nodes_q['y'] == edge['y1'])]
-                
-                if not start_nodes.empty and not end_nodes.empty:
-                    start_cluster = start_nodes.iloc[0]['cluster_name']
-                    end_cluster = end_nodes.iloc[0]['cluster_name']
-                    
-                    if start_cluster == cluster or end_cluster == cluster:
-                        other_cluster = end_cluster if start_cluster == cluster else start_cluster
-                        if other_cluster != cluster:
-                            cluster_edges.append((other_cluster, edge['weight']))
-            
-            # Calculate top co-occurrences
-            co_occurrence_counts = {}
-            for other_cluster, weight in cluster_edges:
-                co_occurrence_counts[other_cluster] = co_occurrence_counts.get(other_cluster, 0) + weight
-            
-            # Get top 2 co-occurrences
-            top_co_occurrences = sorted(co_occurrence_counts.items(), key=lambda x: x[1], reverse=True)[:2]
-            
+            cluster_count = int(cluster_counts.get(cluster, 0))
+            percentage = (cluster_count / total_nodes) * 100 if total_nodes else 0.0
+            avg_sentiment = float(cluster_sentiment.get(cluster, 0.0))
+            top_co_occurrences = sorted(
+                per_cluster_cooc.get(cluster, {}).items(),
+                key=lambda x: x[1],
+                reverse=True,
+            )[:2]
             tributary_stats[cluster] = {
                 'count': cluster_count,
                 'percentage': percentage,
@@ -115,7 +121,7 @@ def run():
                 'color': topic_mapping.get(cluster, {}).get('color', '#64748b'),
                 'icon': topic_mapping.get(cluster, {}).get('icon', '')
             }
-        
+
         return {
             'total_nodes': total_nodes,
             'total_edges': total_edges,
@@ -154,76 +160,63 @@ def run():
 
         # Use ALL nodes in the quarter (raw data already filtered by engagement > 30, sentiment > 0.3)
         nodes_q_all = nodes_q.copy()
-        
-        # Keep track of which nodes are connected for edge calculations
-        node_coords = set()
-        for _, edge in edges_q.iterrows():
-            node_coords.add((edge['x0_rot'], edge['y0_rot']))
-            node_coords.add((edge['x1_rot'], edge['y1_rot']))
-        
+
         # Color mapping
         custom_cmap = ['#1f77b4', '#808000', '#ff7f0e', '#d62728', '#9467bd', '#8c564b', '#17becf']
         unique_clusters = sorted(nodes_q_all['cluster_name'].dropna().unique())
         cluster_color_map = {cluster: custom_cmap[i % len(custom_cmap)] for i, cluster in enumerate(unique_clusters)}
 
-        # Prepare edge data for JavaScript
+        # Coord→cluster lookup once (O(N)); replaces the O(E*N) nested
+        # iterrows that scanned all nodes per edge.
+        coord_to_cluster = dict(zip(
+            zip(nodes_q_all['x_rot'].to_numpy(), nodes_q_all['y_rot'].to_numpy()),
+            nodes_q_all['cluster_name'].to_numpy(),
+        ))
+
         edge_data = []
-        for _, edge in edges_q.iterrows():
-            # Get cluster names for start and end nodes
-            start_coord = (edge['x0_rot'], edge['y0_rot'])
-            end_coord = (edge['x1_rot'], edge['y1_rot'])
-            
-            start_cluster = "Unknown"
-            end_cluster = "Unknown"
-            
-            for _, node in nodes_q_all.iterrows():
-                node_coord = (node['x_rot'], node['y_rot'])
-                if node_coord == start_coord:
-                    start_cluster = node['cluster_name']
-                elif node_coord == end_coord:
-                    end_cluster = node['cluster_name']
-            
+        for rec in edges_q.to_dict('records'):
+            start_cluster = coord_to_cluster.get((rec['x0_rot'], rec['y0_rot']), "Unknown")
+            end_cluster = coord_to_cluster.get((rec['x1_rot'], rec['y1_rot']), "Unknown")
             edge_data.append({
-                'x0': float(edge['x0_rot']),
-                'y0': float(edge['y0_rot']),
-                'x1': float(edge['x1_rot']),
-                'y1': float(edge['y1_rot']),
-                'weight': float(edge['weight']),
-                'color': edge['color'],
-                'hover_text': f"<b>Topics:</b> {start_cluster} ↔ {end_cluster}<br><b>Themes:</b> {edge['theme_1']} ↔ {edge['theme_2']}<br><b>Engagement Score:</b> {int(edge['weight'])}<br><b>Sentiment:</b> {edge['sentiment']:.2f}"
+                'x0': float(rec['x0_rot']),
+                'y0': float(rec['y0_rot']),
+                'x1': float(rec['x1_rot']),
+                'y1': float(rec['y1_rot']),
+                'weight': float(rec['weight']),
+                'color': rec['color'],
+                'hover_text': f"<b>Topics:</b> {start_cluster} ↔ {end_cluster}<br><b>Themes:</b> {rec['theme_1']} ↔ {rec['theme_2']}<br><b>Engagement Score:</b> {int(rec['weight'])}<br><b>Sentiment:</b> {rec['sentiment']:.2f}"
             })
 
-        # Prepare node data for JavaScript.
         # Focal / non-focal streams: the top 3 clusters by total volume for
         # this quarter are "focal" — they keep current alpha. Non-focal
         # clusters drop to 0.25 alpha so the eye locks onto the dominant
-        # streams. Colors themselves are unchanged (Knaflic preattentive
-        # focus — emphasize via intensity, not hue shift).
+        # streams.
         cluster_volumes = nodes_q_all.groupby('cluster_name')['scaled_size'].sum()
         focal_clusters = set(cluster_volumes.nlargest(3).index)
 
         node_data = []
         for cluster in unique_clusters:
-            cluster_data = nodes_q_all[nodes_q_all['cluster_name'] == cluster]
-            for _, node in cluster_data.iterrows():
-                if isinstance(node['avg_score'], set):
-                    avg_score_display = int(next(iter(node['avg_score'])))
+            cluster_slice = nodes_q_all[nodes_q_all['cluster_name'] == cluster]
+            color = cluster_color_map[cluster]
+            is_focal = cluster in focal_clusters
+            for rec in cluster_slice.to_dict('records'):
+                raw = rec['avg_score']
+                if isinstance(raw, set):
+                    avg_score_display = int(next(iter(raw)))
                 else:
-                    avg_score_display = int(float(node['avg_score']))
-
+                    avg_score_display = int(float(raw))
                 try:
-                    sentiment_value = float(node['sentiment']) if pd.notna(node['sentiment']) else 0.0
-                except:
+                    sentiment_value = float(rec['sentiment']) if pd.notna(rec['sentiment']) else 0.0
+                except (TypeError, ValueError):
                     sentiment_value = 0.0
-
                 node_data.append({
-                    'x': float(node['x_rot']),
-                    'y': float(node['y_rot']),
-                    'size': float(node['scaled_size']),
-                    'color': cluster_color_map[cluster],
+                    'x': float(rec['x_rot']),
+                    'y': float(rec['y_rot']),
+                    'size': float(rec['scaled_size']),
+                    'color': color,
                     'cluster': cluster,
-                    'is_focal': cluster in focal_clusters,
-                    'hover_text': f"<b>Topic:</b> {node['cluster_name']}<br><b>Theme:</b> {node['theme']}<br><b>Engagement Score:</b> {avg_score_display}<br><b>Sentiment:</b> {sentiment_value:.2f}"
+                    'is_focal': is_focal,
+                    'hover_text': f"<b>Topic:</b> {rec['cluster_name']}<br><b>Theme:</b> {rec['theme']}<br><b>Engagement Score:</b> {avg_score_display}<br><b>Sentiment:</b> {sentiment_value:.2f}"
                 })
 
         # Calculate centroids for labels
@@ -242,14 +235,15 @@ def run():
         centroids['x'] += radius_offset * np.cos(angle_offset)
         centroids['y'] += radius_offset * np.sin(angle_offset)
 
-        label_data = []
-        for _, row in centroids.iterrows():
-            label_data.append({
+        label_data = [
+            {
                 'x': float(row['x']),
                 'y': float(row['y']),
                 'text': row['cluster_name'],
-                'color': cluster_color_map[row['cluster_name']]
-            })
+                'color': cluster_color_map[row['cluster_name']],
+            }
+            for row in centroids.to_dict('records')
+        ]
 
         # Create HTML with smart hover system
         html_code = f"""
@@ -617,7 +611,7 @@ def run():
             st.session_state.slider_index = quarter_labels.index(new_label)
             st.rerun()
     def create_professional_sidebar_html(river_data, selected_label, quarter_labels, current_index):
-        """Create the Narrative Trees sidebar HTML - cleaned up without time navigation"""
+        """Create the Inner Life Trees sidebar HTML - cleaned up without time navigation"""
         
         tributary_stats = river_data['tributary_stats']
         co_occurrence_rate = river_data['co_occurrence_rate']
@@ -693,10 +687,6 @@ def run():
         
         return html_template
 
-    # Main execution starts here
-    selected_quarter = reverse_label_map[quarter_labels[st.session_state.slider_index]]
-    selected_label = quarter_labels[st.session_state.slider_index]
-
     # Seed defaults BEFORE reading so the first paint already filters.
     # Engagement Level defaults to 80 (user preference — surface only the
     # strongly-engaged connections on landing). Sentiment defaults to "All"
@@ -720,31 +710,32 @@ def run():
             out = out[out["sentiment"] < 0]
         return out
 
-    # Calculate river flow data on filtered edges
-    river_data = calculate_river_flow_data(df_nodes, _apply_filters(df_edges), selected_quarter)
-    
-    # Display the main title + relocated "Living Narrative Intelligence"
-    # block (previously in the left sidebar iframe). Subtitle + description
-    # typography matches Theme Pathways (h3 subtitle, grey description p).
-    st.markdown("""
-    <div style="text-align: center; margin-bottom: 1rem;">
-        <h1 style="font-size: 3rem; font-weight: 800;">Narrative Trees</h1>
-        <h3 style="font-size: 1.5rem; font-weight: 500;">Living Narrative Intelligence</h3>
-        <p style="font-size: 1rem; color: #888; max-width: 800px; margin: 0.75rem auto 0 auto;">
-            Where meditation stories converge and flow together.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Functional Timeline with Beautiful Dots (now actually clickable!)
+    inject_inner_life_css()
+    render_hero(
+        eyebrow="TREES",
+        title="Inner Life Trees",
+        subtitle="Living Narrative Intelligence",
+        description="Where meditation stories converge and flow together.",
+    )
+
+    # create_functional_timeline calls st.rerun() on slider change, so by
+    # the time we reach the lines below the slider_index is settled.
     create_functional_timeline(quarter_labels, st.session_state.slider_index)
 
-    # Update selected quarter and label after potential changes
     selected_quarter = reverse_label_map[quarter_labels[st.session_state.slider_index]]
     selected_label = quarter_labels[st.session_state.slider_index]
-    
-    # Recalculate river flow data with updated quarter (filters still apply)
-    river_data = calculate_river_flow_data(df_nodes, _apply_filters(df_edges), selected_quarter)
+
+    # Memoize river_data per (quarter, engagement_min, sentiment_filter) so
+    # scrubbing the slider back to a previously-computed quarter is instant.
+    # `calculate_river_flow_data` is pure w.r.t. df_nodes + filtered edges.
+    _river_cache = st.session_state.setdefault("_river_cache_v1", {})
+    _river_key = (selected_quarter, engagement_min, sentiment_filter)
+    if _river_key not in _river_cache:
+        with st.spinner("Growing the trees..."):
+            _river_cache[_river_key] = calculate_river_flow_data(
+                df_nodes, _apply_filters(df_edges), selected_quarter
+            )
+    river_data = _river_cache[_river_key]
     
     # Display current statistics
     st.markdown(f"""
@@ -786,21 +777,35 @@ def run():
         )
 
         # Story Tributaries iframe (summary stats only; header and fake
-        # filters have been moved out of this iframe).
-        sidebar_html = create_professional_sidebar_html(
-            river_data, selected_label, quarter_labels, st.session_state.slider_index
-        )
-        components.html(sidebar_html, height=500, scrolling=False)
-    
+        # filters have been moved out of this iframe). Cached per
+        # (quarter, engagement, sentiment) — same key space as river_data.
+        _sidebar_cache = st.session_state.setdefault("_sidebar_html_cache_v1", {})
+        if _river_key not in _sidebar_cache:
+            _sidebar_cache[_river_key] = create_professional_sidebar_html(
+                river_data, selected_label, quarter_labels, st.session_state.slider_index
+            )
+        components.html(_sidebar_cache[_river_key], height=500, scrolling=False)
+
     with col_plot:
-        # Create and display the dynamic HTML visualization
-        viz_html = create_dynamic_visualization_html(river_data, selected_label)
-        components.html(viz_html, height=900, scrolling=False)
+        # Create and display the dynamic HTML visualization. Cached per
+        # (quarter, engagement, sentiment) — scrubbing back to a prior
+        # setting skips the JSON-dumps of edge/node/label payloads.
+        _viz_cache = st.session_state.setdefault("_viz_html_cache_v1", {})
+        if _river_key not in _viz_cache:
+            _viz_cache[_river_key] = create_dynamic_visualization_html(river_data, selected_label)
+        components.html(_viz_cache[_river_key], height=900, scrolling=False)
     
 
-    # Footer
+    # Page 5 doesn't inject the shared CSS (its typography is inline), so
+    # render the footer directly without relying on the .footer-text class.
     st.markdown("""
-    <div style="text-align: center; font-size: 1rem; font-weight: 600; color: #666; margin-top: 3rem; padding: 1rem; border-top: 1px solid #eee; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+    <div style="text-align: center; font-size: 1rem; font-weight: 600;
+                color: #666; margin-top: 3rem; padding: 1rem;
+                border-top: 1px solid #eee;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;">
         Powered By MinyanLabs ©2026
     </div>
     """, unsafe_allow_html=True)

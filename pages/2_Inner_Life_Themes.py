@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.colors import hex_to_rgb
 
+from shared_ui import inject_inner_life_css, render_footer, render_hero
+
 # --- Custom Font ---
 st.markdown("""
     <style>
@@ -38,7 +40,7 @@ st.markdown("""
 
 # --- Page Config ---
 st.set_page_config(
-    page_title="Theme Pathways — Topic Flow: How Themes Connect",
+    page_title="Inner Life Themes — Topic Flow: How Themes Connect",
     layout="wide",
 )
 
@@ -54,6 +56,7 @@ def format_number(n):
     else:
         return str(int(n))
 
+@st.cache_resource(show_spinner=False)
 def create_sankey_custom(df):
     filtered = df[df['count'] > 0].copy()
     if filtered.empty:
@@ -64,34 +67,36 @@ def create_sankey_custom(df):
     themes = theme_vol.index.tolist()
     topics = topic_vol.index.tolist()
     node_labels = themes + topics
+    theme_index = {t: i for i, t in enumerate(themes)}
+    topic_index = {t: i + len(themes) for i, t in enumerate(topics)}
 
-    theme_hover_text = []
     total_discussions = filtered['count'].sum()
 
+    theme_hover_text = []
     for theme in themes:
-        theme_data = filtered[filtered['theme'] == theme]
-        theme_count = theme_data['count'].sum()
-        connected_topics = len(theme_data)
+        theme_count = theme_vol[theme]
         percentage = (theme_count / total_discussions) * 100
-        top_topic = theme_data.loc[theme_data['count'].idxmax(), 'cluster_name'] if not theme_data.empty else "N/A"
-
-        hover_text = (
+        theme_hover_text.append(
             f"<b style='font-size: 16px; color: #2c3e50'>{theme}</b><br>"
             f"Total: <b>{format_number(theme_count)}</b><br>"
             f"Global Share: <b>{percentage:.1f}%</b><br>"
         )
-        theme_hover_text.append(hover_text)
+
+    # One groupby per topic metric (vectorized) rather than filtering the
+    # DF per topic inside a Python loop.
+    topic_grouped = filtered.groupby('cluster_name')
+    topic_primary_idx = topic_grouped['count'].idxmax()
+    topic_primary_theme = filtered.loc[topic_primary_idx, ['cluster_name', 'theme', 'count']].set_index('cluster_name')
+    topic_connected = topic_grouped['theme'].nunique()
 
     topic_hover_text = []
     for topic in topics:
-        topic_data = filtered[filtered['cluster_name'] == topic]
-        topic_count = topic_data['count'].sum()
-        primary_theme = topic_data.loc[topic_data['count'].idxmax(), 'theme'] if not topic_data.empty else "N/A"
-        primary_count = topic_data['count'].max() if not topic_data.empty else 0
-        connected_themes = topic_data['theme'].nunique()
+        topic_count = topic_vol[topic]
+        primary_theme = topic_primary_theme.loc[topic, 'theme']
+        primary_count = topic_primary_theme.loc[topic, 'count']
+        connected_themes = int(topic_connected.loc[topic])
         percentage = (topic_count / total_discussions) * 100
-
-        hover_text = (
+        topic_hover_text.append(
             f"<b style='font-size: 16px; color: #2c3e50'>{topic}</b><br>"
             f"Mentions: <b>{format_number(topic_count)}</b><br>"
             f"Global Share: <b>{percentage:.1f}%</b><br>"
@@ -99,29 +104,24 @@ def create_sankey_custom(df):
             f"Top Count: <b>{format_number(primary_count)}</b><br>"
             f"Themes: <b>{connected_themes}</b>"
         )
-        topic_hover_text.append(hover_text)
 
     node_hover_text = theme_hover_text + topic_hover_text
 
+    # Replace iterrows() with to_dict('records'), and pre-index theme/topic
+    # positions so we don't pay a linear .index() per row.
     src, tgt, val, link_hover_text = [], [], [], []
-    for _, r in filtered.iterrows():
-        src_idx = themes.index(r['theme'])
-        tgt_idx = topics.index(r['cluster_name']) + len(themes)
-        src.append(src_idx)
-        tgt.append(tgt_idx)
+    for r in filtered.to_dict('records'):
+        src.append(theme_index[r['theme']])
+        tgt.append(topic_index[r['cluster_name']])
         val.append(r['count'])
-
         flow_percentage = (r['count'] / total_discussions) * 100
-        theme_contribution = (r['count'] / theme_vol[r['theme']]) * 100
         topic_contribution = (r['count'] / topic_vol[r['cluster_name']]) * 100
-
-        link_hover = (
+        link_hover_text.append(
             f"<b style='font-size: 15px; color: #2c3e50'>{r['theme']} → {r['cluster_name']}</b><br>"
             f"Count: <b>{format_number(r['count'])}</b><br>"
             f"Global Share: <b>{flow_percentage:.1f}%</b><br>"
             f"Topic Share: <b>{topic_contribution:.1f}%</b>"
         )
-        link_hover_text.append(link_hover)
 
     color_families = {
         "Meditation & Mindfulness": ["#00FFFF", "#87FDFC"],
@@ -239,15 +239,13 @@ def run():
     except Exception:
         main_topics = pd.DataFrame()
 
-    st.markdown("""
-    <div style="text-align: center;">
-        <h1 style="font-size: 3rem; font-weight: 800;">Topic Flow: How Themes Connect</h1>
-        <h3 style="font-size: 1.5rem; font-weight: 500;">What People Say Most</h3>
-        <p style="font-size: 1rem; color: #888; max-width: 800px; margin: 0.75rem auto 0 auto;">
-            Hover over to discover theme details.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    inject_inner_life_css()
+    render_hero(
+        eyebrow="THEMES",
+        title="Inner Life Themes",
+        subtitle="Topic Flow: How Themes Connect",
+        description="Hover over to discover theme details.",
+    )
     
     # Enhanced chart display with export configuration
     fig = create_sankey_custom(main_topics)
