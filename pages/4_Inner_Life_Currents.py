@@ -203,18 +203,28 @@ def run():
             nodes_q['cluster_name'].to_numpy(),
         ))
 
+        # Flag top-10 edges by weight. Only these get full opacity and hover;
+        # the rest fade back as visual texture. Keeps the "backbone" legible
+        # instead of ~200 edges competing at the same contrast level.
+        top_edge_cutoff = None
+        if not edges_q.empty:
+            top_k = min(10, len(edges_q))
+            top_edge_cutoff = edges_q['weight'].nlargest(top_k).min()
+
         edge_data = []
         for rec in edges_q.to_dict('records'):
             start_cluster = coord_to_cluster.get((rec['x0_rot'], rec['y0_rot']), "Unknown")
             end_cluster = coord_to_cluster.get((rec['x1_rot'], rec['y1_rot']), "Unknown")
+            weight = float(rec['weight'])
             edge_data.append({
                 'x0': float(rec['x0_rot']),
                 'y0': float(rec['y0_rot']),
                 'x1': float(rec['x1_rot']),
                 'y1': float(rec['y1_rot']),
-                'weight': float(rec['weight']),
+                'weight': weight,
                 'color': rec['color'],
-                'hover_text': f"<b>Topics:</b> {start_cluster} ↔ {end_cluster}<br><b>Themes:</b> {rec['theme_1']} ↔ {rec['theme_2']}<br><b>Engagement Score:</b> {int(rec['weight'])}<br><b>Sentiment:</b> {rec['sentiment']:.2f}"
+                'is_top': top_edge_cutoff is not None and weight >= top_edge_cutoff,
+                'hover_text': f"<b>Topics:</b> {start_cluster} ↔ {end_cluster}<br><b>Themes:</b> {rec['theme_1']} ↔ {rec['theme_2']}<br><b>Engagement Score:</b> {int(weight)}<br><b>Sentiment:</b> {rec['sentiment']:.2f}"
             })
 
         node_data = []
@@ -252,12 +262,17 @@ def run():
         radius_offset = 0.27
         centroids['x'] += radius_offset * np.cos(angle_offset)
         centroids['y'] += radius_offset * np.sin(angle_offset)
+        # Anchor text toward the centroid so long labels on the left side
+        # ("Practice, Retreat, & Meta") don't render past the canvas edge.
+        # cos < 0 → anchor on left side of plot → draw text rightward (into canvas).
+        centroids['cos'] = np.cos(angle_offset)
         label_data = [
             {
                 'x': float(row['x']),
                 'y': float(row['y']),
                 'text': row['cluster_name'],
                 'color': cluster_color_map[row['cluster_name']],
+                'textposition': 'middle right' if row['cos'] < -0.15 else ('middle left' if row['cos'] > 0.15 else 'middle center'),
             }
             for row in centroids.to_dict('records')
         ]
@@ -484,29 +499,33 @@ def run():
                 const traces = [];
                 
                 try {{
-                    // Add visual edge lines
+                    // Add visual edge lines. Top-weight edges stay bold;
+                    // the rest fade back to visual texture only.
                     edgeData.forEach((edge, index) => {{
+                        const isTop = edge.is_top;
                         traces.push({{
                             x: [edge.x0, edge.x1],
                             y: [edge.y0, edge.y1],
                             mode: 'lines',
                             line: {{
-                                width: Math.min(8, edge.weight * 0.02),
+                                width: isTop ? Math.min(8, edge.weight * 0.02) : Math.min(2, edge.weight * 0.015),
                                 color: edge.color
                             }},
-                            opacity: 0.6,
+                            opacity: isTop ? 0.75 : 0.12,
                             hoverinfo: 'skip',
                             showlegend: false,
                             name: 'edge_lines'
                         }});
                     }});
-                    
-                    // Create scatter points along edges for hover
+
+                    // Hover points only on top edges. Restricts hover surface
+                    // to the backbone so the viewer isn't swarmed by tooltips.
                     const edgeHoverX = [];
                     const edgeHoverY = [];
                     const edgeHoverTexts = [];
 
                     edgeData.forEach((edge) => {{
+                        if (!edge.is_top) return;
                         const dx = edge.x1 - edge.x0;
                         const dy = edge.y1 - edge.y0;
                         const edgeLength = Math.sqrt(dx * dx + dy * dy);
@@ -559,26 +578,10 @@ def run():
                         if (clusterNodes.length === 0) return;
                         
                         const sizes = clusterNodes.map(n => window.innerWidth <= 768 ? n.size * 0.8 : n.size);
-                        
-                        // Create cluster-colored hover backgrounds with transparency
-                        const hoverBgColors = clusterNodes.map(n => {{
-                            try {{
-                                const hex = n.color || '#1f77b4';
-                                const r = parseInt(hex.slice(1, 3), 16);
-                                const g = parseInt(hex.slice(3, 5), 16);
-                                const b = parseInt(hex.slice(5, 7), 16);
-                                return `rgba(${{r}}, ${{g}}, ${{b}}, 0.9)`;
-                            }} catch (e) {{
-                                return 'rgba(31, 119, 180, 0.9)';
-                            }}
-                        }});
-                        
-                        // Create contrasting text colors based on cluster color
-                        const hoverTextColors = clusterNodes.map(n => {{
-                            const bgColor = n.color || '#1f77b4';
-                            return getContrastingTextColor(bgColor);
-                        }});
-                        
+
+                        // Node dots are visual texture only — no hover.
+                        // Keeps the hover surface limited to the top edges
+                        // so tooltips feel curated instead of overwhelming.
                         traces.push({{
                             x: clusterNodes.map(n => n.x),
                             y: clusterNodes.map(n => n.y),
@@ -586,32 +589,26 @@ def run():
                             marker: {{
                                 size: sizes,
                                 color: clusterNodes[0].color,
-                                opacity: 0.7,
+                                opacity: 0.55,
                                 line: {{ width: 0.5, color: 'white' }}
                             }},
-                            hoverinfo: 'text',
-                            hovertext: clusterNodes.map(n => n.hover_text),
-                            hoverlabel: {{
-                                bgcolor: hoverBgColors,
-                                bordercolor: clusterNodes.map(n => n.color || '#1f77b4'),
-                                font: {{
-                                    family: "DM Sans, sans-serif",
-                                    color: hoverTextColors,
-                                    size: layout.hoverFontSize
-                                }}
-                            }},
+                            hoverinfo: 'skip',
                             showlegend: false,
                             name: `cluster_${{cluster}}`
                         }});
                     }});
                 
-                    // Add cluster labels
+                    // Add cluster labels. textposition is set per-label
+                    // (computed from centroid angle) so left-side labels
+                    // like "Practice, Retreat, & Meta" render rightward
+                    // into the canvas instead of clipping off the edge.
                     labelData.forEach((label, index) => {{
                         traces.push({{
                             x: [label.x],
                             y: [label.y],
                             mode: 'text',
                             text: [`<b>${{label.text}}</b>`],
+                            textposition: label.textposition || 'middle center',
                             textfont: {{
                                 size: layout.labelFontSize,
                                 color: label.color,
