@@ -17,7 +17,7 @@ def get_base64_image(image_path):
 st.set_page_config(
     page_title="MindSpace OS",
     layout="wide",
-    page_icon="assets/narrative_web_clean.png",  # Using your existing narrative_web.png
+    page_icon="assets/narrative_web_clean.png",
     initial_sidebar_state="collapsed"
 )
 
