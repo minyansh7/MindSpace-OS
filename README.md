@@ -16,11 +16,11 @@ Six interactive pages, accessible from the sidebar:
 |---|---|
 | **Emotion Pulse** | UMAP map where posts cluster by emotional vocabulary (via GoEmotions). Frustration, awe, curiosity each occupy their own region. |
 | **Meditation Weather Report** | 18 months of sentiment trends across topics, rendered as weather metaphors (sunny days, storms). |
-| **Inner Life Themes** | Sankey diagram — how broad themes branch into specific discussions. |
+| **Community Dynamics** | Sankey diagram — poster emotional archetype flowing into commenter emotional archetype. |
 | **Inner Life Web** | Static co-occurrence network across the full archive. Capped at 40 nodes by default; toggle shows the full hairball. |
 | **Inner Life Currents** | Temporal network view — how theme connections shift quarter by quarter. |
 
-The three network-style pages (Themes, Web, Currents) form an "Inner Life" metaphor family — each a different angle on how meditation themes connect.
+The two "Inner Life" pages (Web, Currents) are a metaphor family for how meditation themes connect statically and over time. Community Dynamics sits alongside them as a complementary view of who responds to whom.
 
 ---
 
@@ -76,7 +76,7 @@ A `Dockerfile` is included for containerized deploys. **Note:** the current `CMD
 ├── pages/                         # Streamlit multipage auto-discovers these
 │   ├── 0_Emotion_Pulse.py
 │   ├── 1_Meditation_Weather_Report.py
-│   ├── 2_Inner_Life_Themes.py     # Sankey
+│   ├── 2_Community_Dynamics.py    # Poster → Commenter Sankey
 │   ├── 3_Inner_Life_Web.py        # static co-occurrence network
 │   └── 4_Inner_Life_Currents.py   # temporal network
 ├── precomputed/                   # Parquet aggregates (topics, clusters, timeseries)
@@ -100,7 +100,7 @@ See [`CLAUDE.md`](CLAUDE.md) for the editorial layer:
 - Typographic conventions (eyebrow labels, page H1s, hover text wrapping)
 - Session-state plumbing across time-trend pages
 
-The design pass that produced the current naming family (Inner Life Themes, Web, Currents) and stripped decorative noise is documented in a long-form retrospective at [`docs/publish_draft.md`](docs/publish_draft.md).
+The design pass that produced the current naming family (Inner Life Web, Currents) and stripped decorative noise is documented in a long-form retrospective at [`docs/publish_draft.md`](docs/publish_draft.md).
 
 ---
 

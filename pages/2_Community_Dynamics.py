@@ -35,22 +35,31 @@ st.markdown("""
     .js-plotly-plot .sankey-node text {
         text-shadow: none !important;
     }
+    .column-eyebrows {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 10px;
+        margin-bottom: -10px;
+        font-size: 13px;
+        color: #64748b;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 # --- Page Config ---
 st.set_page_config(
-    page_title="Inner Life Themes — Topic Flow: How Themes Connect",
+    page_title="Community Dynamics — Emotional Flow: From Poster to Commenter",
     layout="wide",
 )
 
 # --- Load precomputed figure ---
-# The Sankey is deterministic from precomputed/main_topics.parquet and takes
-# no runtime inputs, so we pre-serialize the whole figure at build time in
-# ``scripts/build_precomputed.py`` and just parse the JSON here. This
-# skips ~140 lines of Python (groupby, palette assignment, hover-text
-# formatting) that used to run on every cold start.
-_FIG_PATH = pathlib.Path("precomputed/figures/themes_sankey.json")
+# Deterministic from precomputed/emotion_clusters.parquet; pre-serialized at
+# build time in ``scripts/build_precomputed.py`` so cold start is just a JSON
+# parse (~5 KB file, 5 nodes per side). See CLAUDE.md "perf tier-3".
+_FIG_PATH = pathlib.Path("precomputed/figures/community_dynamics_sankey.json")
 
 
 @st.cache_resource(show_spinner=False)
@@ -62,21 +71,26 @@ def load_sankey_figure():
 def run():
     inject_inner_life_css()
     render_hero(
-        eyebrow="THEMES",
-        title="Inner Life Themes",
-        subtitle="Topic Flow: How Themes Connect",
-        description="Hover over to discover theme details.",
+        eyebrow="COMMUNITY",
+        title="Community Dynamics",
+        subtitle="Emotional Flow: From Poster to Commenter",
+        description="Hover over to see how emotional tones travel between posters and replies.",
     )
 
     fig = load_sankey_figure()
-    
+
+    st.markdown(
+        '<div class="column-eyebrows"><span>POSTER</span><span>COMMENTER</span></div>',
+        unsafe_allow_html=True,
+    )
+
     sankey_config = {
         'displayModeBar': False,
         'displaylogo': False,
         'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d'],
         'toImageButtonOptions': {
             'format': 'png',
-            'filename': 'main_topics_sankey_flow',
+            'filename': 'community_dynamics_sankey',
             'height': 900,
             'width': 1400,
             'scale': 2

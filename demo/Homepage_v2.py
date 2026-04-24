@@ -152,9 +152,9 @@ section_eyebrow("The Themes")
 
 feed_item(
     "03",
-    "Inner Life Themes",
-    "Themes flow into topics. Trace what leads where.",
-    href="/Inner_Life_Themes",
+    "Community Dynamics",
+    "Posters set the emotional tone; commenters respond. See who meets whom.",
+    href="/Community_Dynamics",
 )
 feed_item(
     "04",

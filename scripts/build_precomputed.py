@@ -10,12 +10,12 @@ change (or the wrap rules below, or the Sankey palette).
 Outputs:
 - ``precomputed/emotion_clusters_slim.parquet`` — the 4 columns the
   Emotion Pulse page actually reads, with ``hover_text`` already wrapped.
-- ``precomputed/figures/themes_sankey.json`` — full Plotly figure JSON
-  for the Inner Life Themes Sankey, ready for ``plotly.io.from_json``.
+- ``precomputed/figures/community_dynamics_sankey.json`` — full Plotly figure
+  JSON for the Community Dynamics Sankey (poster → commenter emotional flow),
+  ready for ``plotly.io.from_json``.
 """
 from __future__ import annotations
 
-import json
 import pathlib
 import re
 
@@ -160,34 +160,22 @@ def build_emotion_slim() -> None:
 
 
 # --------------------------------------------------------------------------
-# Inner Life Themes (Sankey) figure JSON
+# Community Dynamics (Sankey) figure JSON
 # --------------------------------------------------------------------------
+# Poster archetype -> Commenter archetype flow, joined via the shared post_id
+# that Reddit encodes in the comment URL. Must stay in lockstep with
+# ``ARCHETYPE_COLORS`` in pages/0_Emotion_Pulse.py so Emotion Pulse and
+# Community Dynamics use one visual language.
 
-COLOR_FAMILIES = {
-    "Meditation & Mindfulness": ["#00FFFF", "#87FDFC"],
-    "Self-Regulation": ["#0091EA", "#2196F3"],
-    "Anxiety & Mental Health": ["#00E676", "#4CAF50"],
-    "Awareness": ["#CDDC39", "#D4E157"],
-    "Buddhism & Spirituality": ["#FFD600", "#FFD700"],
-    "Concentration & Flow": ["#FF6D00", "#FF8C00"],
-    "Practice, Retreat & Meta": ["#F50057", "#F50057"],
+ARCHETYPE_COLORS = {
+    "Reflective Caring": "#ff5e78",
+    "Soothing Empathy": "#00c49a",
+    "Tender Uncertainty": "#6a5acd",
+    "Melancholic Confusion": "#9a32cd",
+    "Anxious Concern": "#ffc300",
 }
-TOPIC_COLOR_ORDER = [
-    "#00E5FF", "#0091EA", "#00E676", "#CDDC39",
-    "#FFD600", "#FF6D00", "#F50057",
-]
-THEME_ASSIGNMENTS = {
-    "self-awareness": "Awareness",
-    "jhanas": "Buddhism & Spirituality",
-    "metta": "Buddhism & Spirituality",
-    "practice updates": "Practice, Retreat & Meta",
-}
-VIVID_PALETTE = [
-    "#00BFFF", "#42A5F5", "#66BB6A", "#81C784", "#ADFF2F",
-    "#FFEB3B", "#FFA500", "#FF9800", "#FF80AB", "#FFB6C1",
-    "#40E0D0", "#00CED1", "#87CEFA", "#B0E0E6", "#98FB98",
-    "#FFE4B5", "#FFDAB9", "#FFC0CB", "#DA70D6", "#9370DB",
-]
+
+_POST_ID_RE = re.compile(r"/comments/([a-z0-9]+)/")
 
 
 def _format_number(n: float) -> str:
@@ -198,98 +186,104 @@ def _format_number(n: float) -> str:
     return str(int(n))
 
 
-def build_sankey_figure(df: pd.DataFrame) -> go.Figure:
-    filtered = df[df["count"] > 0].copy()
-    if filtered.empty:
+def _extract_post_id(url: object) -> str | None:
+    m = _POST_ID_RE.search(str(url))
+    return m.group(1) if m else None
+
+
+def build_community_dynamics_sankey(df: pd.DataFrame) -> go.Figure:
+    df = df[["type", "url", "archetype_label"]].copy()
+    df["post_id"] = df["url"].map(_extract_post_id)
+
+    posts = (
+        df[df["type"] == "post"][["post_id", "archetype_label"]]
+        .rename(columns={"archetype_label": "poster"})
+        .dropna(subset=["post_id"])
+    )
+    comments = (
+        df[df["type"] == "comment"][["post_id", "archetype_label"]]
+        .rename(columns={"archetype_label": "commenter"})
+        .dropna(subset=["post_id"])
+    )
+    pairs = comments.merge(posts, on="post_id", how="inner")
+    if pairs.empty:
         return go.Figure().add_annotation(text="No data to display")
 
-    theme_vol = filtered.groupby("theme")["count"].sum().sort_values(ascending=False)
-    topic_vol = filtered.groupby("cluster_name")["count"].sum().sort_values(ascending=False)
-    themes = theme_vol.index.tolist()
-    topics = topic_vol.index.tolist()
-    node_labels = themes + topics
-    theme_index = {t: i for i, t in enumerate(themes)}
-    topic_index = {t: i + len(themes) for i, t in enumerate(topics)}
+    total = len(pairs)
+    poster_vol = pairs["poster"].value_counts()
+    commenter_vol = pairs["commenter"].value_counts()
 
-    total = filtered["count"].sum()
+    # Order each side by descending volume — matches screenshot (Tender
+    # Uncertainty top-left, Reflective Caring top-right).
+    posters = poster_vol.index.tolist()
+    commenters = commenter_vol.index.tolist()
+    node_labels = posters + commenters
+    poster_index = {a: i for i, a in enumerate(posters)}
+    commenter_index = {a: i + len(posters) for i, a in enumerate(commenters)}
 
-    theme_hover = [
-        f"<b style='font-size: 16px; color: #2c3e50'>{t}</b><br>"
-        f"Total: <b>{_format_number(theme_vol[t])}</b><br>"
-        f"Global Share: <b>{theme_vol[t]/total*100:.1f}%</b><br>"
-        for t in themes
-    ]
+    flow = (
+        pairs.groupby(["poster", "commenter"]).size().reset_index(name="count")
+    )
 
-    grouped = filtered.groupby("cluster_name")
-    primary_idx = grouped["count"].idxmax()
-    primary_frame = filtered.loc[primary_idx, ["cluster_name", "theme", "count"]].set_index("cluster_name")
-    connected = grouped["theme"].nunique()
+    # Per-poster "top reply" archetype for node hover.
+    poster_top_reply = (
+        flow.loc[flow.groupby("poster")["count"].idxmax()]
+        .set_index("poster")[["commenter", "count"]]
+    )
+    commenter_top_poster = (
+        flow.loc[flow.groupby("commenter")["count"].idxmax()]
+        .set_index("commenter")[["poster", "count"]]
+    )
+    poster_connected = flow.groupby("poster")["commenter"].nunique()
+    commenter_connected = flow.groupby("commenter")["poster"].nunique()
 
-    topic_hover = [
+    poster_hover = [
         (
-            f"<b style='font-size: 16px; color: #2c3e50'>{t}</b><br>"
-            f"Mentions: <b>{_format_number(topic_vol[t])}</b><br>"
-            f"Global Share: <b>{topic_vol[t]/total*100:.1f}%</b><br>"
-            f"Primary Theme: <b>{primary_frame.loc[t, 'theme']}</b><br>"
-            f"Top Count: <b>{_format_number(primary_frame.loc[t, 'count'])}</b><br>"
-            f"Themes: <b>{int(connected.loc[t])}</b>"
+            f"<b style='font-size: 16px; color: #2c3e50'>{a}</b><br>"
+            f"Posts: <b>{_format_number(poster_vol[a])}</b><br>"
+            f"Global Share: <b>{poster_vol[a]/total*100:.1f}%</b><br>"
+            f"Connected replies: <b>{int(poster_connected.loc[a])}</b><br>"
+            f"Top reply: <b>{poster_top_reply.loc[a, 'commenter']}</b> "
+            f"(<b>{poster_top_reply.loc[a, 'count']/poster_vol[a]*100:.1f}%</b>)"
         )
-        for t in topics
+        for a in posters
+    ]
+    commenter_hover = [
+        (
+            f"<b style='font-size: 16px; color: #2c3e50'>{a}</b><br>"
+            f"Replies: <b>{_format_number(commenter_vol[a])}</b><br>"
+            f"Global Share: <b>{commenter_vol[a]/total*100:.1f}%</b><br>"
+            f"Responding to: <b>{int(commenter_connected.loc[a])}</b> archetypes<br>"
+            f"Top poster: <b>{commenter_top_poster.loc[a, 'poster']}</b> "
+            f"(<b>{commenter_top_poster.loc[a, 'count']/commenter_vol[a]*100:.1f}%</b>)"
+        )
+        for a in commenters
     ]
 
     src, tgt, val, link_hover = [], [], [], []
-    for r in filtered.to_dict("records"):
-        src.append(theme_index[r["theme"]])
-        tgt.append(topic_index[r["cluster_name"]])
+    for r in flow.to_dict("records"):
+        src.append(poster_index[r["poster"]])
+        tgt.append(commenter_index[r["commenter"]])
         val.append(r["count"])
-        flow_pct = r["count"] / total * 100
-        topic_pct = r["count"] / topic_vol[r["cluster_name"]] * 100
         link_hover.append(
-            f"<b style='font-size: 15px; color: #2c3e50'>{r['theme']} → {r['cluster_name']}</b><br>"
+            f"<b style='font-size: 15px; color: #2c3e50'>{r['poster']} → {r['commenter']}</b><br>"
             f"Count: <b>{_format_number(r['count'])}</b><br>"
-            f"Global Share: <b>{flow_pct:.1f}%</b><br>"
-            f"Topic Share: <b>{topic_pct:.1f}%</b>"
+            f"Global Share: <b>{r['count']/total*100:.1f}%</b><br>"
+            f"Poster Share: <b>{r['count']/poster_vol[r['poster']]*100:.1f}%</b><br>"
+            f"Commenter Share: <b>{r['count']/commenter_vol[r['commenter']]*100:.1f}%</b>"
         )
 
-    # Node colors — same heuristic as the former page code.
-    node_colors: list[str] = []
-    theme_map: dict[str, str] = {}
-    vivid_idx = 0
-    for t in themes:
-        tl = t.lower()
-        if tl == "mindfulness":
-            c = COLOR_FAMILIES["Meditation & Mindfulness"][1]
-            node_colors.append(c)
-            theme_map[t] = c
-            continue
-        fam_override = THEME_ASSIGNMENTS.get(tl)
-        if fam_override:
-            c = COLOR_FAMILIES[fam_override][vivid_idx % 2]
-            node_colors.append(c)
-            theme_map[t] = c
-            vivid_idx += 1
-            continue
-        matched = False
-        for fam, pair in COLOR_FAMILIES.items():
-            if tl in fam.lower():
-                node_colors.append(pair[0])
-                theme_map[t] = pair[0]
-                matched = True
-                break
-        if not matched:
-            c = VIVID_PALETTE[vivid_idx % len(VIVID_PALETTE)]
-            node_colors.append(c)
-            theme_map[t] = c
-            vivid_idx += 1
-
-    for i, _ in enumerate(topics):
-        node_colors.append(TOPIC_COLOR_ORDER[i % len(TOPIC_COLOR_ORDER)])
-
-    link_colors = [f"rgba{(*hex_to_rgb(theme_map[themes[s]]), 0.4)}" for s in src]
+    node_colors = [ARCHETYPE_COLORS[a] for a in posters] + [
+        ARCHETYPE_COLORS[a] for a in commenters
+    ]
+    link_colors = [
+        f"rgba{(*hex_to_rgb(ARCHETYPE_COLORS[posters[s]]), 0.4)}" for s in src
+    ]
 
     fig = go.Figure(
         data=[
             go.Sankey(
+                arrangement="snap",
                 node=dict(
                     pad=30,
                     thickness=35,
@@ -297,7 +291,7 @@ def build_sankey_figure(df: pd.DataFrame) -> go.Figure:
                     color=node_colors,
                     line=dict(color="rgba(0,0,0,0)", width=0),
                     hovertemplate="%{customdata}<extra></extra>",
-                    customdata=theme_hover + topic_hover,
+                    customdata=poster_hover + commenter_hover,
                 ),
                 link=dict(
                     source=src,
@@ -312,7 +306,7 @@ def build_sankey_figure(df: pd.DataFrame) -> go.Figure:
     )
     fig.update_layout(
         font=dict(family="DM Sans, sans-serif", size=13, color="#2c3e50"),
-        height=720,
+        height=620,
         margin=dict(l=10, r=10, t=40, b=10),
         paper_bgcolor="white",
         plot_bgcolor="white",
@@ -320,11 +314,11 @@ def build_sankey_figure(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def build_themes_sankey_json() -> None:
-    src = PRECOMPUTED / "main_topics.parquet"
-    dst = FIGURES / "themes_sankey.json"
-    df = pd.read_parquet(src)
-    fig = build_sankey_figure(df)
+def build_community_dynamics_sankey_json() -> None:
+    src = PRECOMPUTED / "emotion_clusters.parquet"
+    dst = FIGURES / "community_dynamics_sankey.json"
+    df = pd.read_parquet(src, columns=["type", "url", "archetype_label"])
+    fig = build_community_dynamics_sankey(df)
     dst.write_text(pio.to_json(fig))
     print(f"  wrote {dst.relative_to(REPO)}  size={dst.stat().st_size/1024:.1f} KB")
 
@@ -332,5 +326,5 @@ def build_themes_sankey_json() -> None:
 if __name__ == "__main__":
     print("Building precomputed artifacts...")
     build_emotion_slim()
-    build_themes_sankey_json()
+    build_community_dynamics_sankey_json()
     print("Done.")
