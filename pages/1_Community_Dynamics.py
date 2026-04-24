@@ -38,9 +38,9 @@ st.markdown("""
     .column-eyebrows {
         display: flex;
         justify-content: space-between;
-        padding: 0 10px;
-        margin-bottom: -10px;
+        padding: 8px 10px 4px 10px;
         font-size: 13px;
+        line-height: 1.5;
         color: #64748b;
         letter-spacing: 0.08em;
         text-transform: uppercase;
@@ -74,7 +74,7 @@ def run():
         eyebrow="COMMUNITY",
         title="Community Dynamics",
         subtitle="Emotional Flow: From Poster to Commenter",
-        description="Hover over to see how emotional tones travel between posters and replies.",
+        description="Hover over to see how emotional tones travel between posters and repliers.",
     )
 
     fig = load_sankey_figure()

@@ -310,7 +310,7 @@ def run():
             <div style="font-size: 0.9rem; color: #4A5568; margin: 0; line-height: 1.4; letter-spacing: 0.3px;">
                 <strong>{connected_count} meditation topics</strong> are connected to each other out of <strong>{total_nodes_q} total topics</strong>
                 (<strong>{connected_percentage:.1f}%</strong>). These come from popular Reddit posts with lots of discussion.<br>
-                <span style="color: #4A5568; border-bottom: 4px solid #FFD700; padding-bottom: 1px;"><strong>Hover Over</strong></span> for more details.
+                <span style="color: #4A5568; border-bottom: 4px solid #FFD700; padding-bottom: 1px;"><strong>Hover over</strong></span> for more details.
             </div>
         </div>
     </div>

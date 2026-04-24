@@ -255,7 +255,7 @@ def build_community_dynamics_sankey(df: pd.DataFrame) -> go.Figure:
             f"<b style='font-size: 16px; color: #2c3e50'>{a}</b><br>"
             f"Posts: <b>{_format_number(poster_vol[a])}</b><br>"
             f"Global Share: <b>{poster_vol[a]/total*100:.1f}%</b><br>"
-            f"Connected replies: <b>{int(poster_connected.loc[a])}</b><br>"
+            f"Connected commenters: <b>{int(poster_connected.loc[a])}</b><br>"
             f"Top reply: <b>{poster_top_reply.loc[a, 'commenter']}</b> "
             f"(<b>{poster_top_reply.loc[a, 'count']/poster_vol[a]*100:.1f}%</b>)"
         )
