@@ -17,11 +17,10 @@ Six interactive pages, accessible from the sidebar:
 | **Emotion Pulse** | UMAP map where posts cluster by emotional vocabulary (via GoEmotions). Frustration, awe, curiosity each occupy their own region. |
 | **Meditation Weather Report** | 18 months of sentiment trends across topics, rendered as weather metaphors (sunny days, storms). |
 | **Inner Life Themes** | Sankey diagram — how broad themes branch into specific discussions. |
-| **Inner Life Trees** | Filterable co-occurrence trees, time-sliced by quarter, with engagement + sentiment filters. |
 | **Inner Life Web** | Static co-occurrence network across the full archive. Capped at 40 nodes by default; toggle shows the full hairball. |
 | **Inner Life Currents** | Temporal network view — how theme connections shift quarter by quarter. |
 
-The four network-style pages (Themes, Trees, Web, Currents) form an "Inner Life" metaphor family — each a different angle on how meditation themes connect.
+The three network-style pages (Themes, Web, Currents) form an "Inner Life" metaphor family — each a different angle on how meditation themes connect.
 
 ---
 
@@ -79,8 +78,7 @@ A `Dockerfile` is included for containerized deploys. **Note:** the current `CMD
 │   ├── 1_Meditation_Weather_Report.py
 │   ├── 2_Inner_Life_Themes.py     # Sankey
 │   ├── 3_Inner_Life_Web.py        # static co-occurrence network
-│   ├── 4_Inner_Life_Currents.py   # temporal network
-│   └── 5_Inner_Life_Trees.py      # filterable river-flow trees
+│   └── 4_Inner_Life_Currents.py   # temporal network
 ├── precomputed/                   # Parquet aggregates (topics, clusters, timeseries)
 ├── assets/                        # page icons, hero images
 ├── archive/                       # historical page versions — not rendered
@@ -98,11 +96,11 @@ A `Dockerfile` is included for containerized deploys. **Note:** the current `CMD
 See [`CLAUDE.md`](CLAUDE.md) for the editorial layer:
 
 - Why each page is named what it is (and what it used to be called)
-- The canonical cluster → color mapping (same seven themes across Inner Life Trees, Currents, Web)
+- The canonical cluster → color mapping (same seven themes across Inner Life Currents and Web)
 - Typographic conventions (eyebrow labels, page H1s, hover text wrapping)
 - Session-state plumbing across time-trend pages
 
-The design pass that produced the current naming family (Inner Life Themes, Trees, Web, Currents) and stripped decorative noise is documented in a long-form retrospective at [`docs/publish_draft.md`](docs/publish_draft.md).
+The design pass that produced the current naming family (Inner Life Themes, Web, Currents) and stripped decorative noise is documented in a long-form retrospective at [`docs/publish_draft.md`](docs/publish_draft.md).
 
 ---
 

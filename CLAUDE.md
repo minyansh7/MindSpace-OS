@@ -21,22 +21,13 @@ decision to let the chart speak for itself (data-ink ratio / Tufte):
 Kept here for reference in case the description is wanted back or needed
 as alt text / meta description.
 
-### Inner Life Trees (`pages/5_Inner_Life_Trees.py`)
+### Inner Life Trees — archived 2026-04-24
 
-Previously titled "Professional River Flow" (h1) and "Cocurrence Mapping complex"
-(sidebar), then "Narrative Trees". File renamed from `5_Cocurrence_Mapping_complex.py`
-on 2026-04-21 and to `5_Inner_Life_Trees.py` on 2026-04-23.
-
-Removed subtitle on 2026-04-21:
-
-> "Living Narrative Intelligence Platform"
-
-Rationale: the subtitle overlapped the meaning of the h1 and competed
-visually with the chart below. The eyebrow-styled "QUARTER <label>"
-line that replaced it now communicates the one piece of state the user
-actually needs before scrolling: which quarter of data they're looking at.
-Character style matches the "TIME TRAVEL" eyebrow above the slider for
-typographic consistency.
+Previously at `pages/5_Inner_Life_Trees.py` (titled "Professional River Flow"
+→ "Narrative Trees" → "Inner Life Trees"). Archived to
+`archive/5_Inner_Life_Trees.py` on 2026-04-24 and removed from the live
+sidebar. The remaining three "Inner Life" pages (Themes, Web, Currents)
+are the ongoing naming family.
 
 ### Inner Life Currents (`pages/4_Inner_Life_Currents.py`)
 
@@ -53,11 +44,12 @@ Shows the static co-occurrence network across all data (no time axis).
 
 ## Color palette (canonical cluster→color mapping)
 
-Both Inner Life Currents and Inner Life Trees render the same 7 theme clusters.
+Inner Life Currents and Inner Life Web render the same 7 theme clusters.
 They must use identical colors so the site reads as one visual language.
 
-The reference is the Inner Life Trees chart rendering, which feeds clusters
-through `script_custom_cmap` indexed by alphabetically sorted cluster name:
+The palette below was originally derived from the archived Inner Life
+Trees page's `script_custom_cmap`, indexed by alphabetically sorted
+cluster name. It stays canonical even though Trees has been archived:
 
 | Cluster                      | Hex       | Name   |
 |------------------------------|-----------|--------|
@@ -80,9 +72,8 @@ Sidebar order (derived from the leading numeric prefix in `pages/*.py`):
 3. Inner Life Themes          — `2_Inner_Life_Themes.py` (Sankey)
 4. Inner Life Web             — `3_Inner_Life_Web.py` (static co-occurrence network)
 5. Inner Life Currents        — `4_Inner_Life_Currents.py` (temporal network)
-6. Inner Life Trees           — `5_Inner_Life_Trees.py` (river-flow, filterable, last)
 
-The four relationship-oriented pages (3–6) visualize theme connections
+The three relationship-oriented pages (3–5) visualize theme connections
 from progressively more dynamic angles under the shared "Inner Life" family:
 
 - **Inner Life Themes**: Sankey of how top themes flow into topic clusters
@@ -91,17 +82,13 @@ from progressively more dynamic angles under the shared "Inner Life" family:
   across the full archive
 - **Inner Life Currents**: the same connections rendered as a temporal
   network, quarter by quarter
-- **Inner Life Trees**: deep branching view with engagement-level
-  filters, sentiment filters, quarter slider, and a sidebar analytics
-  panel — the most interactive page, and the final stop in the tour
 
-So the progression is: *flow → static snapshot → temporal motion → deep
-filterable drill-down*. The last page is the most interactive by design.
+So the progression is: *flow → static snapshot → temporal motion*.
 
-Together, the four form a metaphor family — themes, trees, web,
-currents — each a tangible natural form grouped under "Inner Life".
-
-Archived (kept in repo but hidden from sidebar): `archive/0_Emotion_Pulse_v.py`
+Archived (kept in repo but hidden from sidebar):
+- `archive/0_Emotion_Pulse_v.py`
+- `archive/5_Inner_Life_Trees.py` (was the deep filterable drill-down;
+  retired 2026-04-24)
 
 ## Precomputed artifacts (perf tier-3)
 
@@ -129,8 +116,8 @@ The source parquets are kept in the repo for reproducibility.
 **Eyebrow labels** (small uppercase metadata above a value):
 `font-size: 13px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase;`
 
-Used for: "TIME TRAVEL" above the quarter slider, "QUARTER" below the
-Inner Life Trees title, and any future top-of-card metadata.
+Used for: "TIME TRAVEL" above the quarter slider and any future
+top-of-card metadata.
 
 **Page title h1**: `font-size: 3rem; font-weight: 800`.
 
