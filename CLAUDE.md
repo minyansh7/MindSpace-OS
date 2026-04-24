@@ -49,27 +49,36 @@ Previously at `pages/5_Inner_Life_Trees.py` (titled "Professional River Flow"
 sidebar. The remaining three "Inner Life" pages (Themes, Web, Currents)
 are the ongoing naming family.
 
-### Inner Life Currents (`pages/4_Inner_Life_Currents.py`)
+### Inner Life Currents (`pages/3_Inner_Life_Currents.py`)
 
 Previously titled "The Connected Narrative" (h1) and "Cocurrence Mapping
 Over Time" (sidebar), then "Theme Currents". Renamed to "Inner Life
 Currents" on 2026-04-23. Shows how theme co-occurrences evolve quarter
 by quarter via the shared quarter slider.
 
-### Inner Life Web (`pages/3_Inner_Life_Web.py`)
+### Inner Life Web — archived 2026-04-24
 
-Previously titled "The Narrative Web" (h1) and "Cocurrence Mapping"
-(sidebar), then "Theme Web". Renamed to "Inner Life Web" on 2026-04-23.
-Shows the static co-occurrence network across all data (no time axis).
+Previously at `pages/3_Inner_Life_Web.py` (titled "The Narrative Web"
+→ "Cocurrence Mapping" → "Theme Web" → "Inner Life Web"). Archived to
+`archive/3_Inner_Life_Web.py` on 2026-04-24 and removed from the live
+sidebar. The static co-occurrence view was made redundant by
+Inner Life Currents (which carries the same connections plus a time
+axis), so the site was simplified to a single network page.
+
+### Community Weather Report (`pages/2_Community_Weather_Report.py`)
+
+Previously titled "Meditation Weather Report". Renamed to "Community
+Weather Report" on 2026-04-24 to sit thematically alongside Community
+Dynamics — both pages tell the *community* story (who meets whom, and
+how the mood shifts over time). Page content is unchanged; the rename
+is purely editorial.
 
 ## Color palette (canonical cluster→color mapping)
 
-Inner Life Currents and Inner Life Web render the same 7 theme clusters.
-They must use identical colors so the site reads as one visual language.
-
-The palette below was originally derived from the archived Inner Life
-Trees page's `script_custom_cmap`, indexed by alphabetically sorted
-cluster name. It stays canonical even though Trees has been archived:
+Inner Life Currents renders the 7 theme clusters. The palette below
+was originally derived from the archived Inner Life Trees page's
+`script_custom_cmap`, indexed by alphabetically sorted cluster name.
+It stays canonical even though Trees and Web have both been archived:
 
 | Cluster                      | Hex       | Name   |
 |------------------------------|-----------|--------|
@@ -88,26 +97,29 @@ Inner Life Currents' `topic_mapping` dict was synced to match on 2026-04-21.
 Sidebar order (derived from the leading numeric prefix in `pages/*.py`):
 
 1. Emotion Pulse              — `0_Emotion_Pulse.py`
-2. Meditation Weather Report  — `1_Meditation_Weather_Report.py`
-3. Community Dynamics         — `2_Community_Dynamics.py` (Sankey, poster → commenter)
-4. Inner Life Web             — `3_Inner_Life_Web.py` (static co-occurrence network)
-5. Inner Life Currents        — `4_Inner_Life_Currents.py` (temporal network)
+2. Community Dynamics         — `1_Community_Dynamics.py` (Sankey, poster → commenter)
+3. Community Weather Report   — `2_Community_Weather_Report.py` (sentiment over time)
+4. Inner Life Currents        — `3_Inner_Life_Currents.py` (temporal theme network)
 
-The three relationship-oriented pages (3–5) visualize meditation-community
-connections from progressively different angles:
+The four live pages tell one story arc, from individual emotional
+vocabulary to community mood to theme connections over time:
 
-- **Community Dynamics**: Sankey of how emotional archetypes flow from
+- **Emotion Pulse**: introduces the 5 emotional archetypes via a UMAP
+  map of the GoEmotions embedding
+- **Community Dynamics**: Sankey of how those archetypes flow from
   posters to their commenters (who responds to whom, emotionally)
-- **Inner Life Web**: static co-occurrence graph — which themes connect
-  to which across the full archive
-- **Inner Life Currents**: the same theme connections rendered as a
-  temporal network, quarter by quarter
+- **Community Weather Report**: 18 months of sentiment across topics,
+  rendered as weather metaphors — *how the community mood shifts*
+- **Inner Life Currents**: theme co-occurrences rendered as a temporal
+  network, quarter by quarter
 
-So the progression is: *social flow → static topic snapshot → temporal
-topic motion*.
+So the progression is: *individual → social → temporal mood → temporal
+theme connections*.
 
 Archived (kept in repo but hidden from sidebar):
 - `archive/0_Emotion_Pulse_v.py`
+- `archive/3_Inner_Life_Web.py` (static co-occurrence network;
+  retired 2026-04-24, superseded by Inner Life Currents)
 - `archive/5_Inner_Life_Trees.py` (was the deep filterable drill-down;
   retired 2026-04-24)
 

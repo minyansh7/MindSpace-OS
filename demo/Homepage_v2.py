@@ -142,37 +142,25 @@ feed_item(
 )
 feed_item(
     "02",
-    "Meditation Weather Report",
+    "Community Dynamics",
+    "Posters set the emotional tone; commenters respond. See who meets whom.",
+    href="/Community_Dynamics",
+)
+feed_item(
+    "03",
+    "Community Weather Report",
     "Sentiment forecasts: which topics get sunny, which storm, quarter by quarter.",
-    href="/Meditation_Weather_Report",
+    href="/Community_Weather_Report",
 )
 
 # --- The Themes ---------------------------------------------------------
 section_eyebrow("The Themes")
 
 feed_item(
-    "03",
-    "Community Dynamics",
-    "Posters set the emotional tone; commenters respond. See who meets whom.",
-    href="/Community_Dynamics",
-)
-feed_item(
     "04",
-    "Inner Life Web",
-    "Which topics keep showing up together? A connection map of the archive.",
-    href="/Inner_Life_Web",
-)
-feed_item(
-    "05",
     "Inner Life Currents",
     "How the conversation drifts. Watch theme connections shift quarter by quarter.",
     href="/Inner_Life_Currents",
-)
-feed_item(
-    "06",
-    "Inner Life Trees",
-    "A river of meditation stories with filters to dig into any branch.",
-    href="/Inner_Life_Trees",
 )
 
 # --- Footer -------------------------------------------------------------
