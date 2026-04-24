@@ -38,10 +38,11 @@ ARCHETYPE_SYMBOLS = {
     "Anxious Concern": ("star-triangle-up", 8),
 }
 # Centroid label offsets (x, y) in UMAP data units. Soothing Empathy pulled
-# down slightly (was 4.0) to clear the top-right radar inset.
+# left (was x=1.5) so the label clears the top-right radar inset; the radar
+# was simultaneously shrunk to 240x240 (see #radar-wrap CSS below).
 CENTROID_OFFSETS = {
     "Reflective Caring": (3.9, 1.2),
-    "Soothing Empathy": (1.5, 3.4),
+    "Soothing Empathy": (-3.0, 3.0),
     "Tender Uncertainty": (-4.1, -2.5),
     "Melancholic Confusion": (0.5, -1.5),
     "Anxious Concern": (2.4, -0.3),
@@ -179,10 +180,10 @@ def run():
             #umap-plot {{ width: 100%; height: 100%; }}
             #radar-wrap {{
                 position: absolute;
-                top: 10px;
+                top: 0px;
                 right: 10px;
-                width: 320px;
-                height: 320px;
+                width: 240px;
+                height: 240px;
                 background: rgba(255, 255, 255, 0.92);
                 border-radius: 12px;
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.10);
