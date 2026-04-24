@@ -156,7 +156,7 @@ def run():
                 <p style="font-size: 16px; color: #718096; margin: 0; line-height: 1.8; font-weight: 300; opacity: 0.9;">
                     <strong>Each point</strong> marks a message shared on Reddit about meditation.<br>
                     <strong>Color</strong> reflects the dominant emotion underneath each message.<br>
-                    <strong>Hover</strong> a point — the radar in the top-right will redraw with that post's 8 GoEmotions scores.
+                    <strong>Hover</strong> to discover.
                 </p>
             </div>
         </div>
@@ -193,18 +193,6 @@ def run():
                 z-index: 10;
                 pointer-events: none;
             }}
-            #radar-caption {{
-                position: absolute;
-                top: 16px;
-                right: 22px;
-                font-size: 10px;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-                color: #64748b;
-                z-index: 11;
-                pointer-events: none;
-                font-family: 'Inter', sans-serif;
-            }}
             #radar-plot {{ width: 100%; height: 100%; }}
             #initial-hover-box {{
                 position: absolute;
@@ -234,7 +222,6 @@ def run():
     <body>
         <div class="plot-wrap">
             <div id="umap-plot"></div>
-            <div id="radar-caption">Hovered post · 8 emotions</div>
             <div id="radar-wrap"><div id="radar-plot"></div></div>
             <div id="initial-hover-box">
                 <b>Emotion Pulse: Tender Uncertainty</b><br>
