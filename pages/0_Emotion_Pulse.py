@@ -183,8 +183,8 @@ def run():
                 position: absolute;
                 top: 10px;
                 right: 10px;
-                width: 280px;
-                height: 280px;
+                width: 320px;
+                height: 320px;
                 background: rgba(255, 255, 255, 0.92);
                 border-radius: 12px;
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.10);
@@ -210,7 +210,7 @@ def run():
                 position: absolute;
                 top: 15px;
                 left: 15px;
-                right: 310px;
+                right: 350px;
                 background-color: rgba(106, 90, 205, 0.95);
                 color: white;
                 padding: 10px 14px;
@@ -292,7 +292,7 @@ def run():
                 }},
                 bgcolor: 'rgba(255,255,255,0)'
             }},
-            margin: {{ t: 28, r: 36, b: 20, l: 36 }},
+            margin: {{ t: 36, r: 60, b: 32, l: 60 }},
             showlegend: false,
             paper_bgcolor: 'rgba(255,255,255,0)'
         }};
