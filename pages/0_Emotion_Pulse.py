@@ -154,8 +154,6 @@ def run():
         <div style="display: flex; justify-content: center;">
             <div style="max-width: 600px; text-align: center;">
                 <p style="font-size: 16px; color: #718096; margin: 0; line-height: 1.8; font-weight: 300; opacity: 0.9;">
-                    <strong>Each point</strong> marks a message shared on Reddit about meditation.<br>
-                    <strong>Color</strong> reflects the dominant emotion underneath each message.<br>
                     <strong>Hover</strong> to discover.
                 </p>
             </div>
