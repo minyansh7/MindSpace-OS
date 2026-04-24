@@ -34,7 +34,13 @@ FIGURES.mkdir(parents=True, exist_ok=True)
 # Emotion Pulse slim parquet
 # --------------------------------------------------------------------------
 
-EMOTION_COLUMNS = ["umap_x", "umap_y", "hover_text", "archetype_label"]
+USER_RADAR_EMOTIONS = [
+    "gratitude", "joy", "caring", "love",
+    "confusion", "fear", "sadness", "grief",
+]
+EMOTION_COLUMNS = (
+    ["umap_x", "umap_y", "hover_text", "archetype_label"] + USER_RADAR_EMOTIONS
+)
 WRAP_WIDTH = 75
 
 
@@ -144,6 +150,11 @@ def build_emotion_slim() -> None:
         "Emotional Pulse:", "Emotion Pulse:", regex=False
     )
     df["hover_text"] = df["hover_text"].map(wrap_hover_text)
+    # 8 GoEmotions probabilities feed the per-point radar inset on the
+    # Emotion Pulse page. float32 is ample precision for radial plotting
+    # and keeps the parquet ~90 KB lighter than the float64 default.
+    for col in USER_RADAR_EMOTIONS:
+        df[col] = df[col].astype("float32")
     df.to_parquet(dst, compression="zstd", index=False)
     print(f"  wrote {dst.relative_to(REPO)}  rows={len(df):,}  size={dst.stat().st_size/1024:.1f} KB")
 
