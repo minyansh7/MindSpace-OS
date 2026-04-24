@@ -346,7 +346,7 @@ st.markdown(f"""
 st.markdown("""
 <div class="hero-title">MindSpace OS</div>
 <div class="hero-subtitle">
-    Explore interlinked visualizations revealing emotions felt, themes emerged & intertwined, and challenges shared 
+    Explore interlinked visualizations revealing the emotions felt, the themes that emerge and intertwine, and the challenges shared
     across online meditation communities.
 </div>
 """, unsafe_allow_html=True)
