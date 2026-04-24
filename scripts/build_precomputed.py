@@ -177,6 +177,18 @@ ARCHETYPE_COLORS = {
 
 _POST_ID_RE = re.compile(r"/comments/([a-z0-9]+)/")
 
+# Hand-picked flows rendered at full opacity. Everything else is faded.
+# Matches the source screenshot's emphasis. Colored by the commenter
+# (target), so the bright ribbon picks up the right-side node's color.
+EMPHASIZED_FLOWS: set[tuple[str, str]] = {
+    ("Tender Uncertainty", "Reflective Caring"),
+    ("Reflective Caring", "Reflective Caring"),
+    ("Anxious Concern", "Reflective Caring"),
+    ("Anxious Concern", "Soothing Empathy"),
+}
+EMPHASIZED_ALPHA = 0.85
+FADED_ALPHA = 0.15
+
 
 def _format_number(n: float) -> str:
     if n >= 1_000_000:
@@ -260,7 +272,9 @@ def build_community_dynamics_sankey(df: pd.DataFrame) -> go.Figure:
         for a in commenters
     ]
 
-    src, tgt, val, link_hover = [], [], [], []
+    # Color each link by the commenter (target). Hand-picked flows render at
+    # full opacity; the rest are faded but still visible.
+    src, tgt, val, link_hover, link_colors = [], [], [], [], []
     for r in flow.to_dict("records"):
         src.append(poster_index[r["poster"]])
         tgt.append(commenter_index[r["commenter"]])
@@ -272,12 +286,16 @@ def build_community_dynamics_sankey(df: pd.DataFrame) -> go.Figure:
             f"Poster Share: <b>{r['count']/poster_vol[r['poster']]*100:.1f}%</b><br>"
             f"Commenter Share: <b>{r['count']/commenter_vol[r['commenter']]*100:.1f}%</b>"
         )
+        target_rgb = hex_to_rgb(ARCHETYPE_COLORS[r["commenter"]])
+        alpha = (
+            EMPHASIZED_ALPHA
+            if (r["poster"], r["commenter"]) in EMPHASIZED_FLOWS
+            else FADED_ALPHA
+        )
+        link_colors.append(f"rgba{(*target_rgb, alpha)}")
 
     node_colors = [ARCHETYPE_COLORS[a] for a in posters] + [
         ARCHETYPE_COLORS[a] for a in commenters
-    ]
-    link_colors = [
-        f"rgba{(*hex_to_rgb(ARCHETYPE_COLORS[posters[s]]), 0.4)}" for s in src
     ]
 
     fig = go.Figure(
