@@ -20,7 +20,7 @@ def get_time_colors(hour):
         return {'primary': '#6C5CE7', 'secondary': '#2D3436', 'bg_gradient': 'linear-gradient(135deg, #6C5CE7 0%, #2D3436 100%)', 'ripple_color': 'rgba(108, 92, 231, 0.3)', 'text_color': 'white'}
 
 def run():
-    st.set_page_config(page_title="Meditation Weather Report", layout="wide")
+    st.set_page_config(page_title="Community Weather Report", layout="wide")
     colors = get_time_colors(datetime.datetime.now().hour)
 
     # Enhanced Global Styling
@@ -542,7 +542,7 @@ def run():
     inject_inner_life_css()
     render_hero(
         eyebrow="WEATHER REPORT",
-        title="Meditation Weather Report",
+        title="Community Weather Report",
         subtitle="How the mood on each meditation topic shifts across six quarters.",
         description="This weather map shows how people's sentiment changes over time across topics of meditation.",
     )

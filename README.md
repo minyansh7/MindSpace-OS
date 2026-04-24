@@ -15,12 +15,11 @@ Six interactive pages, accessible from the sidebar:
 | Page | What it shows |
 |---|---|
 | **Emotion Pulse** | UMAP map where posts cluster by emotional vocabulary (via GoEmotions). Frustration, awe, curiosity each occupy their own region. |
-| **Meditation Weather Report** | 18 months of sentiment trends across topics, rendered as weather metaphors (sunny days, storms). |
 | **Community Dynamics** | Sankey diagram — poster emotional archetype flowing into commenter emotional archetype. |
-| **Inner Life Web** | Static co-occurrence network across the full archive. Capped at 40 nodes by default; toggle shows the full hairball. |
+| **Community Weather Report** | 18 months of sentiment trends across topics, rendered as weather metaphors (sunny days, storms). |
 | **Inner Life Currents** | Temporal network view — how theme connections shift quarter by quarter. |
 
-The two "Inner Life" pages (Web, Currents) are a metaphor family for how meditation themes connect statically and over time. Community Dynamics sits alongside them as a complementary view of who responds to whom.
+Community Dynamics and Community Weather Report together show *who meets whom* and *how the mood shifts over time* — the two "Community" pages. Inner Life Currents complements them with a temporal network of theme co-occurrences.
 
 ---
 
@@ -75,10 +74,9 @@ A `Dockerfile` is included for containerized deploys. **Note:** the current `CMD
 ├── Homepage.py                    # entry point — landing page with page cards
 ├── pages/                         # Streamlit multipage auto-discovers these
 │   ├── 0_Emotion_Pulse.py
-│   ├── 1_Meditation_Weather_Report.py
-│   ├── 2_Community_Dynamics.py    # Poster → Commenter Sankey
-│   ├── 3_Inner_Life_Web.py        # static co-occurrence network
-│   └── 4_Inner_Life_Currents.py   # temporal network
+│   ├── 1_Community_Dynamics.py    # Poster → Commenter Sankey
+│   ├── 2_Community_Weather_Report.py
+│   └── 3_Inner_Life_Currents.py   # temporal network
 ├── precomputed/                   # Parquet aggregates (topics, clusters, timeseries)
 ├── assets/                        # page icons, hero images
 ├── archive/                       # historical page versions — not rendered
@@ -100,7 +98,7 @@ See [`CLAUDE.md`](CLAUDE.md) for the editorial layer:
 - Typographic conventions (eyebrow labels, page H1s, hover text wrapping)
 - Session-state plumbing across time-trend pages
 
-The design pass that produced the current naming family (Inner Life Web, Currents) and stripped decorative noise is documented in a long-form retrospective at [`docs/publish_draft.md`](docs/publish_draft.md).
+The design pass that produced the current naming family and stripped decorative noise is documented in a long-form retrospective at [`docs/publish_draft.md`](docs/publish_draft.md).
 
 ---
 

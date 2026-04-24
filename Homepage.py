@@ -376,14 +376,14 @@ st.markdown(f"""
             <div class="theme-title">Emotion Pulse</div>
         </div>
     </a>
-    <a href="/Meditation_Weather_Report" style="text-decoration: none; display: block;">
-        <div class="theme-card">
-            <div class="theme-title">Meditation Weather Report</div>
-        </div>
-    </a>
     <a href="/Community_Dynamics" style="text-decoration: none; display: block;">
         <div class="theme-card">
             <div class="theme-title">Community Dynamics</div>
+        </div>
+    </a>
+    <a href="/Community_Weather_Report" style="text-decoration: none; display: block;">
+        <div class="theme-card">
+            <div class="theme-title">Community Weather Report</div>
         </div>
     </a>
     <a href="/Inner_Life_Currents" style="text-decoration: none; display: block;">

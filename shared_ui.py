@@ -14,8 +14,8 @@ Typographic and color contracts (see ``CLAUDE.md``):
 """
 import streamlit as st
 
-# Pinned Plotly.js CDN URL for the three ``components.html`` network-graph
-# iframes (Inner Life Web / Currents / Trees). Pinned (not ``-latest``) so
+# Pinned Plotly.js CDN URL for the ``components.html`` iframes (Emotion
+# Pulse UMAP, Inner Life Currents network). Pinned (not ``-latest``) so
 # the browser can cache the asset across site deploys and across page
 # navigation — ``-latest`` cache-busts whenever the CDN updates.
 #
