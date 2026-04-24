@@ -185,6 +185,7 @@ EMPHASIZED_FLOWS: set[tuple[str, str]] = {
     ("Reflective Caring", "Reflective Caring"),
     ("Anxious Concern", "Reflective Caring"),
     ("Anxious Concern", "Soothing Empathy"),
+    ("Melancholic Confusion", "Melancholic Confusion"),
 }
 EMPHASIZED_ALPHA = 0.85
 FADED_ALPHA = 0.15
