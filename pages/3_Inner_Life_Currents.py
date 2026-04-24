@@ -710,7 +710,8 @@ def run():
                     text-transform: uppercase; font-weight: 700;
                     margin-bottom: 6px;">How to read</div>
         Bolder lines = more-engaged discussions; green = positive sentiment,
-        red = negative. <b>Scrub the Time Travel slider</b> to watch connections shift.
+        red = negative.<br>
+        <b>Scrub the Time Travel slider</b> to watch connections shift.
     </div>
     """, unsafe_allow_html=True)
 
