@@ -381,9 +381,9 @@ st.markdown(f"""
             <div class="theme-title">Meditation Weather Report</div>
         </div>
     </a>
-    <a href="/Inner_Life_Themes" style="text-decoration: none; display: block;">
+    <a href="/Community_Dynamics" style="text-decoration: none; display: block;">
         <div class="theme-card">
-            <div class="theme-title">Inner Life Themes</div>
+            <div class="theme-title">Community Dynamics</div>
         </div>
     </a>
     <a href="/Inner_Life_Currents" style="text-decoration: none; display: block;">

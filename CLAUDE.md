@@ -6,20 +6,40 @@ and conventions that are not obvious from the code alone.
 
 ## Page-by-page editorial notes
 
-### Inner Life Themes (`pages/2_Inner_Life_Themes.py`)
+### Community Dynamics (`pages/2_Community_Dynamics.py`)
 
-Previously titled "Main Topics Sankey" / "Main Topics", then "Theme Pathways".
-Renamed to "Inner Life Themes" on 2026-04-23 as part of the unified
-"Inner Life" naming family across pages 2–5.
+Previously titled "Main Topics Sankey" / "Main Topics", then "Theme Pathways",
+then "Inner Life Themes" (2026-04-23).
 
-Removed descriptive line from the page header on 2026-04-21 per editorial
-decision to let the chart speak for itself (data-ink ratio / Tufte):
+Renamed to **Community Dynamics** on 2026-04-24 when the chart itself was
+replaced: instead of theme→cluster flow (from `main_topics.parquet`), the
+Sankey now shows **poster emotional archetype → commenter emotional
+archetype** (from `emotion_clusters.parquet`, joined on the post_id
+embedded in the comment URL). The page stepped out of the "Inner Life"
+naming family because the new chart's story is social/relational, not
+topical.
+
+Column eyebrow labels `POSTER` / `COMMENTER` sit above the plot as small-
+caps metadata (same typographic treatment as the "TIME TRAVEL" eyebrow),
+matching the source screenshot.
+
+Node ordering: descending volume per side. Node colors pull from
+`ARCHETYPE_COLORS` in `pages/0_Emotion_Pulse.py` (canonical archetype
+palette — must stay in sync across the two pages). Link ribbons are
+colored by the poster's archetype at `rgba(..., 0.4)`.
+
+Link hover shows three normalized views of the same count: Global Share
+(of all pairs), Poster Share (of that poster's outgoing flow), and
+Commenter Share (of that commenter's incoming flow). Each answers a
+different question — landscape, reception, attraction.
+
+Removed descriptive line on 2026-04-21 (from the predecessor chart) per
+data-ink ratio:
 
 > "This Sankey diagram blends top flowing themes into topic families using
 > harmonious colors for clarity and beauty."
 
-Kept here for reference in case the description is wanted back or needed
-as alt text / meta description.
+Kept here for reference.
 
 ### Inner Life Trees — archived 2026-04-24
 
@@ -69,21 +89,22 @@ Sidebar order (derived from the leading numeric prefix in `pages/*.py`):
 
 1. Emotion Pulse              — `0_Emotion_Pulse.py`
 2. Meditation Weather Report  — `1_Meditation_Weather_Report.py`
-3. Inner Life Themes          — `2_Inner_Life_Themes.py` (Sankey)
+3. Community Dynamics         — `2_Community_Dynamics.py` (Sankey, poster → commenter)
 4. Inner Life Web             — `3_Inner_Life_Web.py` (static co-occurrence network)
 5. Inner Life Currents        — `4_Inner_Life_Currents.py` (temporal network)
 
-The three relationship-oriented pages (3–5) visualize theme connections
-from progressively more dynamic angles under the shared "Inner Life" family:
+The three relationship-oriented pages (3–5) visualize meditation-community
+connections from progressively different angles:
 
-- **Inner Life Themes**: Sankey of how top themes flow into topic clusters
-  (broad, read-once overview)
-- **Inner Life Web**: static co-occurrence graph — who connects to whom
-  across the full archive
-- **Inner Life Currents**: the same connections rendered as a temporal
-  network, quarter by quarter
+- **Community Dynamics**: Sankey of how emotional archetypes flow from
+  posters to their commenters (who responds to whom, emotionally)
+- **Inner Life Web**: static co-occurrence graph — which themes connect
+  to which across the full archive
+- **Inner Life Currents**: the same theme connections rendered as a
+  temporal network, quarter by quarter
 
-So the progression is: *flow → static snapshot → temporal motion*.
+So the progression is: *social flow → static topic snapshot → temporal
+topic motion*.
 
 Archived (kept in repo but hidden from sidebar):
 - `archive/0_Emotion_Pulse_v.py`
@@ -100,16 +121,17 @@ that the site loads directly, so the runtime never rebuilds them:
   `archetype_label`) with `hover_text` already wrapped to the 75-char
   tooltip width. Shrinks the source parquet from 3.7 MB to ~420 KB and
   removes the 2,977-row Python wrap loop from cold-start cost.
-- **`precomputed/figures/themes_sankey.json`** — the full Plotly figure
-  JSON for the Inner Life Themes Sankey. The page calls
-  `plotly.io.from_json()` to load it, skipping ~140 lines of Python
-  (groupby, palette assignment, hover-text formatting) that used to
-  run on every cold start.
+- **`precomputed/figures/community_dynamics_sankey.json`** — the full
+  Plotly figure JSON for the Community Dynamics Sankey (poster → commenter
+  emotional archetype flow). The page calls `plotly.io.from_json()` to
+  load it, skipping the groupby / palette / hover-text formatting that
+  would otherwise run on every cold start. 5 nodes per side → small
+  payload (~20 KB), effectively free to parse.
 
-Run `python3 scripts/build_precomputed.py` whenever the source parquets
-(`precomputed/emotion_clusters.parquet`, `precomputed/main_topics.parquet`)
-change, or the wrap rules / Sankey palette in the build script change.
-The source parquets are kept in the repo for reproducibility.
+Run `python3 scripts/build_precomputed.py` whenever the source parquet
+(`precomputed/emotion_clusters.parquet`) changes, or the wrap rules /
+archetype palette / Sankey hover template in the build script change.
+The source parquet is kept in the repo for reproducibility.
 
 ## Typographic conventions
 
