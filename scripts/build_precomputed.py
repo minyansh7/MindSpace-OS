@@ -325,13 +325,12 @@ def build_community_dynamics_sankey(df: pd.DataFrame) -> go.Figure:
     )
     fig.update_layout(
         font=dict(family="DM Sans, sans-serif", size=13, color="#2c3e50"),
-        height=740,
-        # Generous top/bottom margins so the largest node bars (Tender
-        # Uncertainty poster, Reflective Caring commenter, Melancholic
-        # Confusion at the bottom) and their labels don't clip against
-        # the chart edges. Top margin needs extra headroom because the
-        # topmost labels sit adjacent to the chart's top edge.
-        margin=dict(l=10, r=10, t=90, b=50),
+        height=670,
+        # Tight top margin — the POSTER/COMMENTER column eyebrows are
+        # rendered in the page just above this chart and already provide
+        # visual separation. Bottom margin stays generous so the bottom
+        # Melancholic Confusion node and its label clear the chart edge.
+        margin=dict(l=10, r=10, t=20, b=50),
         paper_bgcolor="white",
         plot_bgcolor="white",
     )
