@@ -29,12 +29,12 @@ function ogCard({ title, subtitle, accentColor = accent }) {
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <text x="80" y="100" fill="${tertiary}" font-family="ui-monospace, Menlo, monospace" font-size="20" letter-spacing="2" text-transform="uppercase">MINDSPACEOS</text>
+  <text x="80" y="100" fill="${tertiary}" font-family="ui-monospace, Menlo, monospace" font-size="20" letter-spacing="2" text-transform="uppercase">MINDSPACE OS</text>
   <text x="80" y="280" fill="${text}" font-family="Inter, system-ui, sans-serif" font-size="72" font-weight="700" letter-spacing="-2">${escape(title.slice(0, 50))}</text>
   ${title.length > 50 ? `<text x="80" y="360" fill="${text}" font-family="Inter, system-ui, sans-serif" font-size="72" font-weight="700" letter-spacing="-2">${escape(title.slice(50, 100))}</text>` : ''}
   <text x="80" y="${title.length > 50 ? 460 : 380}" fill="${tertiary}" font-family="Source Serif 4, Georgia, serif" font-style="italic" font-size="32">${escape(subtitle)}</text>
   <line x1="80" y1="540" x2="1120" y2="540" stroke="${accentColor}" stroke-width="2"/>
-  <text x="80" y="580" fill="${tertiary}" font-family="Inter, system-ui, sans-serif" font-size="20">mindspaceos.com · A field guide to the emotional shape of online meditation</text>
+  <text x="80" y="580" fill="${tertiary}" font-family="Inter, system-ui, sans-serif" font-size="20">mindspaceos.com · A field guide to the emotional shape of meditation online communities</text>
 </svg>`;
 }
 
