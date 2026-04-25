@@ -149,18 +149,19 @@ def run():
 
     selected_quarter = reverse_label_map[quarter_labels[st.session_state.slider_index]]
 
-    # Topic mapping — colors synced with the Inner Life Trees page chart
-    # (its script_custom_cmap indexed by alphabetical cluster order).
-    # Icons intentionally left empty — color alone is the category anchor,
-    # matching the Inner Life Trees page.
+    # Editorial earth-pigment palette (canonical, see CLAUDE.md).
+    # NYT Upshot / Pudding / FT Visual lineage. Replaced matplotlib defaults
+    # on 2026-04-26 for editorial brand fit. Each color earns its cluster
+    # in one word — oxblood/mustard/aubergine/teal/forest/walnut/terracotta.
+    # Icons intentionally left empty — color alone is the category anchor.
     topic_mapping = {
-        'Anxiety & Mental Health':   {'color': '#1f77b4', 'icon': ''},
-        'Awareness':                 {'color': '#808000', 'icon': ''},
-        'Buddhism & Spirituality':   {'color': '#ff7f0e', 'icon': ''},
-        'Concentration & Flow':      {'color': '#d62728', 'icon': ''},
-        'Meditation & Mindfulness':  {'color': '#9467bd', 'icon': ''},
-        'Practice, Retreat, & Meta': {'color': '#8c564b', 'icon': ''},
-        'Self-Regulation':           {'color': '#17becf', 'icon': ''},
+        'Anxiety & Mental Health':   {'color': '#B23A48', 'icon': ''},
+        'Awareness':                 {'color': '#E8A93B', 'icon': ''},
+        'Buddhism & Spirituality':   {'color': '#6B4F8F', 'icon': ''},
+        'Concentration & Flow':      {'color': '#1F6F8B', 'icon': ''},
+        'Meditation & Mindfulness':  {'color': '#4A7C59', 'icon': ''},
+        'Practice, Retreat, & Meta': {'color': '#8B6F47', 'icon': ''},
+        'Self-Regulation':           {'color': '#D97757', 'icon': ''},
     }
 
     # Cached per-quarter prep. Previously the code did O(E) iterrows for

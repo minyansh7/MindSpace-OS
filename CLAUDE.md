@@ -75,22 +75,40 @@ is purely editorial.
 
 ## Color palette (canonical cluster→color mapping)
 
-Inner Life Currents renders the 7 theme clusters. The palette below
-was originally derived from the archived Inner Life Trees page's
-`script_custom_cmap`, indexed by alphabetically sorted cluster name.
-It stays canonical even though Trees and Web have both been archived:
+Editorial earth-pigment palette (NYT Upshot / Pudding / FT Visual lineage).
+Replaced the matplotlib defaults on 2026-04-26 after a /design-consultation
+review with two outside voices both rejecting matplotlib defaults as
+"Jupyter notebook colors" and the prior Weather Report saturated tropical
+palette as wellness-app coded — both wrong for an editorial data-journalism
+site explicitly positioned against wellness aesthetics.
 
-| Cluster                      | Hex       | Name   |
-|------------------------------|-----------|--------|
-| Anxiety & Mental Health      | `#1f77b4` | blue   |
-| Awareness                    | `#808000` | olive  |
-| Buddhism & Spirituality      | `#ff7f0e` | orange |
-| Concentration & Flow         | `#d62728` | red    |
-| Meditation & Mindfulness     | `#9467bd` | purple |
-| Practice, Retreat, & Meta    | `#8c564b` | brown  |
-| Self-Regulation              | `#17becf` | cyan   |
+Each color earns its cluster in one word: oxblood for clinical anxiety,
+mustard ochre for noticing/awareness, aubergine for Buddhist robe iconography
+(non-cliché), deep teal for focused depth, forest green for meditation as
+labor (not lifestyle), walnut brown for daily zafu/monastery practice,
+terracotta for embodied warmth.
 
-Inner Life Currents' `topic_mapping` dict was synced to match on 2026-04-21.
+| Cluster                      | Hex       | Name           |
+|------------------------------|-----------|----------------|
+| Anxiety & Mental Health      | `#B23A48` | oxblood red    |
+| Awareness                    | `#E8A93B` | mustard ochre  |
+| Buddhism & Spirituality      | `#6B4F8F` | muted aubergine|
+| Concentration & Flow         | `#1F6F8B` | deep teal      |
+| Meditation & Mindfulness     | `#4A7C59` | forest green   |
+| Practice, Retreat, & Meta    | `#8B6F47` | walnut brown   |
+| Self-Regulation              | `#D97757` | terracotta     |
+
+Pages using this palette (must stay in sync):
+- `pages/3_Inner_Life_Currents.py` → `topic_mapping` dict
+- `scripts/build_chart_figures.py` → `TOPIC_MAPPING` (Inner Life Currents
+  static build) and `WEATHER_TOPIC_COLORS` (Community Weather Report —
+  primary is canonical, secondary/border derived for gradient/border use)
+
+Legibility caveat: the earth palette sits ~35–55% luminance, so on the
+homepage's time-of-day gradient backgrounds two pairings can be tight
+(forest-green on morning teal, terracotta on dawn coral). For weather-map
+regions specifically, add a 1px dark stroke on small chips. For chart
+panels (white card, deep navy network background), no mitigation needed.
 
 ## Page ordering and naming family
 
