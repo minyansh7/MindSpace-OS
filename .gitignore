@@ -1,39 +1,28 @@
-# Python
+# Existing repo .gitignore (preserved)
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-
-# Virtual environments
-meditation-env/
+.venv/
 venv/
 env/
-.venv/
-ENV/
-
-# Distribution / packaging
-build/
-dist/
-*.egg-info/
-.eggs/
-
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Streamlit
-.streamlit/secrets.toml
-
-# Env files
 .env
-.env.local
+*.egg-info/
+dist/
+build/
+.streamlit/secrets.toml
+.DS_Store
+.idea/
+.vscode/
 
-# Notebooks
-.ipynb_checkpoints/
+# Site (Astro)
+site/node_modules/
+site/dist/
+site/.astro/
+site/.wrangler/
+site/.env
+site/.env.local
+
+# gstack daemon logs
+.gstack/

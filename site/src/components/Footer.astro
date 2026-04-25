@@ -1,0 +1,38 @@
+---
+import { project } from '../lib/canonical.ts';
+---
+<footer class="w-full border-t border-[var(--color-hairline)] mt-24">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12 grid grid-cols-1 md:grid-cols-3 gap-10">
+    <div>
+      <a href="/" class="brand-mark hover:text-[var(--color-accent)] transition-colors">
+        MINDSPACEOS
+      </a>
+      <p class="mt-3 text-sm text-[var(--color-text-secondary)] max-w-xs">
+        {project.tagline}.
+      </p>
+      <p class="mt-3 text-xs text-[var(--color-text-tertiary)]">
+        By MinyanLabs · ©2026
+      </p>
+    </div>
+    <div>
+      <h3 class="eyebrow mb-3">Site</h3>
+      <ul class="space-y-2 text-sm text-[var(--color-text-secondary)]">
+        <li><a href="/#findings" class="hover:text-[var(--color-text)]">Findings</a></li>
+        <li><a href="/#explore" class="hover:text-[var(--color-text)]">Explore the data</a></li>
+        <li><a href="/#essays" class="hover:text-[var(--color-text)]">Essays</a></li>
+        <li><a href="/about" class="hover:text-[var(--color-text)]">About</a></li>
+        <li><a href="/about#methodology" class="hover:text-[var(--color-text)]">Methodology</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="eyebrow mb-3">Open</h3>
+      <ul class="space-y-2 text-sm text-[var(--color-text-secondary)]">
+        <li><a href={project.substack_pub} target="_blank" rel="noopener" class="hover:text-[var(--color-text)]">Subscribe on Substack ↗</a></li>
+        <li><a href={project.github} target="_blank" rel="noopener" class="hover:text-[var(--color-text)]">Source code on GitHub ↗</a></li>
+        <li><span class="text-[var(--color-text-tertiary)]">Data license: CC BY 4.0</span></li>
+        <li><a href={`mailto:${project.contact}`} class="hover:text-[var(--color-text)]">Contact</a></li>
+        <li><a href={`mailto:${project.takedown}`} class="hover:text-[var(--color-text)]">Takedown</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>

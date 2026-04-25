@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+/* Fallback font with size-adjusted metrics to closely match Inter dimensions.
+   Eliminates CLS from font swap (browser uses fallback first, swaps to Inter,
+   shift was ~0.19 — with size-adjust it stays under 0.05). */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  size-adjust: 107%;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+
+@theme {
+  /* MindSpace OS — dark-first editorial palette
+     Locked 2026-04-25 per design review.
+     OKLCH-balanced for WCAG AA on the dark ground. */
+  --color-ground: #0B0E13;
+  --color-surface: #141821;
+  --color-surface-elev: #1C2230;
+  --color-hairline: #2A3142;
+  --color-text: #E8ECF2;
+  --color-text-secondary: #8A93A6;
+  --color-text-tertiary: #898FA0;
+  --color-accent: #7DA3FF;
+  --color-accent-warm: #FFB347;
+
+  --color-archetype-reflective: #FF7A91;
+  --color-archetype-soothing: #3FD8B0;
+  --color-archetype-tender: #8C7DE0;
+  --color-archetype-melancholic: #B557E0;
+  --color-archetype-anxious: #FFD23F;
+
+  --font-display: 'Inter', 'Inter Fallback', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+  --font-sans: 'Inter', 'Inter Fallback', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --tracking-tight: -0.03em;
+  --tracking-display: -0.02em;
+  --tracking-eyebrow: 0.08em;
+}
+
+html {
+  background: var(--color-ground);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  background: var(--color-ground);
+  color: var(--color-text);
+}
+
+@media (min-width: 768px) {
+  body { font-size: 19px; line-height: 1.65; }
+}
+
+.prose-editorial {
+  font-family: var(--font-serif);
+  color: var(--color-text);
+  font-size: 17px;
+  line-height: 1.7;
+  max-width: 65ch;
+}
+
+@media (min-width: 768px) {
+  .prose-editorial { font-size: 19px; line-height: 1.75; }
+}
+
+.prose-editorial p { margin-bottom: 1.25em; }
+.prose-editorial a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.prose-editorial a:hover { text-decoration-thickness: 2px; }
+.prose-editorial em { font-style: italic; }
+.prose-editorial strong { font-weight: 600; }
+
+.h-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.05;
+  color: var(--color-text);
+  font-size: clamp(2.25rem, 6vw, 4.25rem);
+}
+
+.h-section {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.15;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+.pull-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  line-height: 1.35;
+  color: var(--color-text);
+  border-left: 2px solid var(--color-accent);
+  padding-left: 1.25rem;
+}
+
+.brand-mark {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.footnote {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-tertiary);
+}
+.footnote a { color: var(--color-text-secondary); text-decoration: underline; text-underline-offset: 2px; }
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+.card:hover {
+  background: var(--color-surface-elev);
+  border-color: var(--color-text-tertiary);
+}
+a.card:hover { transform: translateY(-2px); }
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

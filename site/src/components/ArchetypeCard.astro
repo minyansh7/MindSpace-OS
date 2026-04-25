@@ -1,0 +1,14 @@
+---
+import type { Archetype } from '../lib/canonical.ts';
+interface Props { archetype: Archetype; }
+const { archetype } = Astro.props;
+---
+<div class="card p-5 relative overflow-hidden" id={`archetype-${archetype.slug}`}>
+  <div class="absolute left-0 top-0 bottom-0 w-1" style={`background:${archetype.color_dark}`}></div>
+  <h3 class="font-display font-semibold text-lg mb-2 pl-2" style="font-family: var(--font-display);">
+    {archetype.name}
+  </h3>
+  <p class="text-sm text-[var(--color-text-secondary)] leading-relaxed pl-2">
+    {archetype.sketch}
+  </p>
+</div>

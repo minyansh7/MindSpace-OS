@@ -1,0 +1,18 @@
+---
+import type { Page } from '../lib/canonical.ts';
+interface Props { page: Page; index: number; }
+const { page, index } = Astro.props;
+const num = String(index + 1).padStart(2, '0');
+---
+<a href={`/explore/${page.slug}/`} class="card block p-6 group">
+  <div class="flex items-start justify-between mb-3">
+    <span class="eyebrow">{`#${num} · view`}</span>
+    <span class="text-[var(--color-text-tertiary)] group-hover:text-[var(--color-accent)] transition-colors text-lg">→</span>
+  </div>
+  <h3 class="font-display font-semibold text-2xl mb-2 leading-tight" style="font-family: var(--font-display);">
+    {page.title}
+  </h3>
+  <p class="text-sm text-[var(--color-text-secondary)] leading-snug">
+    {page.subtitle}
+  </p>
+</a>

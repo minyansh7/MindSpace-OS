@@ -1,0 +1,18 @@
+---
+import type { Essay } from '../lib/canonical.ts';
+interface Props { essay: Essay; }
+const { essay } = Astro.props;
+const dateLabel = new Date(essay.published).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+---
+<a href={essay.url} target="_blank" rel="noopener" class="card block p-6 group">
+  <div class="flex items-center justify-between mb-3">
+    <span class="eyebrow">Substack · {dateLabel}</span>
+    <span class="text-[var(--color-text-tertiary)] group-hover:text-[var(--color-accent)] transition-colors text-lg">↗</span>
+  </div>
+  <h3 class="font-serif italic text-xl mb-3 leading-snug" style="font-family: var(--font-serif);">
+    {essay.title}
+  </h3>
+  <p class="text-sm text-[var(--color-text-secondary)] leading-relaxed">
+    {essay.summary}
+  </p>
+</a>

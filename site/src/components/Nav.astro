@@ -1,0 +1,33 @@
+---
+import { project } from '../lib/canonical.ts';
+const navItems = [
+  { label: 'Findings', href: '/#findings' },
+  { label: 'Explore', href: '/#explore' },
+  { label: 'Essays', href: '/#essays' },
+  { label: 'About', href: '/about' },
+];
+---
+<nav class="w-full border-b border-[var(--color-hairline)]">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
+    <a href="/" class="brand-mark hover:text-[var(--color-accent)] transition-colors">
+      MINDSPACEOS
+    </a>
+    <ul class="hidden md:flex items-center gap-7">
+      {navItems.map((item) => (
+        <li>
+          <a href={item.href} class="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors">
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a
+      href={project.substack_pub}
+      target="_blank"
+      rel="noopener"
+      class="text-sm text-[var(--color-accent)] hover:underline underline-offset-4"
+    >
+      Subscribe ↗
+    </a>
+  </div>
+</nav>
