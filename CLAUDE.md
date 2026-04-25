@@ -4,6 +4,45 @@ Design-intent notes and editorial copy for the MindSpace OS site.
 This file documents rationale, removed-but-preserved marketing copy,
 and conventions that are not obvious from the code alone.
 
+## Two surfaces, one repo
+
+MindSpace OS ships two sibling deliverables from this repo:
+
+1. **Astro editorial site** (`site/`). Static build, the public reading
+   experience. Lives at `site/dist/` after `npm run build`. Hosted on
+   Cloudflare Pages (project `mindspace-os`, account
+   `985e6531724a5e9ce8670a37ead0d6f1`):
+   - Production: https://mindspace-os.pages.dev (built from `main`)
+   - Branch previews: `https://<branch>.mindspace-os.pages.dev`
+     auto-built per push when Cloudflare Git integration is connected.
+2. **Streamlit interactive app** (`Homepage.py` + `pages/*.py`). The live
+   chart surface the editorial site iframes / links to. Hosted on
+   Streamlit Cloud at https://mindspaceos.streamlit.app .
+
+Canonical data shared by both surfaces lives in `data/canonical.json`
+(post counts, archetype palette, page metadata, essay listings). Python
+reads it directly; the Astro site reads it via `site/src/lib/canonical.ts`.
+A vitest in `site/tests/canonical.test.mjs` enforces no-inline-duplicates.
+
+Static chart embeds (`site/public/charts/*.html`) are baked by
+`python3 scripts/build_chart_figures.py`. Re-run that script whenever the
+palette or chart logic changes; the Astro site iframes those HTML files
+directly so it never has to talk to the Streamlit app at runtime.
+
+## Deploy
+
+The Astro site goes live on Cloudflare Pages two ways:
+
+- **Cloudflare Git integration (preferred)** — connect at
+  https://dash.cloudflare.com/985e6531724a5e9ce8670a37ead0d6f1/pages/view/mindspace-os/settings/builds-deployments
+  with build settings: root directory `site`, build command `npm run build`,
+  output directory `dist`, framework preset Astro. After this, every push
+  to GitHub triggers a Cloudflare build automatically.
+- **Manual one-shot** — `cd site && npm run build && npx wrangler pages
+  deploy dist --project-name=mindspace-os --branch=<git-branch>`. Used
+  when Git integration isn't wired or for ad-hoc previews. Requires
+  `wrangler login` first.
+
 ## Page-by-page editorial notes
 
 ### Community Dynamics (`pages/2_Community_Dynamics.py`)
