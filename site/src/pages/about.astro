@@ -1,0 +1,128 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { project, data, citations, limitations } from '../lib/canonical.ts';
+---
+<Base
+  title={`About — ${project.name}`}
+  description="How this project was built, what the data can and can't tell you, and how to cite it."
+  ogImage="/og/about.png"
+  pathname="/about/"
+>
+  <Nav />
+
+  <main id="main">
+  <article class="max-w-3xl mx-auto px-5 sm:px-8 pt-12 sm:pt-20 pb-16">
+    <p class="eyebrow mb-4">About this project</p>
+    <h1 class="h-display mb-6">A field guide to the emotional shape of meditation communities online.</h1>
+
+    <div class="prose-editorial">
+      <p>
+        {project.name} is a visual analysis of {data.post_count_canonical.toLocaleString()} r/meditation
+        posts and comments from {data.date_range_human}. It maps the emotional vocabulary the community
+        actually uses, the response patterns between posters and commenters, the mood weather across
+        topics over six quarters, and the way theme connections drift quarter by quarter.
+      </p>
+      <p>
+        The finding is summarized in one line: <strong>the dominant emotional register on r/meditation
+        isn't peace, it's struggle wrapped around curiosity</strong>. Joy ranks 25th of 28 emotions in
+        the GoEmotions classification. Amusement is dead last. The vocabulary that dominates is
+        <em>"I'm trying again."</em>
+      </p>
+      <p>
+        Two long-form essays unpack the findings:
+        <a href={data.subreddit ? "https://minyansh.substack.com/p/what-48000-reddit-posts-on-meditation" : "#"}>
+          What 3,000 Reddit posts on meditation actually sound like</a> (the thesis essay) and
+        <a href="https://minyansh.substack.com/p/the-emotion-map-of-meditation-online">
+          Meditation communities are not as calm as they look</a> (the response-pattern essay).
+      </p>
+    </div>
+
+    <h2 class="h-section mt-16 mb-6" id="methodology">Methodology.</h2>
+    <div class="prose-editorial">
+      <p>
+        The corpus is <strong>{data.post_count_canonical.toLocaleString()} posts and comments</strong>
+        from <a href={`https://www.reddit.com/${data.subreddit}/`} target="_blank" rel="noopener">{data.subreddit}</a>,
+        spanning {data.date_range_human}. Posts without at least one comment were filtered out, since
+        the response-pattern analysis depends on comment-side data; the pre-filter total was 2,977.
+        The canonical figure used on every public surface is <strong>{data.post_count_canonical.toLocaleString()}</strong>.
+      </p>
+      <p>
+        Each post and comment is classified by Google Research's <strong>GoEmotions</strong> model
+        (Demszky et al. 2020), which scores text against a 27-emotion taxonomy plus neutral. Embeddings
+        from the classifier are projected to two dimensions via UMAP (McInnes et al. 2018) and clustered
+        with a Gaussian Mixture Model into the five emotional archetypes shown on the
+        <a href="/explore/emotion-pulse/">Emotion Pulse</a> page. Topic clusters were derived separately
+        and labeled by hand into seven theme families: Anxiety &amp; Mental Health, Awareness, Buddhism &amp;
+        Spirituality, Concentration &amp; Flow, Meditation &amp; Mindfulness, Practice/Retreat/Meta, and
+        Self-Regulation.
+      </p>
+      <p>
+        Source code, processed parquet artifacts, and the analysis scripts live in
+        <a href={project.github} target="_blank" rel="noopener">the GitHub repository</a>. The dataset
+        will be published on HuggingFace with a stable DOI; that's the citable artifact.
+      </p>
+    </div>
+
+    <h2 class="h-section mt-16 mb-6" id="limitations">Limitations — what this can and can't tell you.</h2>
+    <div class="prose-editorial">
+      <p>This analysis has real limits. They aren't a defect, they're the shape of the work:</p>
+      <ul class="list-disc pl-6 space-y-3 my-6">
+        {limitations.map((l) => <li>{l}</li>)}
+      </ul>
+      <p>
+        The most consequential of these is the <strong>model circularity</strong>. GoEmotions was
+        trained on Reddit comments. Applying it to r/meditation Reddit posts means part of what we
+        see is what Reddit emotion looks like in general, not specifically what meditation talk looks
+        like. The thesis ("struggle wrapped around curiosity") is robust to this — both struggle
+        words and curiosity words are well-distributed in the GoEmotions training set — but specific
+        rankings (e.g. "joy ranks 25th of 28") should be read as <em>relative within this corpus</em>,
+        not as a universal claim about meditation.
+      </p>
+    </div>
+
+    <h2 class="h-section mt-16 mb-6" id="ethics">Ethics &amp; takedowns.</h2>
+    <div class="prose-editorial">
+      <p>
+        Reddit posts are public, but using them at scale for a public visualization requires care.
+        Quotes shown in tooltips and essays are <strong>paraphrased, not verbatim</strong>; specific
+        usernames, post URLs, and identifying details are not surfaced. If you find yourself in this
+        data and would like your post excluded, email
+        <a href={`mailto:${project.takedown}`}>{project.takedown}</a> with a link to the post and
+        we'll remove it from the next data refresh.
+      </p>
+    </div>
+
+    <h2 class="h-section mt-16 mb-6" id="cite">Cite this work.</h2>
+    <div class="prose-editorial">
+      <p>If you reference {project.name} in research or writing:</p>
+      <pre class="bg-[var(--color-surface)] border border-[var(--color-hairline)] rounded-lg p-4 text-xs sm:text-sm overflow-x-auto"><code>{`Shi, M. (2026). MindSpace OS: An emotion map of online meditation
+  discourse from r/meditation, 2024–2025. ${project.domain}`}</code></pre>
+      <p class="mt-6">It also rests on these prior works:</p>
+      <ul class="space-y-3 mt-4 text-sm">
+        {citations.map((c) => (
+          <li>
+            <strong>{c.label}</strong> — {c.authors} ({c.year}). <em>{c.title}.</em>
+            {c.venue && <span> {c.venue}.</span>}
+            {c.arxiv && <span> arXiv:<a href={c.url} target="_blank" rel="noopener">{c.arxiv}</a>.</span>}
+            {c.huggingface && <span> <a href={c.huggingface} target="_blank" rel="noopener">HuggingFace</a>.</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <h2 class="h-section mt-16 mb-6">Built by.</h2>
+    <div class="prose-editorial">
+      <p>
+        MindSpace OS is built by <a href={project.linkedin} target="_blank" rel="noopener">Minyan Shi</a>
+        at MinyanLabs. Subscribe to the <a href={project.substack_pub} target="_blank" rel="noopener">
+        Substack</a> for the next essay. Reach out at
+        <a href={`mailto:${project.contact}`}>{project.contact}</a>.
+      </p>
+    </div>
+  </article>
+  </main>
+
+  <Footer />
+</Base>

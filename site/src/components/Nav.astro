@@ -1,0 +1,85 @@
+---
+import { project } from '../lib/canonical.ts';
+const navItems = [
+  { label: 'Findings', href: '/#findings' },
+  { label: 'Explore', href: '/#explore' },
+  { label: 'Essays', href: '/#essays' },
+  { label: 'About', href: '/about' },
+];
+---
+<nav class="w-full border-b border-[var(--color-hairline)]">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-5 sm:py-6 flex items-center justify-between">
+    <a href="/" class="brand-mark brand-mark-link">
+      MINDSPACE OS
+    </a>
+    <ul class="hidden md:flex items-center gap-7">
+      {navItems.map((item) => (
+        <li>
+          <a href={item.href} class="text-sm nav-link">
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a
+      href={project.substack_pub}
+      target="_blank"
+      rel="noopener"
+      class="text-sm nav-link nav-link--subscribe"
+    >
+      Subscribe ↗
+    </a>
+  </div>
+</nav>
+
+<style>
+  /* Yellow swipe-underline on hover for nav links — homage to original Homepage.py
+     .nav-bar a::before. A 6px-tall yellow bar grows from 0% → 100% width behind text. */
+  .nav-link {
+    position: relative;
+    display: inline-block;
+    color: var(--color-text);
+    text-decoration: none;
+    padding: 0.2rem 0;
+    transition: color 0.3s ease;
+  }
+  .nav-link::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 6px;
+    background-color: #FFFF00;
+    transition: width 0.4s ease-in-out;
+    z-index: -1;
+  }
+  .nav-link:hover::before { width: 100%; }
+  .nav-link--subscribe { color: var(--color-text); }
+
+  /* Brand mark — luminous ambient glow on hover. No layout shift, no underline.
+     Three stacked text-shadow layers: outer warm halo + mid bloom + inner white sharpen.
+     Visual vocabulary echoes the yellow accent, the time-of-day gradients, and the
+     meditation-circle's pulsing radiance — same design language, applied to the brand. */
+  .brand-mark-link {
+    position: relative;
+    display: inline-block;
+    color: var(--color-text);
+    text-decoration: none;
+    text-shadow: 0 0 0 rgba(255, 236, 74, 0); /* explicit start state for smooth transition */
+    transition: text-shadow 380ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: text-shadow;
+  }
+  .brand-mark-link:hover,
+  .brand-mark-link:focus-visible {
+    text-shadow:
+      0 0 22px rgba(255, 236, 74, 0.58),  /* outer warm halo — the page's air lighting up */
+      0 0 10px rgba(255, 236, 74, 0.34),  /* mid bloom */
+      0 0 3px  rgba(255, 255, 255, 0.55); /* inner white sharpen — the letters become crisper */
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-link::before,
+    .brand-mark-link { transition: none; }
+  }
+</style>

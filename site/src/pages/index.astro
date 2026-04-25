@@ -1,0 +1,116 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import PageCard from '../components/PageCard.astro';
+import EssayCard from '../components/EssayCard.astro';
+import ArchetypeCard from '../components/ArchetypeCard.astro';
+import MeditationCircle from '../components/MeditationCircle.astro';
+import { project, data, archetypes, pages, essays, citations } from '../lib/canonical.ts';
+
+const goEmotions = citations.find((c) => c.id === 'goemotions')!;
+
+const datasetSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: project.name,
+  description: project.thesis,
+  url: project.domain,
+  creator: { '@type': 'Person', name: 'Minyan Shi', url: project.linkedin },
+  publisher: { '@type': 'Organization', name: 'MinyanLabs' },
+  license: 'https://creativecommons.org/licenses/by/4.0/',
+  variableMeasured: ['emotion classification', 'topic cluster', 'sentiment', 'response pattern'],
+  temporalCoverage: `${data.date_range_start}/${data.date_range_end}`,
+  inLanguage: 'en',
+  isBasedOn: [
+    { '@type': 'CreativeWork', name: 'GoEmotions', url: 'https://arxiv.org/abs/2005.00547' },
+    { '@type': 'CreativeWork', name: 'UMAP', url: 'https://arxiv.org/abs/1802.03426' },
+  ],
+};
+---
+<Base
+  title={`${project.name} — ${project.tagline}`}
+  description={project.thesis}
+  pathname="/"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(datasetSchema)}></script>
+  <Nav />
+
+  <main id="main">
+  <!-- Typographic hero — no chart, claim earns the chart later -->
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 pt-14 pb-12 sm:pt-20 sm:pb-20">
+    <MeditationCircle size={100} align="start" />
+    <p class="eyebrow mb-6">A field guide to the emotional shape of meditation communities online</p>
+    <h1 class="h-display mb-6 max-w-4xl">
+      Confusion.
+      <span class="block">Compassion.</span>
+    </h1>
+    <p class="text-lg sm:text-xl max-w-3xl leading-relaxed hero-subtitle">
+      What {data.post_count_canonical.toLocaleString()} Reddit posts and comments on meditation,
+      January 2024 – June 2025, actually sound like:
+      <span class="block mt-3 hero-thesis">{project.thesis}</span>
+    </p>
+  </section>
+
+  <!-- Anchor quotable line — designed for screenshot -->
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-12">
+    <blockquote class="pull-quote max-w-3xl">
+      "Joy ranks 25th of 28 emotions. Amusement is dead last."
+    </blockquote>
+    <p class="footnote mt-4 max-w-3xl">
+      Emotion classification via Google Research's GoEmotions ({goEmotions.authors.split(',')[0]} et al. {goEmotions.year}),
+      a 27-category model trained on Reddit comments.
+      <a href="/about#methodology">What this can and can't tell you →</a>
+    </p>
+  </section>
+
+  <!-- Findings (the 4 archetype cards as the cognitive anchor) -->
+  <section id="findings" class="max-w-7xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
+    <div class="max-w-3xl mb-10">
+      <p class="eyebrow mb-3">Five emotion archetypes</p>
+      <h2 class="h-section mb-4">The shape of struggle wrapped with curiosity.</h2>
+      <p class="leading-relaxed max-w-2xl section-prose">
+        The community's emotional vocabulary clusters into five recurring types — not a personality
+        test, a structure. People who post and reply drift between them, but most of what's said
+        about meditation lives inside one of these five neighborhoods.
+      </p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      {archetypes.map((a) => <ArchetypeCard archetype={a} />)}
+    </div>
+  </section>
+
+  <!-- Explore the data -->
+  <section id="explore" class="max-w-7xl mx-auto px-5 sm:px-8 py-16 sm:py-24 border-t border-[var(--color-hairline)]">
+    <div class="max-w-3xl mb-10">
+      <p class="eyebrow mb-3">Four interactive views</p>
+      <h2 class="h-section mb-4">Explore the data.</h2>
+      <p class="leading-relaxed max-w-2xl section-prose">
+        Each view answers a different question — what people feel, who responds to whom, how the
+        community mood shifts, how theme connections drift over six quarters from January 2024 to
+        June 2025.
+        <span class="block mt-3">Open any one for the live, interactive chart (best on desktop).</span>
+      </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {pages.map((p, i) => <PageCard page={p} index={i} />)}
+    </div>
+  </section>
+
+  <!-- Essays -->
+  <section id="essays" class="max-w-7xl mx-auto px-5 sm:px-8 py-16 sm:py-24 border-t border-[var(--color-hairline)]">
+    <div class="max-w-3xl mb-10">
+      <p class="eyebrow mb-3">Long-form</p>
+      <h2 class="h-section mb-4">Read the deeper writing.</h2>
+      <p class="text-[var(--color-text-secondary)] leading-relaxed max-w-2xl">
+        Two essays unpack the findings in plain prose. Subscribe on Substack for the next ones.
+      </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {essays.map((e) => <EssayCard essay={e} />)}
+    </div>
+  </section>
+
+  </main>
+  <Footer />
+</Base>

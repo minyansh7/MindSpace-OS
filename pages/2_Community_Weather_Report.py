@@ -412,22 +412,25 @@ def run():
             'Practice, Retreat, & Meta': {'left': '42%', 'top': '86%'}
         }
 
-    # --- Enhanced Color Mapping for Topics ---
+    # --- Topic Color Mapping ---
+    # Editorial earth-pigment palette (canonical, see CLAUDE.md). Synced with
+    # WEATHER_TOPIC_COLORS in scripts/build_chart_figures.py on 2026-04-26.
+    # primary = canonical, secondary = +25 RGB (gradient pair), border = -30 RGB.
     def get_topic_colors(topic_name):
         if 'Meditation' in topic_name and 'Mindfulness' in topic_name:
-            return {'primary': '#00CED1', 'secondary': '#20B2AA', 'border': '#008B8B'}
+            return {'primary': '#4A7C59', 'secondary': '#699877', 'border': '#366343'}
         elif 'Self-Regulation' in topic_name:
-            return {'primary': '#1E90FF', 'secondary': '#4169E1', 'border': '#0000CD'}
+            return {'primary': '#D97757', 'secondary': '#E89174', 'border': '#B45C40'}
         elif 'Anxiety' in topic_name or 'Mental Health' in topic_name:
-            return {'primary': '#32CD32', 'secondary': '#228B22', 'border': '#006400'}
+            return {'primary': '#B23A48', 'secondary': '#CB5361', 'border': '#941C2A'}
         elif 'Awareness' in topic_name:
-            return {'primary': '#9ACD32', 'secondary': '#7FFF00', 'border': '#556B2F'}
+            return {'primary': '#E8A93B', 'secondary': '#F4C05C', 'border': '#C3891F'}
         elif 'Buddhism' in topic_name or 'Spirituality' in topic_name:
-            return {'primary': '#FFD700', 'secondary': '#FFA500', 'border': '#FF8C00'}
+            return {'primary': '#6B4F8F', 'secondary': '#8469A8', 'border': '#553C75'}
         elif 'Concentration' in topic_name or 'Flow' in topic_name:
-            return {'primary': '#FF4500', 'secondary': '#FF6347', 'border': '#DC143C'}
+            return {'primary': '#1F6F8B', 'secondary': '#3C8CA8', 'border': '#14576E'}
         elif 'Practice' in topic_name or 'Retreat' in topic_name or 'Meta' in topic_name:
-            return {'primary': '#FF1493', 'secondary': '#C71585', 'border': '#B22222'}
+            return {'primary': '#8B6F47', 'secondary': '#A88960', 'border': '#6E5635'}
         else:
             return {'primary': '#87CEEB', 'secondary': '#4682B4', 'border': '#4682B4'}
 

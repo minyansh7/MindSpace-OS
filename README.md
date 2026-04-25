@@ -2,9 +2,12 @@
 
 > A visual field guide to how people actually talk about meditation.
 
-MindSpace OS is an interactive Streamlit site that turns **2,977 posts from r/meditation** (Jan 2024 – Jun 2025) into six navigable views — emotional maps, sentiment weather, theme networks, and quarterly shifts. Built to see what a practice community sounds like when nobody's selling anything.
+MindSpace OS turns **2,899 posts and comments from r/meditation** (Jan 2024 – Jun 2025) into a navigable field guide — emotional maps, sentiment weather, theme networks, and quarterly shifts. Built to see what a practice community sounds like when nobody's selling anything.
 
-**Live site:** [https://mindspaceos.streamlit.app]
+The project ships as two sibling surfaces from one repo:
+
+- **Editorial site** (`site/`) — Astro static build, the public reading experience. Hosted on Cloudflare Pages: [https://mindspace-os.pages.dev](https://mindspace-os.pages.dev) (canonical domain `mindspaceos.com` once DNS lands).
+- **Interactive Streamlit app** (`Homepage.py` + `pages/`) — the live charts the editorial site embeds and links into. Hosted on Streamlit Cloud: [https://mindspaceos.streamlit.app](https://mindspaceos.streamlit.app).
 
 ---
 
@@ -33,37 +36,47 @@ That's not a failure mode — that's what a practice community actually sounds l
 
 ## Tech stack
 
-- **App framework**: [Streamlit](https://streamlit.io/) (multipage)
-- **Visualization**: [Plotly](https://plotly.com/python/) for interactive charts; custom `components.html` iframes for the network pages
-- **Data**: [DuckDB](https://duckdb.org/) (`reddit_progress.duckdb`) + precomputed Parquet aggregates in `precomputed/`
-- **NLP**: [GoEmotions](https://github.com/google-research/google-research/tree/master/goemotions) for emotion classification; [UMAP](https://umap-learn.readthedocs.io/) for dimensionality reduction
-- **Language**: Python 3.11
+- **Editorial site** (`site/`): [Astro](https://astro.build) static build with Tailwind, `@astrojs/sitemap`. Hosted on Cloudflare Pages (project `mindspace-os`). Imports the canonical archetype + post-count data from `data/canonical.json` so Python and TS read from one source of truth.
+- **Streamlit app** (`Homepage.py` + `pages/`): multipage Streamlit, [Plotly](https://plotly.com/python/) for interactive charts, custom `components.html` iframes for the network pages.
+- **Static chart bake** (`scripts/build_chart_figures.py`): regenerates the standalone `site/public/charts/*.html` embeds the Astro site iframes when the live Streamlit app is unreachable.
+- **Data**: [DuckDB](https://duckdb.org/) (`reddit_progress.duckdb`) + precomputed Parquet aggregates in `precomputed/`.
+- **NLP**: [GoEmotions](https://github.com/google-research/google-research/tree/master/goemotions) for emotion classification; [UMAP](https://umap-learn.readthedocs.io/) for dimensionality reduction.
+- **Language**: Python 3.11 (Streamlit + data pipeline), TypeScript / Astro (editorial site).
 
 ---
 
 ## Local development
 
-```bash
-# Clone
-git clone https://github.com/minyansh7/Mindfulness-Space-L0.git
-cd Mindfulness-Space-L0
+### Streamlit app
 
-# Create venv (recommended)
+```bash
+git clone https://github.com/minyansh7/MindSpace-OS.git
+cd MindSpace-OS
+
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Install
 pip install -r requirements.txt
 
-# Run
 streamlit run Homepage.py
 ```
 
 Open http://localhost:8501. Navigate between pages via the sidebar.
 
+### Editorial site (Astro)
+
+```bash
+cd site
+npm install
+npm run dev      # http://localhost:4321 with HMR
+npm run build    # static build into site/dist/
+npm run preview  # serve the prod build at http://localhost:4321
+```
+
+The Astro build is what ships to Cloudflare Pages. The static chart embeds it iframes are baked by `python3 scripts/build_chart_figures.py` and live under `site/public/charts/*.html`.
+
 ### Docker
 
-A `Dockerfile` is included for containerized deploys. **Note:** the current `CMD` references `app.py` — update to `Homepage.py` before use (or rename the entry point). Streamlit Cloud runs `Homepage.py` directly and does not use the Dockerfile.
+A `Dockerfile` is included for containerized deploys of the Streamlit app. **Note:** the current `CMD` references `app.py` — update to `Homepage.py` before use (or rename the entry point). Streamlit Cloud runs `Homepage.py` directly and does not use the Dockerfile.
 
 ---
 
@@ -71,17 +84,26 @@ A `Dockerfile` is included for containerized deploys. **Note:** the current `CMD
 
 ```
 .
-├── Homepage.py                    # entry point — landing page with page cards
+├── Homepage.py                    # Streamlit entry point
 ├── pages/                         # Streamlit multipage auto-discovers these
 │   ├── 0_Emotion_Pulse.py
 │   ├── 1_Community_Dynamics.py    # Poster → Commenter Sankey
 │   ├── 2_Community_Weather_Report.py
 │   └── 3_Inner_Life_Currents.py   # temporal network
+├── site/                          # Astro editorial site (Cloudflare Pages)
+│   ├── src/                       # pages, components, layouts, lib
+│   ├── public/                    # static assets, OG cards, baked chart embeds
+│   ├── tests/                     # vitest build + canonical-data assertions
+│   └── astro.config.mjs
+├── data/canonical.json            # single source of truth — archetypes, post counts, page metadata, essays. Read by both Streamlit (Python) and Astro (TS).
+├── scripts/
+│   ├── build_chart_figures.py     # bakes site/public/charts/*.html embeds
+│   └── build_precomputed.py       # generates precomputed/ Parquet aggregates
 ├── precomputed/                   # Parquet aggregates (topics, clusters, timeseries)
-├── assets/                        # page icons, hero images
+├── assets/                        # Streamlit page icons, hero images
 ├── archive/                       # historical page versions — not rendered
 ├── reddit_progress.duckdb         # source database
-├── CLAUDE.md                      # design-intent notes (naming rationale, color palette, typography conventions)
+├── CLAUDE.md                      # design-intent notes (naming, color palette, typography, deploy)
 ├── drafts/                        # launch copy + Playwright posting scripts
 ├── docs/                          # long-form writeups
 └── requirements.txt
@@ -105,7 +127,7 @@ The design pass that produced the current naming family and stripped decorative 
 ## Data
 
 - **Source**: r/meditation public posts & comments, Jan 2024 – Jun 2025
-- **Count**: 2,977 posts processed
+- **Count**: 2,899 posts and comments (canonical, post response-pattern filter). 2,977 pre-filter, documented in `data/canonical.json` for reproducibility.
 - **Processing**: emotion classification → UMAP clustering → theme grouping → temporal binning by quarter
 - **Storage**: DuckDB for raw, Parquet aggregates for app runtime
 

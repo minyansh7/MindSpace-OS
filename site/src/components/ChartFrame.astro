@@ -1,0 +1,93 @@
+---
+import type { Page } from '../lib/canonical.ts';
+import { STREAMLIT_BASE } from '../lib/canonical.ts';
+interface Props { page: Page; }
+const { page } = Astro.props;
+/* Streamlit Cloud embed flags — strips menu/footer/loading-screen/page-padding,
+   gives a cleaner iframe surface. Sidebar state is controlled per-page in Streamlit
+   via `initial_sidebar_state="collapsed"` (see docs/streamlit-embed-followups.md). */
+const iframeSrc = STREAMLIT_BASE + page.streamlit_path
+  + '?embed=true&embed_options=hide_loading_screen,disable_scrolling,show_padding';
+---
+<figure class="w-full" data-chartframe data-iframe-src={iframeSrc}>
+  <div class="relative w-full aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/3] bg-[var(--color-surface)] border border-[var(--color-hairline)] rounded-xl overflow-hidden">
+    <!-- Static screenshot — loads first, mobile-final, desktop-pre-interaction -->
+    <img
+      src={page.screenshot}
+      alt={`Static preview of ${page.title} chart`}
+      class="absolute inset-0 w-full h-full object-cover object-top"
+      loading="eager"
+      decoding="async"
+      data-chart-static
+    />
+
+    <!-- Desktop interactive overlay — hidden on mobile -->
+    <div
+      class="hidden md:flex absolute inset-0 items-center justify-center bg-[var(--color-ground)]/40 backdrop-blur-[1px] transition-opacity duration-300"
+      data-chart-overlay
+    >
+      <button
+        type="button"
+        class="px-6 py-3 bg-[var(--color-text)] text-[var(--color-ground)] rounded-full font-medium text-sm hover:bg-[var(--color-accent)] transition-colors flex items-center gap-2"
+        data-chart-load
+      >
+        Tap to interact
+        <span class="text-xs opacity-70">~2MB live chart</span>
+      </button>
+    </div>
+
+    <!-- Live iframe slot — populated on click (desktop only) -->
+    <div class="hidden absolute inset-0" data-chart-frame></div>
+
+    <!-- Mobile fallback CTA — visible only on mobile -->
+    <div class="md:hidden absolute bottom-4 right-4">
+      <a
+        href={iframeSrc}
+        target="_blank"
+        rel="noopener"
+        class="px-4 py-2 bg-[var(--color-text)]/95 text-[var(--color-ground)] rounded-full text-xs font-medium inline-flex items-center gap-1.5"
+      >
+        View interactive on desktop ↗
+      </a>
+    </div>
+  </div>
+  <figcaption class="footnote mt-3">
+    Static preview shown above. {page.callout}
+  </figcaption>
+</figure>
+
+<script is:inline>
+  // Static-screenshot-first interactivity. Desktop only.
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-chartframe]').forEach((root) => {
+      const button = root.querySelector('[data-chart-load]');
+      const overlay = root.querySelector('[data-chart-overlay]');
+      const frameSlot = root.querySelector('[data-chart-frame]');
+      const src = root.getAttribute('data-iframe-src');
+      if (!button || !overlay || !frameSlot || !src) return;
+      button.addEventListener('click', () => {
+        const iframe = document.createElement('iframe');
+        iframe.src = src;
+        iframe.title = 'Live interactive chart';
+        iframe.loading = 'lazy';
+        iframe.className = 'w-full h-full border-0';
+        iframe.setAttribute('allowfullscreen', '');
+        frameSlot.appendChild(iframe);
+        frameSlot.classList.remove('hidden');
+        frameSlot.classList.add('block');
+        overlay.classList.add('opacity-0', 'pointer-events-none');
+      });
+    });
+
+    // postMessage height calc — Streamlit pages can emit { type: 'height', value }
+    window.addEventListener('message', (e) => {
+      if (!e.data || e.data.type !== 'height') return;
+      const iframes = document.querySelectorAll('[data-chartframe] iframe');
+      iframes.forEach((iframe) => {
+        if (iframe.contentWindow === e.source) {
+          iframe.style.height = e.data.value + 'px';
+        }
+      });
+    });
+  });
+</script>

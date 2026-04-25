@@ -1,0 +1,180 @@
+{
+  "$comment": "Single source of truth for the MindSpace OS site. Imported by both Python (Streamlit) and JS/TS (Astro shell). Do not duplicate these values inline; add a CI test that asserts no inline duplicates.",
+  "project": {
+    "name": "MindSpace OS",
+    "tagline": "The emotional shape of meditation communities online",
+    "thesis": "The dominant emotion isn't peace. It's struggle closely wrapped around curiosity.",
+    "anchor_quotes": [
+      "The vocabulary that dominates is 'I'm trying again.'",
+      "Comments pull people inward toward intimacy rather than amplification."
+    ],
+    "domain": "https://mindspaceos.com",
+    "essays_subdomain": "https://essays.mindspaceos.com",
+    "github": "https://github.com/minyansh7/MindSpace-OS",
+    "substack_pub": "https://minyansh.substack.com",
+    "twitter": null,
+    "linkedin": "https://www.linkedin.com/in/minyanshi/",
+    "contact": "minyanshi@proton.me",
+    "takedown": "takedown@mindspaceos.com"
+  },
+  "data": {
+    "subreddit": "r/meditation",
+    "post_count_canonical": 2899,
+    "post_count_canonical_note": "Posts and comments after final filter (those with at least one comment, used for response-pattern analysis).",
+    "post_count_pre_filter": 2977,
+    "post_count_pre_filter_note": "Total posts before response-pattern filter. Use 2899 on all public surfaces; 2977 documented for reproducibility.",
+    "date_range_start": "2024-01-01",
+    "date_range_end": "2025-06-30",
+    "date_range_human": "January 2024 – June 2025",
+    "language": "English"
+  },
+  "archetypes": [
+    {
+      "slug": "reflective-caring",
+      "name": "Reflective Caring",
+      "color": "#ff5e78",
+      "color_dark": "#FF7A91",
+      "symbol": "circle",
+      "icon": "leaf",
+      "quote": "Just wanted to share. Sat 20 minutes today. It felt different. Thank you all.",
+      "sketch": "The poster who shares a hard moment carefully and asks for no specific advice. Vocabulary leans toward gratitude and 'I just wanted to share.'"
+    },
+    {
+      "slug": "soothing-empathy",
+      "name": "Soothing Empathy",
+      "color": "#00c49a",
+      "color_dark": "#3FD8B0",
+      "symbol": "diamond",
+      "icon": "ripple",
+      "quote": "You're not broken. This is part of it. Be patient with yourself.",
+      "sketch": "The commenter who responds to anxious posts with reassurance, not advice. 'You're not broken. This is part of it.' Most-upvoted commenter type. The reason the subreddit feels safer than its emotional content suggests it should."
+    },
+    {
+      "slug": "tender-uncertainty",
+      "name": "Tender Uncertainty",
+      "color": "#6a5acd",
+      "color_dark": "#8C7DE0",
+      "symbol": "triangle-nw",
+      "icon": "waves",
+      "quote": "Tried Sam Harris, Tara Brach, no app. Still nothing sticks.",
+      "sketch": "The poster who's read three books and tried four apps and is asking why nothing has clicked yet. Curiosity laced with frustration. The engine that keeps the subreddit alive."
+    },
+    {
+      "slug": "melancholic-confusion",
+      "name": "Melancholic Confusion",
+      "color": "#9a32cd",
+      "color_dark": "#B557E0",
+      "symbol": "star-square",
+      "icon": "stone",
+      "quote": "Something opened up today and I just don't know how to talk about it.",
+      "sketch": "The poster who writes about a small grief or a small breakthrough and isn't sure how to talk about it. Posts get fewer upvotes but ~36% more comments — this archetype attracts intimacy, not amplification."
+    },
+    {
+      "slug": "anxious-concern",
+      "name": "Anxious Concern",
+      "color": "#ffc300",
+      "color_dark": "#FFD23F",
+      "symbol": "star-triangle-up",
+      "icon": "mycelium",
+      "quote": "I keep trying. I'm not sure that's the same as practice.",
+      "sketch": "The poster mid-spiral. Writes at 2am asking if it's normal that the breath feels like a brick. Vocabulary leans toward 'trying again,' 'I think I'm doing it wrong,' 'is this anxiety or just me.' Reads as one person checking whether their experience is shared."
+    }
+  ],
+  "clusters": [
+    { "name": "Anxiety & Mental Health", "color": "#1f77b4", "color_dark": "#5BA3E0" },
+    { "name": "Awareness", "color": "#808000", "color_dark": "#B8B85A" },
+    { "name": "Buddhism & Spirituality", "color": "#ff7f0e", "color_dark": "#FF9A3D" },
+    { "name": "Concentration & Flow", "color": "#d62728", "color_dark": "#F25555" },
+    { "name": "Meditation & Mindfulness", "color": "#9467bd", "color_dark": "#B894E0" },
+    { "name": "Practice, Retreat, & Meta", "color": "#8c564b", "color_dark": "#C08A75" },
+    { "name": "Self-Regulation", "color": "#17becf", "color_dark": "#4FD4E0" }
+  ],
+  "pages": [
+    {
+      "slug": "emotion-pulse",
+      "title": "Emotion pulse",
+      "subtitle": "Where the conversation's emotional vocabulary lands",
+      "intro": "A UMAP map of every post, colored by its dominant emotion (GoEmotions, 27 categories). Posts using similar emotional language sit close together. Five recurring archetypes emerge as distinct neighborhoods: Reflective Caring, Soothing Empathy, Tender Uncertainty, Melancholic Confusion, Anxious Concern.",
+      "callout": "Joy ranks 25th of 28 emotions. Amusement is dead last.",
+      "streamlit_path": "/Emotion_Pulse",
+      "screenshot": "/screenshots/emotion-pulse.svg"
+    },
+    {
+      "slug": "community-dynamics",
+      "title": "Community dynamics",
+      "subtitle": "Who responds to whom, emotionally",
+      "intro": "Each ribbon shows how a poster's emotional tone flows into the commenter's tone. Grief gets mirrored: about 1 in 4 people reply with grief themselves. Anxiety doesn't — only 7 out of 100 reply with anxiety; more than half offer warm reassurance instead. The community has unwritten response rules.",
+      "callout": "Grief gets mirrored. Anxiety gets reassurance.",
+      "streamlit_path": "/Community_Dynamics",
+      "screenshot": "/screenshots/community-dynamics.svg"
+    },
+    {
+      "slug": "community-weather-report",
+      "title": "Community weather report",
+      "subtitle": "How the community mood shifts over time",
+      "intro": "Eighteen months of sentiment across topics, drawn as weather. The metaphor reads more honestly than a heatmap because mood, like weather, is uneven. Some topics run sunny, some cloudy — luckily, nothing stormy.",
+      "callout": "",
+      "streamlit_path": "/Community_Weather_Report",
+      "screenshot": "/screenshots/community-weather-report.svg"
+    },
+    {
+      "slug": "inner-life-currents",
+      "title": "Inner life currents",
+      "subtitle": "How theme connections shift over time",
+      "intro": "A temporal network of theme co-occurrences. Drag the Time Travel slider through six quarters and watch which topics keep showing up together — Anxiety & Mental Health bonded tightly to Self-Regulation early in the period, then loosened as Concentration & Flow took its place.",
+      "callout": "",
+      "streamlit_path": "/Inner_Life_Currents",
+      "screenshot": "/screenshots/inner-life-currents.svg"
+    }
+  ],
+  "essays": [
+    {
+      "title": "What 2,899 Reddit Posts on Meditation Actually Sound Like",
+      "subtitle": "The center of gravity isn't peace — it's struggle wrapped around curiosity.",
+      "url": "https://minyansh.substack.com/p/what-48000-reddit-posts-on-meditation",
+      "published": "2026-04-21",
+      "summary": "Establishes the central finding: the dominant emotion on r/meditation isn't peace, it's struggle wrapped around curiosity.",
+      "pull_quote": "What I noticed, sitting with three thousand posts: the dominant register isn't peace. It's the steady act of trying again — the breath that didn't work, and the breath you took anyway.",
+      "read_time_minutes": 8
+    },
+    {
+      "title": "Meditation Communities Are Not as Calm as They Look",
+      "subtitle": "What 2,899 Reddit posts and comments reveal about daily emotions, confusion, and compassion in online meditation communities.",
+      "url": "https://minyansh.substack.com/p/the-emotion-map-of-meditation-online",
+      "published": "2026-04-24",
+      "summary": "Adds findings on how the community responds: grief gets mirrored, anxiety gets reassurance, lurkers do most of the emotional work.",
+      "pull_quote": "Grief gets mirrored. Anxiety gets reassurance. The most-upvoted commenters rarely post — they only respond. There are unwritten rules here, and the community keeps them.",
+      "read_time_minutes": 12
+    }
+  ],
+  "citations": [
+    {
+      "id": "goemotions",
+      "label": "GoEmotions",
+      "authors": "Demszky, D., Movshovitz-Attias, D., Ko, J., Cowen, A., Nemade, G., & Ravi, S.",
+      "year": 2020,
+      "title": "GoEmotions: A Dataset of Fine-Grained Emotions",
+      "venue": "Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics",
+      "arxiv": "2005.00547",
+      "url": "https://arxiv.org/abs/2005.00547",
+      "huggingface": "https://huggingface.co/datasets/google-research-datasets/go_emotions"
+    },
+    {
+      "id": "umap",
+      "label": "UMAP",
+      "authors": "McInnes, L., Healy, J., & Melville, J.",
+      "year": 2018,
+      "title": "UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction",
+      "arxiv": "1802.03426",
+      "url": "https://arxiv.org/abs/1802.03426"
+    }
+  ],
+  "limitations": [
+    "Sample bias: r/meditation posters self-select into the platform; they're not 'all meditators.'",
+    "Self-selection: the people who post are not the people who don't. Lurkers are invisible to this dataset.",
+    "Model circularity: GoEmotions was trained on Reddit comments. Running it on r/meditation Reddit posts means part of the 'emotional vocabulary' it detects is what Reddit emotion looks like in general, not what meditation discussion looks like specifically.",
+    "Time window: 18 months covers a single annual cycle; longer-period seasonal effects are not visible.",
+    "English only.",
+    "Anonymization: post text is paraphrased, not verbatim, in any user-facing surface. Hover text on Emotion Pulse may include reconstructed phrases — see /about for the policy."
+  ]
+}
