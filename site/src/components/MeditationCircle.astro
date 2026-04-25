@@ -1,0 +1,91 @@
+---
+/* Pulsing/rippling brand icon — direct port of the original Homepage.py meditation-circle.
+   Two animations layered:
+     - pulse: the inner circle scales 1 → 1.1 → 1 over 3s (heartbeat feel)
+     - ripple: a 2px ring expands from the inner circle and fades, every 2s (continuous radiance)
+   Sized smaller than the original 150px (now ~100px) per design direction. */
+
+interface Props {
+  size?: number;       // outer circle diameter in px (defaults to 100)
+  imgSize?: number;    // inner image diameter in px
+  align?: 'start' | 'center';  // 'start' = left-align with surrounding hero copy
+}
+
+const { size = 100, imgSize = Math.round((size ?? 100) * 0.62), align = 'center' } = Astro.props;
+---
+<div class={`meditation-container ${align === 'start' ? 'is-start' : 'is-center'}`} aria-hidden="true">
+  <div class="meditation-circle" style={`--m-size: ${size}px; --m-img: ${imgSize}px;`}>
+    <img src="/narrative_web_clean.png" alt="" />
+  </div>
+</div>
+
+<style>
+  .meditation-container {
+    display: flex;
+    align-items: center;
+    /* Bottom margin reserves room for the downward ripple expansion (~46px past
+       circle edge at peak) so the eyebrow + H1 below stay clear of the animation. */
+    margin: 0 0 6rem 0;
+    pointer-events: none;
+  }
+  .meditation-container.is-center { justify-content: center; }
+  /* is-start: shift right enough so the ripple ring (which expands ~78px past the
+     circle edge at peak) doesn't get clipped by the section's left padding. */
+  .meditation-container.is-start  {
+    justify-content: flex-start;
+    padding-left: 60px;
+  }
+  @media (max-width: 640px) {
+    .meditation-container.is-start { padding-left: 48px; }
+  }
+
+  .meditation-circle {
+    width: var(--m-size);
+    height: var(--m-size);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.30);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    animation: pulse 3s ease-in-out infinite;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Concentric ring that expands continuously — the "heartbeat" radiating outward */
+  .meditation-circle::before {
+    content: '';
+    position: absolute;
+    top: -14px;
+    left: -14px;
+    right: -14px;
+    bottom: -14px;
+    border: 2px solid rgba(255, 255, 255, 0.55);
+    border-radius: 50%;
+    animation: ripple 2s ease-out infinite;
+  }
+
+  .meditation-circle img {
+    width: var(--m-img);
+    height: var(--m-img);
+    object-fit: contain;
+    border-radius: 50%;
+    /* On the gradient background the white-cornered tree image needs no further treatment. */
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1);   opacity: 0.85; }
+    50%      { transform: scale(1.08); opacity: 1;    }
+  }
+
+  @keyframes ripple {
+    0%   { transform: scale(1);   opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .meditation-circle,
+    .meditation-circle::before { animation: none; }
+  }
+</style>

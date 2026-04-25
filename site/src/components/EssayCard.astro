@@ -4,15 +4,74 @@ interface Props { essay: Essay; }
 const { essay } = Astro.props;
 const dateLabel = new Date(essay.published).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 ---
-<a href={essay.url} target="_blank" rel="noopener" class="card block p-6 group">
-  <div class="flex items-center justify-between mb-3">
-    <span class="eyebrow">Substack · {dateLabel}</span>
-    <span class="text-[var(--color-text-tertiary)] group-hover:text-[var(--color-accent)] transition-colors text-lg">↗</span>
+<a href={essay.url} target="_blank" rel="noopener" class="essay-card">
+  <div class="essay-card-meta">
+    <span class="eyebrow">Substack · {dateLabel} · {essay.read_time_minutes} min read</span>
+    <span class="essay-card-arrow" aria-hidden="true">↗</span>
   </div>
-  <h3 class="font-serif italic text-xl mb-3 leading-snug" style="font-family: var(--font-serif);">
-    {essay.title}
+  <h3 class="essay-card-title">
+    <span class="essay-card-title-text">{essay.title}</span>
   </h3>
-  <p class="text-sm text-[var(--color-text-secondary)] leading-relaxed">
-    {essay.summary}
-  </p>
+  <p class="essay-card-summary">{essay.summary}</p>
 </a>
+
+<style>
+  .essay-card {
+    display: block;
+    padding: 24px 28px 28px;
+    border-radius: 12px;
+    background: var(--color-surface, rgba(255, 255, 255, 0.04));
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+    text-decoration: none;
+    color: inherit;
+  }
+  .essay-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .essay-card-arrow {
+    font-size: 18px;
+    color: var(--color-text-tertiary, rgba(232, 230, 226, 0.55));
+    transition: color 0.32s ease, transform 0.32s ease;
+  }
+  .essay-card:hover .essay-card-arrow,
+  .essay-card:focus-visible .essay-card-arrow {
+    color: var(--color-accent, #ffec4a);
+    transform: translate(2px, -2px);
+  }
+  .essay-card-title {
+    font-family: var(--font-serif, var(--font-display, Georgia, serif));
+    font-style: italic;
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.28;
+    color: var(--color-text-primary, #f4efe4);
+    margin: 0 0 12px 0;
+  }
+  .essay-card-title-text {
+    background-image: linear-gradient(to right, var(--color-accent, #ffec4a), var(--color-accent, #ffec4a));
+    background-size: 0% 2px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.42s cubic-bezier(0.2, 0.8, 0.2, 1);
+    padding-bottom: 2px;
+  }
+  .essay-card:hover .essay-card-title-text,
+  .essay-card:focus-visible .essay-card-title-text {
+    background-size: 100% 2px;
+  }
+  .essay-card-summary {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-text-secondary, rgba(232, 230, 226, 0.72));
+    margin: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .essay-card-title-text,
+    .essay-card-arrow {
+      transition: none;
+    }
+  }
+</style>

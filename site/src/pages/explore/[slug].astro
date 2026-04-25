@@ -3,6 +3,8 @@ import Base from '../../layouts/Base.astro';
 import Nav from '../../components/Nav.astro';
 import Footer from '../../components/Footer.astro';
 import ChartFrame from '../../components/ChartFrame.astro';
+import StaticChart from '../../components/StaticChart.astro';
+import PageCard from '../../components/PageCard.astro';
 import { pages, project, data, citations } from '../../lib/canonical.ts';
 
 export function getStaticPaths() {
@@ -12,6 +14,27 @@ export function getStaticPaths() {
 const { page } = Astro.props;
 const goEmotions = citations.find((c) => c.id === 'goemotions')!;
 const otherPages = pages.filter((p) => p.slug !== page.slug);
+
+/* Streamlit migration: complete.
+   Phase 1 — emotion-pulse, community-dynamics → self-hosted static HTML.
+   Phase 2a — inner-life-currents → self-hosted static HTML (Time Travel inlined).
+   Phase 2b — community-weather-report → self-hosted static HTML (quarter selector,
+              7 animated weather regions, full hover tooltips).
+   All four chart pages now render without Streamlit at runtime.
+   See scripts/build_chart_figures.py. */
+const STATIC_CHART_SLUGS = new Set([
+  'emotion-pulse',
+  'community-dynamics',
+  'inner-life-currents',
+  'community-weather-report',
+]);
+const isStatic = STATIC_CHART_SLUGS.has(page.slug);
+const staticHeight: Record<string, number> = {
+  'emotion-pulse': 1100,
+  'community-dynamics': 1000,
+  'inner-life-currents': 1000,
+  'community-weather-report': 1200,
+};
 ---
 <Base
   title={`${page.title} — ${project.name}`}
@@ -34,18 +57,28 @@ const otherPages = pages.filter((p) => p.slug !== page.slug);
       <p>{page.intro}</p>
     </div>
 
-    <blockquote class="pull-quote max-w-3xl mb-12">
-      "{page.callout}"
-    </blockquote>
+    {page.callout && (
+      <blockquote class="pull-quote max-w-3xl mb-12">
+        "{page.callout}"
+      </blockquote>
+    )}
   </article>
 
   <!-- Chart -->
   <section class="max-w-7xl mx-auto px-5 sm:px-8 pb-12">
-    <ChartFrame page={page} />
+    {isStatic ? (
+      <StaticChart
+        src={`${page.slug}.html`}
+        height={staticHeight[page.slug] ?? 900}
+        title={`${page.title} — interactive chart`}
+      />
+    ) : (
+      <ChartFrame page={page} />
+    )}
     <p class="footnote mt-4 max-w-3xl">
       Based on {data.post_count_canonical.toLocaleString()} r/meditation posts and comments,
-      {data.date_range_human}. Emotion classification via GoEmotions
-      ({goEmotions.authors.split(',')[0]} et al. {goEmotions.year}, trained on Reddit comments —
+      {data.date_range_human}. Emotion classification via Google Research's GoEmotions
+      ({goEmotions.authors.split(',')[0]} et al. {goEmotions.year}), trained on Reddit comments —
       see <a href="/about#methodology">methodology</a> for limitations.
     </p>
   </section>
@@ -56,11 +89,7 @@ const otherPages = pages.filter((p) => p.slug !== page.slug);
     <h2 class="h-section mb-8">The other three views.</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       {otherPages.map((p) => (
-        <a href={`/explore/${p.slug}/`} class="card block p-5 group">
-          <p class="eyebrow mb-2">View</p>
-          <h3 class="font-display font-semibold text-lg mb-2" style="font-family: var(--font-display);">{p.title}</h3>
-          <p class="text-sm text-[var(--color-text-secondary)]">{p.subtitle}</p>
-        </a>
+        <PageCard page={p} index={pages.findIndex((x) => x.slug === p.slug)} />
       ))}
     </div>
   </section>

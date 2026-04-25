@@ -54,6 +54,22 @@ const ogUrl = new URL(ogImage, project.domain).toString();
     <meta name="twitter:image" content={ogUrl} />
 
     <slot name="head" />
+
+    {/* Time-of-day gradient — homage to original Homepage.py.
+        Sets data-time-of-day on <html> so CSS can swap the gradient.
+        Runs synchronously in <head> to prevent FOUC. No flash. */}
+    <script is:inline>
+      (function () {
+        var h = new Date().getHours();
+        var slot =
+          (h >= 5  && h < 8)  ? 'dawn'      :
+          (h >= 8  && h < 12) ? 'morning'   :
+          (h >= 12 && h < 17) ? 'afternoon' :
+          (h >= 17 && h < 20) ? 'evening'   :
+                                'night';
+        document.documentElement.dataset.timeOfDay = slot;
+      })();
+    </script>
   </head>
   <body>
     <slot />

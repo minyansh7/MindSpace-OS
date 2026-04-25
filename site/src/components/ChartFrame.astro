@@ -3,10 +3,14 @@ import type { Page } from '../lib/canonical.ts';
 import { STREAMLIT_BASE } from '../lib/canonical.ts';
 interface Props { page: Page; }
 const { page } = Astro.props;
-const iframeSrc = STREAMLIT_BASE + page.streamlit_path + '?embed=true';
+/* Streamlit Cloud embed flags — strips menu/footer/loading-screen/page-padding,
+   gives a cleaner iframe surface. Sidebar state is controlled per-page in Streamlit
+   via `initial_sidebar_state="collapsed"` (see docs/streamlit-embed-followups.md). */
+const iframeSrc = STREAMLIT_BASE + page.streamlit_path
+  + '?embed=true&embed_options=hide_loading_screen,disable_scrolling,show_padding';
 ---
 <figure class="w-full" data-chartframe data-iframe-src={iframeSrc}>
-  <div class="relative w-full aspect-[4/3] sm:aspect-[16/10] bg-[var(--color-surface)] border border-[var(--color-hairline)] rounded-xl overflow-hidden">
+  <div class="relative w-full aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/3] bg-[var(--color-surface)] border border-[var(--color-hairline)] rounded-xl overflow-hidden">
     <!-- Static screenshot — loads first, mobile-final, desktop-pre-interaction -->
     <img
       src={page.screenshot}

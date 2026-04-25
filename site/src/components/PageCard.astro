@@ -3,16 +3,201 @@ import type { Page } from '../lib/canonical.ts';
 interface Props { page: Page; index: number; }
 const { page, index } = Astro.props;
 const num = String(index + 1).padStart(2, '0');
+// Archetype palette (canonical) for chart previews
+const C = {
+  reflective: '#FF7A91',
+  soothing: '#3FD8B0',
+  tender: '#8C7DE0',
+  melancholic: '#B557E0',
+  anxious: '#FFD23F',
+  ink: 'rgba(244, 239, 228, 0.55)',
+  sand: 'rgba(244, 239, 228, 0.85)',
+};
 ---
-<a href={`/explore/${page.slug}/`} class="card block p-6 group">
-  <div class="flex items-start justify-between mb-3">
-    <span class="eyebrow">{`#${num} · view`}</span>
-    <span class="text-[var(--color-text-tertiary)] group-hover:text-[var(--color-accent)] transition-colors text-lg">→</span>
+<a href={`/explore/${page.slug}/`} class="card card-bulb page-card">
+  <div class="page-card-preview" aria-hidden="true">
+    {page.slug === 'emotion-pulse' && (
+      <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" shape-rendering="geometricPrecision">
+        <!-- UMAP-style scatter, 5 archetype clusters -->
+        {[
+          { cx: 80, cy: 60, c: C.tender, n: 14 },
+          { cx: 220, cy: 60, c: C.soothing, n: 12 },
+          { cx: 260, cy: 130, c: C.anxious, n: 10 },
+          { cx: 60, cy: 130, c: C.reflective, n: 11 },
+          { cx: 160, cy: 95, c: C.melancholic, n: 8 },
+        ].map((cl) => Array.from({ length: cl.n }).map((_, i) => {
+          const angle = (i / cl.n) * Math.PI * 2 + cl.cx;
+          const r = 8 + ((i * 7919) % 25);
+          const x = cl.cx + Math.cos(angle) * r;
+          const y = cl.cy + Math.sin(angle) * r * 0.7;
+          const size = 2 + ((i * 13) % 4);
+          const op = 0.35 + ((i * 29) % 50) / 100;
+          return <circle cx={x} cy={y} r={size} fill={cl.c} opacity={op} />;
+        })).flat()}
+      </svg>
+    )}
+    {page.slug === 'community-dynamics' && (
+      <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" shape-rendering="geometricPrecision">
+        <!-- Sankey-style ribbons left -> right -->
+        <defs>
+          <linearGradient id={`ribA-${page.slug}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color={C.reflective} stop-opacity="0.7" /><stop offset="100%" stop-color={C.soothing} stop-opacity="0.5" />
+          </linearGradient>
+          <linearGradient id={`ribB-${page.slug}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color={C.melancholic} stop-opacity="0.6" /><stop offset="100%" stop-color={C.tender} stop-opacity="0.5" />
+          </linearGradient>
+          <linearGradient id={`ribC-${page.slug}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color={C.anxious} stop-opacity="0.6" /><stop offset="100%" stop-color={C.soothing} stop-opacity="0.5" />
+          </linearGradient>
+          <linearGradient id={`ribD-${page.slug}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color={C.tender} stop-opacity="0.5" /><stop offset="100%" stop-color={C.reflective} stop-opacity="0.5" />
+          </linearGradient>
+        </defs>
+        <!-- Left poster nodes -->
+        <rect x="22" y="22" width="6" height="34" fill={C.reflective} opacity="0.85" />
+        <rect x="22" y="62" width="6" height="28" fill={C.melancholic} opacity="0.85" />
+        <rect x="22" y="96" width="6" height="38" fill={C.anxious} opacity="0.85" />
+        <rect x="22" y="140" width="6" height="22" fill={C.tender} opacity="0.85" />
+        <!-- Right commenter nodes -->
+        <rect x="292" y="28" width="6" height="42" fill={C.soothing} opacity="0.85" />
+        <rect x="292" y="78" width="6" height="36" fill={C.tender} opacity="0.85" />
+        <rect x="292" y="122" width="6" height="28" fill={C.reflective} opacity="0.85" />
+        <!-- Ribbons (smoothed: cubics with eased control points + linecap round).
+             Paths terminate exactly at the inner faces of the vertical bars (left bars
+             end at x=28, right bars start at x=292) so the flow is contained between
+             the post and comment columns and does not bleed past them. -->
+        <path d="M 28 39 C 130 39, 190 49, 292 49" stroke={`url(#ribA-${page.slug})`} stroke-width="22" stroke-linecap="round" fill="none" />
+        <path d="M 28 76 C 130 76, 190 96, 292 96" stroke={`url(#ribB-${page.slug})`} stroke-width="18" stroke-linecap="round" fill="none" />
+        <path d="M 28 115 C 130 115, 190 60, 292 60" stroke={`url(#ribC-${page.slug})`} stroke-width="20" stroke-linecap="round" fill="none" />
+        <path d="M 28 151 C 130 151, 190 136, 292 136" stroke={`url(#ribD-${page.slug})`} stroke-width="14" stroke-linecap="round" fill="none" />
+      </svg>
+    )}
+    {page.slug === 'community-weather-report' && (
+      <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" stroke-linecap="round" stroke-linejoin="round" fill="none" shape-rendering="geometricPrecision">
+        <!-- Three big weather glyphs: sun, partly-cloudy, cloud. One concept: weather varies. -->
+        {/* Sun — left */}
+        <g stroke={C.anxious} stroke-width="1.6" opacity="0.92" transform="translate(70, 90)">
+          <circle cx="0" cy="0" r="18" />
+          <line x1="0" y1="-26" x2="0" y2="-32" />
+          <line x1="0" y1="26" x2="0" y2="32" />
+          <line x1="-26" y1="0" x2="-32" y2="0" />
+          <line x1="26" y1="0" x2="32" y2="0" />
+          <line x1="-19" y1="-19" x2="-22.5" y2="-22.5" />
+          <line x1="19" y1="19" x2="22.5" y2="22.5" />
+          <line x1="19" y1="-19" x2="22.5" y2="-22.5" />
+          <line x1="-19" y1="19" x2="-22.5" y2="22.5" />
+        </g>
+
+        {/* Partly cloudy — center */}
+        <g stroke-width="1.6" transform="translate(160, 90)">
+          <g stroke={C.anxious} opacity="0.85">
+            <circle cx="-8" cy="-6" r="14" />
+            <line x1="-8" y1="-26" x2="-8" y2="-30" />
+            <line x1="-26" y1="-6" x2="-30" y2="-6" />
+            <line x1="2" y1="-20" x2="4" y2="-23" />
+            <line x1="-18" y1="-20" x2="-20" y2="-23" />
+          </g>
+          {/* Smoother cloud — single continuous cubic */}
+          <path d="M -18 14 C -26 14, -26 2, -16 1 C -14 -8, 0 -10, 4 -2 C 10 -8, 22 -4, 20 6 C 26 8, 24 16, 16 14 Z" stroke={C.sand} opacity="0.78" />
+        </g>
+
+        {/* Cloud — right */}
+        <g stroke={C.sand} stroke-width="1.6" opacity="0.82" transform="translate(252, 90)">
+          <path d="M -22 12 C -32 12, -32 -2, -20 -3 C -18 -14, -2 -16, 2 -6 C 9 -14, 24 -10, 22 2 C 30 4, 28 14, 18 12 Z" />
+          <path d="M -10 -3 C -14 -7, -8 -13, -1 -10" opacity="0.6" />
+        </g>
+      </svg>
+    )}
+    {page.slug === 'inner-life-currents' && (
+      <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" shape-rendering="geometricPrecision">
+        <!-- Force-directed network: 9 nodes, weighted edges -->
+        {(() => {
+          const nodes = [
+            { x: 80, y: 50, r: 9, c: C.tender },
+            { x: 160, y: 38, r: 11, c: C.melancholic },
+            { x: 240, y: 60, r: 8, c: C.soothing },
+            { x: 60, y: 110, r: 7, c: C.reflective },
+            { x: 130, y: 95, r: 10, c: C.anxious },
+            { x: 200, y: 110, r: 9, c: C.tender },
+            { x: 270, y: 130, r: 7, c: C.melancholic },
+            { x: 100, y: 150, r: 6, c: C.soothing },
+            { x: 175, y: 145, r: 8, c: C.reflective },
+          ];
+          const edges = [
+            [0,1,0.7],[0,3,0.5],[0,4,0.6],[1,2,0.8],[1,4,0.7],[2,5,0.5],[2,6,0.6],
+            [3,4,0.4],[3,7,0.5],[4,5,0.6],[4,8,0.5],[5,6,0.7],[5,8,0.4],[7,8,0.6],
+          ];
+          return (
+            <>
+              {edges.map(([a, b, w], i) => (
+                <line key={`e${i}`} x1={nodes[a as number].x} y1={nodes[a as number].y} x2={nodes[b as number].x} y2={nodes[b as number].y} stroke={C.sand} stroke-width={(w as number) * 0.95} stroke-linecap="round" opacity={(w as number) * 0.5} />
+              ))}
+              {nodes.map((n, i) => <circle key={`n${i}`} cx={n.x} cy={n.y} r={n.r} fill={n.c} opacity="0.85" />)}
+            </>
+          );
+        })()}
+      </svg>
+    )}
+    <span class="page-card-eyebrow">{`#${num} · view`}</span>
   </div>
-  <h3 class="font-display font-semibold text-2xl mb-2 leading-tight" style="font-family: var(--font-display);">
-    {page.title}
-  </h3>
-  <p class="text-sm text-[var(--color-text-secondary)] leading-snug">
-    {page.subtitle}
-  </p>
+  <div class="page-card-body">
+    <h3 class="page-card-title">{page.title}</h3>
+    <p class="page-card-subtitle">{page.subtitle}</p>
+  </div>
 </a>
+
+<style>
+  .page-card {
+    display: block;
+    padding: 0;
+    overflow: hidden;
+  }
+  .page-card-preview {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: linear-gradient(
+      180deg,
+      var(--card-preview-wash-1, rgba(11, 14, 19, 0.42)),
+      var(--card-preview-wash-2, rgba(11, 14, 19, 0.18))
+    );
+    border-bottom: 1px solid var(--color-hairline, rgba(255, 255, 255, 0.08));
+    transition: background 0.6s ease;
+  }
+  .page-card-preview svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .page-card-eyebrow {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary, rgba(232, 230, 226, 0.55));
+    font-family: var(--font-sans, system-ui, sans-serif);
+    background: rgba(11, 14, 19, 0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .page-card-body {
+    padding: 22px 24px 24px;
+  }
+  .page-card-title {
+    font-family: var(--font-display, Georgia, serif);
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 1.2;
+    color: var(--color-text-primary, #f4efe4);
+    margin: 0 0 8px 0;
+  }
+  .page-card-subtitle {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-text-secondary, rgba(232, 230, 226, 0.72));
+    margin: 0;
+  }
+</style>

@@ -6,6 +6,8 @@ export type Archetype = {
   color: string;
   color_dark: string;
   symbol: string;
+  icon: 'leaf' | 'ripple' | 'waves' | 'stone' | 'mycelium';
+  quote: string;
   sketch: string;
 };
 
@@ -25,6 +27,8 @@ export type Essay = {
   url: string;
   published: string;
   summary: string;
+  pull_quote: string;
+  read_time_minutes: number;
 };
 
 export type Citation = {

@@ -5,6 +5,7 @@ import Footer from '../components/Footer.astro';
 import PageCard from '../components/PageCard.astro';
 import EssayCard from '../components/EssayCard.astro';
 import ArchetypeCard from '../components/ArchetypeCard.astro';
+import MeditationCircle from '../components/MeditationCircle.astro';
 import { project, data, archetypes, pages, essays, citations } from '../lib/canonical.ts';
 
 const goEmotions = citations.find((c) => c.id === 'goemotions')!;
@@ -37,25 +38,27 @@ const datasetSchema = {
 
   <main id="main">
   <!-- Typographic hero — no chart, claim earns the chart later -->
-  <section class="max-w-5xl mx-auto px-5 sm:px-8 pt-20 pb-12 sm:pt-32 sm:pb-20">
-    <p class="eyebrow mb-6">A field guide to the emotional shape of online meditation</p>
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 pt-14 pb-12 sm:pt-20 sm:pb-20">
+    <MeditationCircle size={100} align="start" />
+    <p class="eyebrow mb-6">A field guide to the emotional shape of meditation communities online</p>
     <h1 class="h-display mb-6 max-w-4xl">
-      Meditation isn't peaceful.
-      <span class="block text-[var(--color-text-secondary)]">It's persistent.</span>
+      Confusion.
+      <span class="block">Compassion.</span>
     </h1>
-    <p class="text-lg sm:text-xl text-[var(--color-text-secondary)] max-w-2xl leading-relaxed">
-      What {data.post_count_canonical.toLocaleString()} r/meditation posts and comments actually sound like.
-      <span class="text-[var(--color-text)]">{project.thesis}</span>
+    <p class="text-lg sm:text-xl max-w-3xl leading-relaxed hero-subtitle">
+      What {data.post_count_canonical.toLocaleString()} Reddit posts and comments on meditation,
+      January 2024 – June 2025, actually sound like:
+      <span class="block mt-3 hero-thesis">{project.thesis}</span>
     </p>
   </section>
 
   <!-- Anchor quotable line — designed for screenshot -->
-  <section class="max-w-5xl mx-auto px-5 sm:px-8 py-12">
+  <section class="max-w-7xl mx-auto px-5 sm:px-8 py-12">
     <blockquote class="pull-quote max-w-3xl">
       "Joy ranks 25th of 28 emotions. Amusement is dead last."
     </blockquote>
     <p class="footnote mt-4 max-w-3xl">
-      Emotion classification via GoEmotions ({goEmotions.authors.split(',')[0]} et al. {goEmotions.year}),
+      Emotion classification via Google Research's GoEmotions ({goEmotions.authors.split(',')[0]} et al. {goEmotions.year}),
       a 27-category model trained on Reddit comments.
       <a href="/about#methodology">What this can and can't tell you →</a>
     </p>
@@ -64,15 +67,15 @@ const datasetSchema = {
   <!-- Findings (the 4 archetype cards as the cognitive anchor) -->
   <section id="findings" class="max-w-7xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
     <div class="max-w-3xl mb-10">
-      <p class="eyebrow mb-3">Five archetypes</p>
+      <p class="eyebrow mb-3">Five emotion archetypes</p>
       <h2 class="h-section mb-4">The shape of struggle wrapped with curiosity.</h2>
-      <p class="text-[var(--color-text-secondary)] leading-relaxed max-w-2xl">
+      <p class="leading-relaxed max-w-2xl section-prose">
         The community's emotional vocabulary clusters into five recurring types — not a personality
-        test, a structure. Posters and commenters drift between them, but most of what's said on
-        r/meditation lives inside one of these five neighborhoods.
+        test, a structure. People who post and reply drift between them, but most of what's said
+        about meditation lives inside one of these five neighborhoods.
       </p>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       {archetypes.map((a) => <ArchetypeCard archetype={a} />)}
     </div>
   </section>
@@ -82,10 +85,11 @@ const datasetSchema = {
     <div class="max-w-3xl mb-10">
       <p class="eyebrow mb-3">Four interactive views</p>
       <h2 class="h-section mb-4">Explore the data.</h2>
-      <p class="text-[var(--color-text-secondary)] leading-relaxed max-w-2xl">
+      <p class="leading-relaxed max-w-2xl section-prose">
         Each view answers a different question — what people feel, who responds to whom, how the
-        community mood shifts, how theme connections drift over six quarters. Open any one for the
-        live, interactive chart (best on desktop).
+        community mood shifts, how theme connections drift over six quarters from January 2024 to
+        June 2025.
+        <span class="block mt-3">Open any one for the live, interactive chart (best on desktop).</span>
       </p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
