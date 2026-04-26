@@ -570,6 +570,26 @@ def build_community_dynamics_html() -> str:
             .hint-mouse {{ display: none; }}
             .hint-touch {{ display: inline; }}
         }}
+        /* Tap readout — Plotly Sankey doesn't fire hover on touch devices,
+           only click. Show the customdata in this panel below the chart on
+           touch so mobile users get the same info desktop hover provides. */
+        .tap-readout {{
+            display: none;
+            flex: 0 0 auto;
+            margin: 6px 16px 12px;
+            padding: 10px 14px;
+            border-left: 4px solid #FFD700;
+            background: rgba(74, 85, 104, 0.04);
+            font-size: 13px; line-height: 1.45; color: #2c3e50;
+            border-radius: 0 6px 6px 0;
+        }}
+        .tap-readout.empty {{
+            color: #94a3b8; font-style: italic;
+        }}
+        .tap-readout b {{ color: #2c3e50; }}
+        @media (hover: none) {{
+            .tap-readout {{ display: block; }}
+        }}
 {MOBILE_CSS}
     </style>
 </head>
@@ -580,6 +600,7 @@ def build_community_dynamics_html() -> str:
     </div>
     <div class="column-eyebrows"><span>Posts</span><span>Replies</span></div>
     <div id="sankey-plot"></div>
+    <div id="tap-readout" class="tap-readout empty">Tap a ribbon or node above for details.</div>
     <script>
     const FIG = {fig_json};
     const config = {{
@@ -587,10 +608,22 @@ def build_community_dynamics_html() -> str:
         modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d']
     }};
     // The serialized figure already has its own layout. Pass through unchanged.
-    Plotly.newPlot('sankey-plot', FIG.data, FIG.layout, config).then(() => {{
+    Plotly.newPlot('sankey-plot', FIG.data, FIG.layout, config).then((gd) => {{
         // Force Plotly to measure the flex-sized container after first paint and on resize,
         // otherwise the Sankey can underdraw on tall iframes.
         Plotly.Plots.resize('sankey-plot');
+        // Touch fallback: Plotly Sankey hover is mouseenter-only, so phones
+        // never see the tooltip. Wire plotly_click to render the same
+        // customdata into the #tap-readout panel below the chart.
+        const readout = document.getElementById('tap-readout');
+        gd.on('plotly_click', (e) => {{
+            if (!e || !e.points || !e.points.length) return;
+            const pt = e.points[0];
+            const html = pt.customdata || pt.label || '';
+            if (!html) return;
+            readout.classList.remove('empty');
+            readout.innerHTML = html;
+        }});
     }});
     let resizeTimer = null;
     window.addEventListener('resize', () => {{
