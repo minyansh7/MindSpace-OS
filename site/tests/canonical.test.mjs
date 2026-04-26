@@ -48,11 +48,11 @@ test('UMAP citation present', () => {
   expect(cite).toBeDefined();
 });
 
-test('limitations include the GoEmotions circularity disclosure', () => {
-  const text = canonical.limitations.join(' ').toLowerCase();
-  expect(text).toContain('circular');
-  expect(text).toContain('goemotions');
-  expect(text).toContain('reddit');
+test('about page discloses GoEmotions / Reddit model circularity', async () => {
+  const html = (await readFile('dist/about/index.html', 'utf8')).toLowerCase();
+  expect(html).toContain('goemotions');
+  expect(html).toContain('reddit');
+  expect(html).toMatch(/applying goemotions to reddit/);
 });
 
 test('no inline duplicate of post counts in Astro source files', async () => {

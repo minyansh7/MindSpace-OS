@@ -320,7 +320,10 @@ def build_community_dynamics_html() -> str:
     layout = fig.setdefault('layout', {})
     layout.pop('height', None)
     layout['autosize'] = True
-    layout['margin'] = {'l': 10, 'r': 10, 't': 8, 'b': 8}
+    # Bottom margin 80 (vs the prior 8) leaves a strip below the Sankey for the
+    # native Plotly hover tooltip — without it, hovers on bottom-row ribbons get
+    # clipped by the iframe edge.
+    layout['margin'] = {'l': 10, 'r': 10, 't': 8, 'b': 80}
 
     fig_json = json.dumps(fig)
     return f"""<!DOCTYPE html>
@@ -366,7 +369,7 @@ def build_community_dynamics_html() -> str:
     </style>
 </head>
 <body>
-    <div class="hover-hint-row"><span class="hover-hint">Hover</span> to see how emotion shift from posts to replies.</div>
+    <div class="hover-hint-row"><span class="hover-hint">Hover</span> to see how emotions flow from posts to replies</div>
     <div class="column-eyebrows"><span>Posts</span><span>Replies</span></div>
     <div id="sankey-plot"></div>
     <script>
@@ -804,7 +807,7 @@ def build_inner_life_currents_html() -> str:
         document.getElementById('stats').innerHTML = `
             <strong>${{payload.connected_count}} meditation topics</strong> are connected to each other out of <strong>${{payload.total_nodes_q}} total topics</strong>
             (<strong>${{pct}}%</strong>). The bold lines show the <strong>top 10 connections by engagement</strong>; quieter pairings remain as faint threads for context.<br>
-            <span class="hover-hint">Hover</span> a bold line for the topics, themes, and sentiment behind it.`;
+            <span class="hover-hint">Hover</span> for detailed topics, themes, and sentiment behind it.`;
 
         const config = {{
             displayModeBar: false, displaylogo: false, responsive: true,
@@ -1461,7 +1464,7 @@ def build_weather_report_html() -> str:
             <div class="legend-item"><span class="legend-emoji">⛈️</span><span class="legend-text">Storm Warning (-0.6+)</span></div>
             <div class="legend-footer">
                 <strong id="legend-q">2025Q2</strong><br>
-                <strong>Region Size = Discussion Volume</strong><br><span style="color: #ffffff; border-bottom: 3px solid #FFD700; padding-bottom: 1px; font-weight: 700;">Hover</span> to discover details.
+                <strong>Region Size = Discussion Volume</strong><br><span style="color: #ffffff; border-bottom: 4px solid #FFD700; padding-bottom: 1px; font-weight: 700;">Hover</span> to discover details.
             </div>
         </div>
     </div>
