@@ -61,9 +61,11 @@ const staticHeight: Record<string, number> = {
     </p>
 
     <!-- 1 paragraph + 1 callout per design review -->
-    <div class="prose-editorial mb-10">
-      <p>{page.intro}</p>
-    </div>
+    {page.intro && (
+      <div class="prose-editorial mb-10">
+        <p>{page.intro}</p>
+      </div>
+    )}
 
     {page.callout && (
       <blockquote class="pull-quote max-w-3xl mb-12">
