@@ -30,6 +30,39 @@ CHARTS_DIR = SITE_PUBLIC / "charts"
 
 PLOTLY_CDN_URL = "https://cdn.plot.ly/plotly-2.35.2.min.js"
 
+# Mobile baseline injected into every chart's <style>. Keeps each chart
+# readable + tappable at narrow viewports without dedicated per-chart logic.
+# Per-chart polish (label collision tuning, region repositioning, etc.) lives
+# in each chart's own <style>. This is the floor.
+MOBILE_CSS = """
+        @media (max-width: 768px) {
+            body { font-size: 14px; }
+            .plot-wrap { height: 720px !important; }
+            .modebar { display: none !important; }
+            .hovertext { font-size: 12px !important; max-width: 280px !important; }
+            button, [role="button"], input[type="checkbox"] + label,
+            .quarter-btn, .nav-btn, .toggle-btn, .quarter-chip {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            #radar-wrap, .radar-overlay {
+                width: 160px !important; height: 160px !important;
+                top: 4px !important; right: 4px !important;
+            }
+            .stats-bar, .legend, .quarter-strip {
+                font-size: 12px !important;
+                padding: 8px !important;
+            }
+        }
+        @media (max-width: 480px) {
+            body { font-size: 13px; }
+            .plot-wrap { height: 600px !important; }
+            #radar-wrap, .radar-overlay {
+                width: 130px !important; height: 130px !important;
+            }
+        }
+"""
+
 
 # ----------------------------------------------------------------------------
 # Emotion Pulse — UMAP scatter + radar overlay + initial hover seed box
@@ -197,6 +230,7 @@ def build_emotion_pulse_html() -> str:
             transition: opacity 0.6s ease;
             pointer-events: none;
         }}
+{MOBILE_CSS}
     </style>
 </head>
 <body>
@@ -366,6 +400,7 @@ def build_community_dynamics_html() -> str:
             padding-bottom: 1px;
             font-weight: 700;
         }}
+{MOBILE_CSS}
     </style>
 </head>
 <body>
@@ -676,6 +711,7 @@ def build_inner_life_currents_html() -> str:
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
             backdrop-filter: blur(10px);
         }}
+{MOBILE_CSS}
     </style>
 </head>
 <body>
@@ -1443,6 +1479,7 @@ def build_weather_report_html() -> str:
             font-style: italic;
             padding: 4px 0;
         }}
+{MOBILE_CSS}
     </style>
 </head>
 <body>

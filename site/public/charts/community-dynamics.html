@@ -38,6 +38,34 @@
             padding-bottom: 1px;
             font-weight: 700;
         }
+
+        @media (max-width: 768px) {
+            body { font-size: 14px; }
+            .plot-wrap { height: 720px !important; }
+            .modebar { display: none !important; }
+            .hovertext { font-size: 12px !important; max-width: 280px !important; }
+            button, [role="button"], input[type="checkbox"] + label,
+            .quarter-btn, .nav-btn, .toggle-btn, .quarter-chip {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            #radar-wrap, .radar-overlay {
+                width: 160px !important; height: 160px !important;
+                top: 4px !important; right: 4px !important;
+            }
+            .stats-bar, .legend, .quarter-strip {
+                font-size: 12px !important;
+                padding: 8px !important;
+            }
+        }
+        @media (max-width: 480px) {
+            body { font-size: 13px; }
+            .plot-wrap { height: 600px !important; }
+            #radar-wrap, .radar-overlay {
+                width: 130px !important; height: 130px !important;
+            }
+        }
+
     </style>
 </head>
 <body>

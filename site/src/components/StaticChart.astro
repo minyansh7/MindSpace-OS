@@ -9,31 +9,36 @@
    first fetch on parse. A sync inline script immediately after the iframe
    reads `data-time-of-day` (set in <head> by Base.astro) and assigns
    src=base+?tod=<slot>. The script runs the moment the parser hits it —
-   no DOMContentLoaded wait, no cancel-and-restart double fetch. */
+   no DOMContentLoaded wait, no cancel-and-restart double fetch.
+
+   Mobile: uses a smaller min-height at narrow viewports so the chart
+   doesn't reserve giant whitespace before its content fills in. The
+   chart HTMLs ship their own narrow-viewport CSS (see MOBILE_CSS in
+   build_chart_figures.py); this component just sizes the surrounding
+   iframe envelope. */
 
 interface Props {
   /** path under /public/charts/, e.g. "emotion-pulse.html" */
   src: string;
-  /** iframe height in px (chart-specific to fit content without scrollbars) */
+  /** desktop iframe height in px (chart-specific to fit content without scrollbars) */
   height: number;
+  /** mobile iframe height in px. Default: 70% of desktop, min 600px. */
+  mobileHeight?: number;
   /** accessible title for screen readers */
   title: string;
 }
 
-const { src, height, title } = Astro.props;
+const { src, height, mobileHeight, title } = Astro.props;
 const baseSrc = `/charts/${src}`;
+const mobileH = mobileHeight ?? Math.max(600, Math.round(height * 0.7));
 ---
-<figure class="w-full" data-static-chart>
-  <div
-    class="w-full rounded-xl overflow-hidden border border-[var(--color-hairline)]"
-    style={`min-height: ${height}px;`}
-  >
+<figure class="w-full static-chart" data-static-chart>
+  <div class="static-chart-frame w-full rounded-xl overflow-hidden border border-[var(--color-hairline)]">
     <iframe
       data-base-src={baseSrc}
       title={title}
       fetchpriority="high"
-      class="w-full border-0 block"
-      style={`height: ${height}px; background: transparent;`}
+      class="static-chart-iframe w-full border-0 block"
       allowfullscreen
     ></iframe>
     <script is:inline define:vars={{ baseSrc }}>
@@ -46,3 +51,12 @@ const baseSrc = `/charts/${src}`;
     </script>
   </div>
 </figure>
+
+<style define:vars={{ desktopHeight: `${height}px`, mobileHeight: `${mobileH}px` }}>
+  .static-chart-frame { min-height: var(--mobileHeight); }
+  .static-chart-iframe { height: var(--mobileHeight); background: transparent; }
+  @media (min-width: 768px) {
+    .static-chart-frame { min-height: var(--desktopHeight); }
+    .static-chart-iframe { height: var(--desktopHeight); }
+  }
+</style>

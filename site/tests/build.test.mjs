@@ -160,6 +160,28 @@ test('all four static chart HTMLs are self-contained (no Streamlit references)',
   }
 });
 
+test('all four static chart HTMLs include mobile breakpoints', async () => {
+  // MOBILE_CSS in scripts/build_chart_figures.py injects @media (max-width: 768px)
+  // and @media (max-width: 480px) into every chart's <style>. Re-run the bake
+  // script if these break.
+  for (const slug of ['emotion-pulse', 'community-dynamics', 'inner-life-currents', 'community-weather-report']) {
+    const html = await readFile(path.join(DIST, `charts/${slug}.html`), 'utf8');
+    expect(html).toContain('@media (max-width: 768px)');
+    expect(html).toContain('@media (max-width: 480px)');
+    expect(html).toContain('min-height: 44px');
+  }
+});
+
+test('explore page renders responsive iframe heights via StaticChart', async () => {
+  // StaticChart.astro injects desktop (768+) and mobile (<768) heights via CSS
+  // custom properties. Astro/Vite minifies, so the @media rule loses the space
+  // and the selector gets a data-astro-cid suffix.
+  const html = await readFile(path.join(DIST, 'explore/emotion-pulse/index.html'), 'utf8');
+  expect(html).toMatch(/@media\s*\(min-width:\s*768px\)/);
+  expect(html).toMatch(/--mobileHeight:\s*\d+px/);
+  expect(html).toMatch(/--desktopHeight:\s*\d+px/);
+});
+
 test('Plotly-based static charts load Plotly.js from CDN', async () => {
   // Weather Report uses pure HTML/CSS — no Plotly. The other three use Plotly.
   for (const slug of ['emotion-pulse', 'community-dynamics', 'inner-life-currents']) {

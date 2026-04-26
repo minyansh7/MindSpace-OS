@@ -36,6 +36,15 @@ const staticHeight: Record<string, number> = {
   'inner-life-currents': 1000,
   'community-weather-report': 1200,
 };
+/* Mobile iframe heights — match the per-chart `.plot-wrap` height
+   set by MOBILE_CSS in scripts/build_chart_figures.py (720px at <=768px,
+   600px at <=480px), plus padding for surrounding chart chrome. */
+const mobileHeight: Record<string, number> = {
+  'emotion-pulse': 780,
+  'community-dynamics': 780,
+  'inner-life-currents': 820,
+  'community-weather-report': 980,
+};
 ---
 <Base
   title={`${page.title} — ${project.name}`}
@@ -80,6 +89,7 @@ const staticHeight: Record<string, number> = {
       <StaticChart
         src={`${page.slug}.html`}
         height={staticHeight[page.slug] ?? 900}
+        mobileHeight={mobileHeight[page.slug] ?? 700}
         title={`${page.title} — interactive chart`}
       />
     ) : (
