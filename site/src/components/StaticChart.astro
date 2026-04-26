@@ -29,7 +29,13 @@ interface Props {
 }
 
 const { src, height, mobileHeight, title } = Astro.props;
-const baseSrc = `/charts/${src}`;
+/* Cachebust the iframe URL with a build-time identifier so Cloudflare Pages
+   edge cache + browser cache invalidate when the chart HTML changes. Without
+   this, `?tod=dawn` URL variants can serve stale chart HTML from edge cache
+   even after a fresh deploy of the underlying file. Computed once per build
+   at module load. */
+const BUILD_ID = `b${Date.now().toString(36)}`;
+const baseSrc = `/charts/${src}?v=${BUILD_ID}`;
 const mobileH = mobileHeight ?? Math.max(600, Math.round(height * 0.7));
 ---
 <figure class="w-full static-chart" data-static-chart>
@@ -46,7 +52,9 @@ const mobileH = mobileHeight ?? Math.max(600, Math.round(height * 0.7));
         var iframe = document.currentScript.previousElementSibling;
         if (!iframe || iframe.tagName !== 'IFRAME') return;
         var tod = document.documentElement.getAttribute('data-time-of-day') || '';
-        iframe.src = tod ? baseSrc + '?tod=' + encodeURIComponent(tod) : baseSrc;
+        // baseSrc already has ?v=<buildId>; append tod with & if present
+        var sep = baseSrc.indexOf('?') >= 0 ? '&' : '?';
+        iframe.src = tod ? baseSrc + sep + 'tod=' + encodeURIComponent(tod) : baseSrc;
       })();
     </script>
   </div>
