@@ -25,7 +25,7 @@
     "post_count_pre_filter_note": "Total posts before response-pattern filter. Use 2899 on all public surfaces; 2977 documented for reproducibility.",
     "date_range_start": "2024-01-01",
     "date_range_end": "2025-06-30",
-    "date_range_human": "January 2024 – June 2025",
+    "date_range_human": "January 2024 \u2013 June 2025",
     "language": "English"
   },
   "archetypes": [
@@ -67,7 +67,7 @@
       "symbol": "star-square",
       "icon": "stone",
       "quote": "Something opened up today and I just don't know how to talk about it.",
-      "sketch": "The poster who writes about a small grief or a small breakthrough and isn't sure how to talk about it. Posts get fewer upvotes but ~36% more comments — this archetype attracts intimacy, not amplification."
+      "sketch": "The poster who writes about a small grief or a small breakthrough and isn't sure how to talk about it. Posts get fewer upvotes but ~36% more comments \u2014 this archetype attracts intimacy, not amplification."
     },
     {
       "slug": "anxious-concern",
@@ -81,13 +81,41 @@
     }
   ],
   "clusters": [
-    { "name": "Anxiety & Mental Health", "color": "#1f77b4", "color_dark": "#5BA3E0" },
-    { "name": "Awareness", "color": "#808000", "color_dark": "#B8B85A" },
-    { "name": "Buddhism & Spirituality", "color": "#ff7f0e", "color_dark": "#FF9A3D" },
-    { "name": "Concentration & Flow", "color": "#d62728", "color_dark": "#F25555" },
-    { "name": "Meditation & Mindfulness", "color": "#9467bd", "color_dark": "#B894E0" },
-    { "name": "Practice, Retreat, & Meta", "color": "#8c564b", "color_dark": "#C08A75" },
-    { "name": "Self-Regulation", "color": "#17becf", "color_dark": "#4FD4E0" }
+    {
+      "name": "Anxiety & Mental Health",
+      "color": "#1f77b4",
+      "color_dark": "#5BA3E0"
+    },
+    {
+      "name": "Awareness",
+      "color": "#808000",
+      "color_dark": "#B8B85A"
+    },
+    {
+      "name": "Buddhism & Spirituality",
+      "color": "#ff7f0e",
+      "color_dark": "#FF9A3D"
+    },
+    {
+      "name": "Concentration & Flow",
+      "color": "#d62728",
+      "color_dark": "#F25555"
+    },
+    {
+      "name": "Meditation & Mindfulness",
+      "color": "#9467bd",
+      "color_dark": "#B894E0"
+    },
+    {
+      "name": "Practice, Retreat, & Meta",
+      "color": "#8c564b",
+      "color_dark": "#C08A75"
+    },
+    {
+      "name": "Self-Regulation",
+      "color": "#17becf",
+      "color_dark": "#4FD4E0"
+    }
   ],
   "pages": [
     {
@@ -103,7 +131,7 @@
       "slug": "community-dynamics",
       "title": "Community dynamics",
       "subtitle": "Who responds to whom, emotionally",
-      "intro": "Each ribbon shows how a poster's emotional tone flows into the commenter's tone. Grief gets mirrored: about 1 in 4 people reply with grief themselves. Anxiety doesn't — only 7 out of 100 reply with anxiety; more than half offer warm reassurance instead. The community has unwritten response rules.",
+      "intro": "Each ribbon shows how a poster's emotional tone flows into the commenter's tone. Grief gets mirrored: about 1 in 4 people reply with grief themselves. Anxiety doesn't \u2014 only 7 out of 100 reply with anxiety; more than half offer warm reassurance instead. The community has unwritten response rules.",
       "callout": "Grief gets mirrored. Anxiety gets reassurance.",
       "streamlit_path": "/Community_Dynamics",
       "screenshot": "/screenshots/community-dynamics.svg"
@@ -112,7 +140,7 @@
       "slug": "community-weather-report",
       "title": "Community weather report",
       "subtitle": "How the community mood shifts over time",
-      "intro": "Eighteen months of sentiment across topics, drawn as weather. The metaphor reads more honestly than a heatmap because mood, like weather, is uneven. Some topics run sunny, some cloudy — luckily, nothing stormy.",
+      "intro": "Eighteen months of sentiment across topics, drawn as weather. The metaphor reads more honestly than a heatmap because mood, like weather, is uneven. Some topics run sunny, some cloudy \u2014 luckily, nothing stormy.",
       "callout": "",
       "streamlit_path": "/Community_Weather_Report",
       "screenshot": "/screenshots/community-weather-report.svg"
@@ -121,7 +149,7 @@
       "slug": "inner-life-currents",
       "title": "Inner life currents",
       "subtitle": "How theme connections shift over time",
-      "intro": "A temporal network of theme co-occurrences. Drag the Time Travel slider through six quarters and watch which topics keep showing up together — Anxiety & Mental Health bonded tightly to Self-Regulation early in the period, then loosened as Concentration & Flow took its place.",
+      "intro": "A temporal network of theme co-occurrences. Drag the Time Travel slider through six quarters and watch which topics keep showing up together \u2014 Anxiety & Mental Health bonded tightly to Self-Regulation early in the period, then loosened as Concentration & Flow took its place.",
       "callout": "",
       "streamlit_path": "/Inner_Life_Currents",
       "screenshot": "/screenshots/inner-life-currents.svg"
@@ -130,11 +158,11 @@
   "essays": [
     {
       "title": "What 2,899 Reddit Posts on Meditation Actually Sound Like",
-      "subtitle": "The center of gravity isn't peace — it's struggle wrapped around curiosity.",
+      "subtitle": "The center of gravity isn't peace \u2014 it's struggle wrapped around curiosity.",
       "url": "https://minyansh.substack.com/p/what-48000-reddit-posts-on-meditation",
       "published": "2026-04-21",
       "summary": "Establishes the central finding: the dominant emotion on r/meditation isn't peace, it's struggle wrapped around curiosity.",
-      "pull_quote": "What I noticed, sitting with three thousand posts: the dominant register isn't peace. It's the steady act of trying again — the breath that didn't work, and the breath you took anyway.",
+      "pull_quote": "What I noticed, sitting with three thousand posts: the dominant register isn't peace. It's the steady act of trying again \u2014 the breath that didn't work, and the breath you took anyway.",
       "read_time_minutes": 8
     },
     {
@@ -143,7 +171,7 @@
       "url": "https://minyansh.substack.com/p/the-emotion-map-of-meditation-online",
       "published": "2026-04-24",
       "summary": "Adds findings on how the community responds: grief gets mirrored, anxiety gets reassurance, lurkers do most of the emotional work.",
-      "pull_quote": "Grief gets mirrored. Anxiety gets reassurance. The most-upvoted commenters rarely post — they only respond. There are unwritten rules here, and the community keeps them.",
+      "pull_quote": "Grief gets mirrored. Anxiety gets reassurance. The most-upvoted commenters rarely post \u2014 they only respond. There are unwritten rules here, and the community keeps them.",
       "read_time_minutes": 12
     }
   ],
@@ -155,7 +183,8 @@
       "year": 2020,
       "title": "GoEmotions: A Dataset of Fine-Grained Emotions",
       "venue": "Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics",
-      "arxiv": "2005.00547"
+      "arxiv": "2005.00547",
+      "blog": "https://research.google/blog/goemotions-a-dataset-for-fine-grained-emotion-classification/"
     }
   ],
   "limitations": [

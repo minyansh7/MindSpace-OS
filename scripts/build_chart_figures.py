@@ -134,11 +134,22 @@ def build_emotion_pulse_payload() -> dict[str, Any]:
     y_range_pad_top = 0.13 * (y_max - y_min)
     y_range_pad_bot = 0.01 * (y_max - y_min)
 
+    seed_mask = df["hover_text"].str.contains("Insight Timer used to be amazing", na=False)
+    if seed_mask.any():
+        seed_row = df[seed_mask].iloc[0]
+        seed_radar_values = [float(seed_row[c]) for c in USER_RADAR_EMOTIONS]
+        seed_archetype = str(seed_row["archetype_label"])
+    else:
+        seed_radar_values = None
+        seed_archetype = None
+
     return {
         "traces": traces,
         "y_range": [y_min - y_range_pad_bot, y_max + y_range_pad_top],
         "archetype_colors": ARCHETYPE_COLORS,
         "theta_labels": RADAR_THETA_LABELS,
+        "seed_radar_values": seed_radar_values,
+        "seed_archetype": seed_archetype,
     }
 
 
@@ -185,9 +196,7 @@ def build_emotion_pulse_html() -> str:
             opacity: 1;
             transition: opacity 0.6s ease;
             pointer-events: none;
-            animation: fadeOut 1s ease-in-out 5s forwards;
         }}
-        @keyframes fadeOut {{ to {{ opacity: 0; pointer-events: none; }} }}
     </style>
 </head>
 <body>
@@ -198,7 +207,7 @@ def build_emotion_pulse_html() -> str:
             <b>Emotion Pulse: Tender Uncertainty</b><br>
             <b>Top Emotions:</b> caring: 75% annoying: 71% desire: 70% disapproval: 62% realization: 60% remorse: 60% curiosity: 59% approval: 56% excitement: 54% confusion: 53%<br>
             <b>Post/Comment:</b> Insight Timer used to be amazing. While the community content is a nice-to-have, I mostly used it for the timer feature. However in the past few months the number of disruptive...<br><br>
-            <b><span style="text-decoration: underline; text-decoration-color: #ffc300; text-decoration-thickness: 3px;">Hover over</span></b> a point to replace this — and watch the radar in the top-right redraw.
+            <span style="color: inherit; border-bottom: 4px solid #FFD700; padding-bottom: 1px; font-weight: 700;">Hover</span> to discover details - and watch its emotion radar.
         </div>
     </div>
 
@@ -239,35 +248,42 @@ def build_emotion_pulse_html() -> str:
         hoverinfo: 'skip', showlegend: false
     }}];
     const radarConfig = {{ displayModeBar: false, staticPlot: true, responsive: true }};
-    Plotly.newPlot('radar-plot', emptyRadar, radarLayout, radarConfig);
-
-    const umapDiv = document.getElementById('umap-plot');
-    umapDiv.on('plotly_hover', (evt) => {{
-        const pt = evt.points[0];
-        if (!pt || !pt.customdata) return;
-        const scores = pt.customdata;
-        const archetype = pt.data.name;
-        const color = COLORS[archetype] || '#888';
-        Plotly.react('radar-plot', [{{
+    function buildRadarTrace(scores, archetype) {{
+        const color = COLORS[archetype] || '#6a5acd';
+        return [{{
             type: 'scatterpolar', r: [...scores, scores[0]], theta: [...THETA, THETA[0]],
             name: archetype, mode: 'lines',
             line: {{ color: color, width: 2.5 }},
             fillcolor: hexToRgba(color, 0.32), fill: 'toself', opacity: 1,
             hoverinfo: 'skip', showlegend: false
-        }}], radarLayout, radarConfig);
+        }}];
+    }}
+    const seedRadar = (PAYLOAD.seed_radar_values && PAYLOAD.seed_archetype)
+        ? buildRadarTrace(PAYLOAD.seed_radar_values, PAYLOAD.seed_archetype)
+        : emptyRadar;
+    Plotly.newPlot('radar-plot', seedRadar, radarLayout, radarConfig);
+
+    const umapDiv = document.getElementById('umap-plot');
+    const seedBox = document.getElementById('initial-hover-box');
+    let seedDismissed = false;
+    function dismissSeedBox() {{
+        if (seedDismissed || !seedBox) return;
+        seedDismissed = true;
+        seedBox.style.opacity = '0';
+        setTimeout(() => seedBox.remove(), 600);
+    }}
+
+    umapDiv.on('plotly_hover', (evt) => {{
+        const pt = evt.points[0];
+        if (!pt || !pt.customdata) return;
+        const scores = pt.customdata;
+        const archetype = pt.data.name;
+        Plotly.react('radar-plot', buildRadarTrace(scores, archetype), radarLayout, radarConfig);
+        dismissSeedBox();
     }});
     umapDiv.on('plotly_unhover', () => {{
-        Plotly.react('radar-plot', emptyRadar, radarLayout, radarConfig);
+        Plotly.react('radar-plot', seedRadar, radarLayout, radarConfig);
     }});
-
-    const seedBox = document.getElementById('initial-hover-box');
-    if (seedBox) {{
-        const dismiss = () => {{
-            seedBox.style.opacity = '0';
-            setTimeout(() => seedBox.remove(), 600);
-        }};
-        umapDiv.addEventListener('mousemove', dismiss, {{ once: true }});
-    }}
     </script>
 </body>
 </html>"""
@@ -327,16 +343,31 @@ def build_community_dynamics_html() -> str:
             display: flex; justify-content: space-between;
             padding: 12px 32px 6px 32px;
             font-size: 13px; line-height: 1.2;
-            color: #64748b; letter-spacing: 0.08em;
-            text-transform: uppercase; font-weight: 600;
+            color: #64748b; letter-spacing: 0.02em;
+            font-weight: 600;
         }}
         /* The plot consumes whatever vertical space remains so the Sankey ribbons
            span the full iframe height. */
         #sankey-plot {{ flex: 1 1 auto; width: 100%; min-height: 0; }}
+        .hover-hint-row {{
+            flex: 0 0 auto;
+            text-align: center;
+            padding: 0 32px 8px 32px;
+            font-size: 14px;
+            color: #4A5568;
+            line-height: 1.5;
+        }}
+        .hover-hint {{
+            color: #4A5568;
+            border-bottom: 4px solid #FFD700;
+            padding-bottom: 1px;
+            font-weight: 700;
+        }}
     </style>
 </head>
 <body>
-    <div class="column-eyebrows"><span>POST</span><span>COMMENT</span></div>
+    <div class="hover-hint-row"><span class="hover-hint">Hover</span> to see how emotion shift from posts to replies.</div>
+    <div class="column-eyebrows"><span>Posts</span><span>Replies</span></div>
     <div id="sankey-plot"></div>
     <script>
     const FIG = {fig_json};
@@ -1432,7 +1463,7 @@ def build_weather_report_html() -> str:
             <div class="legend-item"><span class="legend-emoji">⛈️</span><span class="legend-text">Storm Warning (-0.6+)</span></div>
             <div class="legend-footer">
                 <strong id="legend-q">2025Q2</strong><br>
-                <em><strong>Region Size = Discussion Volume</strong><br><strong>Hover for details</strong></em>
+                <strong>Region Size = Discussion Volume</strong><br><span style="color: #ffffff; border-bottom: 3px solid #FFD700; padding-bottom: 1px; font-weight: 700;">Hover</span> to discover details.
             </div>
         </div>
     </div>

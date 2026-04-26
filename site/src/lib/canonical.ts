@@ -39,6 +39,7 @@ export type Citation = {
   title: string;
   venue?: string;
   arxiv?: string;
+  blog?: string;
 };
 
 export const project = canonical.project;

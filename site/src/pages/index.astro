@@ -23,7 +23,7 @@ const datasetSchema = {
   temporalCoverage: `${data.date_range_start}/${data.date_range_end}`,
   inLanguage: 'en',
   isBasedOn: [
-    { '@type': 'CreativeWork', name: 'GoEmotions', url: 'https://arxiv.org/abs/2005.00547' },
+    { '@type': 'CreativeWork', name: 'GoEmotions', url: 'https://research.google/blog/goemotions-a-dataset-for-fine-grained-emotion-classification/' },
   ],
 };
 ---
@@ -57,7 +57,7 @@ const datasetSchema = {
       "Joy ranks 25th of 28 emotions. Amusement is dead last."
     </blockquote>
     <p class="footnote mt-4 max-w-3xl">
-      Emotion classification via Google Research's GoEmotions ({goEmotions.authors.split(',')[0]} et al. {goEmotions.year}),
+      Emotion classification via Google Research's <a href={goEmotions.blog} target="_blank" rel="noopener">GoEmotions</a> ({goEmotions.authors.split(',')[0]} et al. {goEmotions.year}),
       a 27-category model trained on Reddit comments.
       <a href="/about#methodology">What this can and can't tell you →</a>
     </p>
