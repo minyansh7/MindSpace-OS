@@ -123,25 +123,25 @@ test('chart pages link to GoEmotions methodology', async () => {
 test('community-dynamics page embeds the static chart, not Streamlit', async () => {
   // Phase 1 migration: this page uses StaticChart (iframe to /charts/*.html), not ChartFrame.
   const html = await readFile(path.join(DIST, 'explore/community-dynamics/index.html'), 'utf8');
-  expect(html).toContain('/charts/community-dynamics');
+  expect(html).toContain('/charts/community-dynamics.html');
   expect(html).not.toContain('mindspaceos.streamlit.app/Community_Dynamics');
 });
 
 test('emotion-pulse page embeds the static chart, not Streamlit', async () => {
   const html = await readFile(path.join(DIST, 'explore/emotion-pulse/index.html'), 'utf8');
-  expect(html).toContain('/charts/emotion-pulse');
+  expect(html).toContain('/charts/emotion-pulse.html');
   expect(html).not.toContain('mindspaceos.streamlit.app/Emotion_Pulse');
 });
 
 test('inner-life-currents page embeds the static chart, not Streamlit', async () => {
   const html = await readFile(path.join(DIST, 'explore/inner-life-currents/index.html'), 'utf8');
-  expect(html).toContain('/charts/inner-life-currents');
+  expect(html).toContain('/charts/inner-life-currents.html');
   expect(html).not.toContain('mindspaceos.streamlit.app/Inner_Life_Currents');
 });
 
 test('community-weather-report page embeds the static chart, not Streamlit', async () => {
   const html = await readFile(path.join(DIST, 'explore/community-weather-report/index.html'), 'utf8');
-  expect(html).toContain('/charts/community-weather-report');
+  expect(html).toContain('/charts/community-weather-report.html');
   expect(html).not.toContain('mindspaceos.streamlit.app/Community_Weather_Report');
 });
 

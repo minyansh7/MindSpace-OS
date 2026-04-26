@@ -184,12 +184,26 @@
       "title": "GoEmotions: A Dataset of Fine-Grained Emotions",
       "venue": "Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics",
       "arxiv": "2005.00547",
+      "url": "https://arxiv.org/abs/2005.00547",
+      "huggingface": "https://huggingface.co/datasets/google-research-datasets/go_emotions",
       "blog": "https://research.google/blog/goemotions-a-dataset-for-fine-grained-emotion-classification/"
+    },
+    {
+      "id": "umap",
+      "label": "UMAP",
+      "authors": "McInnes, L., Healy, J., & Melville, J.",
+      "year": 2018,
+      "title": "UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction",
+      "arxiv": "1802.03426",
+      "url": "https://arxiv.org/abs/1802.03426"
     }
   ],
   "limitations": [
     "Sample bias: r/meditation posters self-select into the platform; they're not 'all meditators.'",
     "Self-selection: the people who post are not the people who don't. Lurkers are invisible to this dataset.",
-    "Time window: 18 months covers a single annual cycle; longer-period seasonal effects are not visible."
+    "Model circularity: GoEmotions was trained on Reddit comments. Running it on r/meditation Reddit posts means part of the 'emotional vocabulary' it detects is what Reddit emotion looks like in general, not what meditation discussion looks like specifically.",
+    "Time window: 18 months covers a single annual cycle; longer-period seasonal effects are not visible.",
+    "English only.",
+    "Anonymization: post text is paraphrased, not verbatim, in any user-facing surface. Hover text on Emotion Pulse may include reconstructed phrases \u2014 see /about for the policy."
   ]
 }
