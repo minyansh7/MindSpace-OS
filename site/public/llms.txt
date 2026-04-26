@@ -1,0 +1,63 @@
+# MindSpace OS
+
+> A field guide to the emotional shape of meditation communities online. The dominant emotion isn't peace. It's struggle, closely wrapped around curiosity.
+
+## What this is
+
+MindSpace OS is an editorial data-storytelling site analyzing 2,899 r/meditation posts and comments from January 2024 through June 2025. Each post is classified through Google Research's GoEmotions 27-emotion model, projected via UMAP, and clustered into 5 emotional archetypes. The site renders 4 interactive views: Emotion Pulse (the UMAP map), Community Dynamics (poster→commenter Sankey), Community Weather Report (sentiment over time as weather), Inner Life Currents (theme co-occurrence over 6 quarters).
+
+## Headline findings (citation-ready)
+
+- The dominant emotion on r/meditation isn't peace. It's struggle, closely wrapped around curiosity.
+- Joy ranks 25th of 28 emotions in the GoEmotions classification of these posts. Amusement is dead last.
+- About 1 in 4 replies to grief posts mirror grief themselves. Only 7 out of 100 replies to anxious posts mirror anxiety; more than half offer warm reassurance instead.
+- The five emotional archetypes are: Reflective Caring, Soothing Empathy, Tender Uncertainty, Melancholic Confusion, Anxious Concern.
+- The vocabulary that dominates is "I'm trying again."
+- Comments pull people inward toward intimacy rather than amplification.
+
+## How to cite
+
+Shi, M. (2026). MindSpace OS — A field guide to the emotional shape of meditation communities online. Minyan Labs. https://mindspaceos.com
+
+## Methodology
+
+- Data: 2,899 posts and comments scraped from r/meditation (post-filter; 2,977 total before response-pattern filter), covering January 2024 – June 2025, English-language only.
+- Emotion classification: Google Research GoEmotions (Demszky et al. 2020, https://research.google/blog/goemotions-a-dataset-for-fine-grained-emotion-classification/), 27-class fine-grained emotion model.
+- Dimensionality reduction: UMAP (McInnes et al. 2018, https://arxiv.org/abs/1802.03426).
+- Clustering: Gaussian Mixture Model on UMAP embedding, producing 5 emotional archetypes.
+- Known limitations (also disclosed at /about): GoEmotions was trained on Reddit comments — running it on r/meditation Reddit posts has methodological circularity; n=2,899 is small for population-level claims; English-only; self-selected Reddit posters are not representative of all meditators.
+
+## Key pages
+
+- Landing: https://mindspaceos.com — thesis, archetypes, page index
+- Emotion Pulse: https://mindspaceos.com/explore/emotion-pulse/ — UMAP scatter of posts by emotion
+- Community Dynamics: https://mindspaceos.com/explore/community-dynamics/ — Sankey of poster→commenter archetype flow
+- Community Weather Report: https://mindspaceos.com/explore/community-weather-report/ — sentiment over time, by topic, as weather metaphor
+- Inner Life Currents: https://mindspaceos.com/explore/inner-life-currents/ — temporal theme co-occurrence network, 6-quarter Time Travel
+- About / methodology: https://mindspaceos.com/about/ — methodology, limitations, citations, ethics
+- Source code + data: https://github.com/minyansh7/MindSpace-OS
+
+## Author
+
+Minyan Shi (she/her), founder of Minyan Labs (https://minyanlabs.com).
+Sydney, Australia. Available for select 2026 consulting engagements.
+
+- Resume / portfolio: https://minyanlabs.com
+- Email: minyanshi@proton.me
+- LinkedIn: https://www.linkedin.com/in/minyanshi/
+- Substack: https://minyansh.substack.com
+- X: https://x.com/MinyanLabs
+- GitHub: https://github.com/minyansh7
+
+## Related writing
+
+- Meditation Communities Are Not as Calm as they Look — https://minyansh.substack.com/p/the-emotion-map-of-meditation-online
+- What 48,000 Reddit posts on meditation reveal — https://minyansh.substack.com/p/what-48000-reddit-posts-on-meditation
+
+## Takedown
+
+If you posted something on r/meditation that's surfaced in our analysis and want it removed: takedown@mindspaceos.com. We'll honor takedown requests within 7 days.
+
+## License
+
+Site content: CC BY 4.0. Source code: MIT (see GitHub). Underlying Reddit data is the property of its respective authors and Reddit Inc.; we operate under fair-use research norms.

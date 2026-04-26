@@ -1,0 +1,140 @@
+---
+// Schema.org JSON-LD emitter. Single component, multiple schema types.
+// Use for Person (about page, footer reference), Dataset (landing/chart pages),
+// CreativeWork (essays/articles), Organization (footer).
+//
+// Why a component, not inline blocks: 5 pages × hand-written JSON-LD = drift.
+// One source of truth = no "MinyanLabs" vs "Minyan Labs" mismatch.
+
+import { identity } from '../data/identity';
+import { project, data, citations } from '../lib/canonical.ts';
+
+interface Props {
+  type: 'Person' | 'Dataset' | 'CreativeWork' | 'Organization' | 'WebSite';
+  pageUrl?: string;
+  pageTitle?: string;
+  pageDescription?: string;
+}
+
+const { type, pageUrl, pageTitle, pageDescription } = Astro.props;
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: identity.person.name,
+  url: identity.links.resume,
+  jobTitle: identity.person.title,
+  worksFor: {
+    '@type': 'Organization',
+    name: identity.org.name,
+    url: identity.links.resume,
+  },
+  email: `mailto:${identity.person.email}`,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Sydney',
+    addressCountry: 'AU',
+  },
+  sameAs: [
+    identity.links.linkedin,
+    identity.links.github_user,
+    identity.links.x,
+    identity.links.substack,
+  ],
+  alumniOf: identity.person.education.map((e) => ({
+    '@type': 'EducationalOrganization',
+    name: e.school,
+  })),
+  award: identity.person.awards,
+  knowsAbout: [
+    'Data Storytelling',
+    'Generative AI',
+    'Audience Strategy',
+    'Data Visualization',
+    'NLP',
+    'Editorial Design',
+  ],
+  description: identity.person.bio_short,
+};
+
+const orgSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: identity.org.name,
+  legalName: identity.org.legal_name,
+  url: identity.links.resume,
+  founder: { '@type': 'Person', name: identity.person.name, url: identity.links.resume },
+  foundingDate: String(identity.org.founded),
+  foundingLocation: identity.org.location,
+  description: identity.org.tagline,
+  email: `mailto:${identity.person.email}`,
+  sameAs: [identity.links.linkedin, identity.links.x, identity.links.github_user],
+};
+
+const datasetSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: project.name,
+  alternateName: 'MindSpace OS r/meditation Emotion Corpus',
+  description: project.thesis,
+  url: project.domain,
+  identifier: project.domain,
+  creator: { '@type': 'Person', name: identity.person.name, url: identity.links.resume },
+  publisher: { '@type': 'Organization', name: identity.org.name, url: identity.links.resume },
+  license: 'https://creativecommons.org/licenses/by/4.0/',
+  isAccessibleForFree: true,
+  citation: citations.map((c) => `${c.authors} (${c.year}). ${c.title}. ${c.url}`),
+  keywords: [
+    'meditation',
+    'emotion analysis',
+    'GoEmotions',
+    'UMAP',
+    'reddit',
+    'r/meditation',
+    'data storytelling',
+    'editorial data viz',
+    'natural language processing',
+    'computational social science',
+  ],
+  temporalCoverage: `${data.date_range_start}/${data.date_range_end}`,
+  spatialCoverage: { '@type': 'Place', name: 'Online (English-language)' },
+  variableMeasured: ['emotion_class', 'archetype', 'sentiment', 'topic_cluster', 'co-occurrence'],
+  about: 'Emotional and topical patterns in 2,899 r/meditation posts (Jan 2024 – Jun 2025), classified via Google Research GoEmotions, projected via UMAP, clustered into 5 emotional archetypes.',
+  measurementTechnique: 'GoEmotions (Demszky 2020) 27-emotion classifier, UMAP dimensionality reduction (McInnes 2018), Gaussian Mixture Model clustering.',
+  inLanguage: 'en',
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: project.name,
+  alternateName: identity.org.name,
+  url: project.domain,
+  description: project.thesis,
+  publisher: { '@type': 'Organization', name: identity.org.name },
+  author: { '@type': 'Person', name: identity.person.name, url: identity.links.resume },
+};
+
+const creativeWorkSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: pageTitle || project.name,
+  description: pageDescription || project.thesis,
+  url: pageUrl || project.domain,
+  author: { '@type': 'Person', name: identity.person.name, url: identity.links.resume },
+  publisher: { '@type': 'Organization', name: identity.org.name, url: identity.links.resume },
+  isPartOf: { '@type': 'WebSite', name: project.name, url: project.domain },
+  inLanguage: 'en',
+};
+
+const schemaMap = {
+  Person: personSchema,
+  Dataset: datasetSchema,
+  Organization: orgSchema,
+  WebSite: websiteSchema,
+  CreativeWork: creativeWorkSchema,
+};
+
+const schema = schemaMap[type];
+---
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

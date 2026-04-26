@@ -5,6 +5,7 @@ import Footer from '../../components/Footer.astro';
 import ChartFrame from '../../components/ChartFrame.astro';
 import StaticChart from '../../components/StaticChart.astro';
 import PageCard from '../../components/PageCard.astro';
+import JsonLd from '../../components/JsonLd.astro';
 import { pages, project, data, citations } from '../../lib/canonical.ts';
 
 export function getStaticPaths() {
@@ -42,6 +43,13 @@ const staticHeight: Record<string, number> = {
   ogImage={`/og/${page.slug}.png`}
   pathname={`/explore/${page.slug}/`}
 >
+  <JsonLd
+    slot="head"
+    type="CreativeWork"
+    pageUrl={`${project.domain}/explore/${page.slug}/`}
+    pageTitle={`${page.title} — ${project.name}`}
+    pageDescription={page.subtitle}
+  />
   <Nav />
 
   <main id="main">

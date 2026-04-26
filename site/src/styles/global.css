@@ -175,6 +175,30 @@ body {
   padding-left: 1.25rem;
 }
 
+.h-finding {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.25rem, 2.2vw, 1.625rem);
+  line-height: 1.3;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+.link-finding {
+  display: inline-block;
+  margin-left: 0.25rem;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(255, 236, 74, 0.4);
+  font-weight: 500;
+  transition: text-decoration-color 200ms ease;
+}
+.link-finding:hover {
+  text-decoration-color: var(--color-accent);
+}
+
 .brand-mark {
   font-family: var(--font-mono);
   /* Match Tailwind text-sm exactly: 14px size, 1.43 line-height (= 1.25 / 0.875).
