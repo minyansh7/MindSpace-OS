@@ -22,21 +22,14 @@ const goEmotions = citations.find((c) => c.id === 'goemotions')!;
       <p>
         {project.name} is a visual analysis of {data.post_count_canonical.toLocaleString()} r/meditation
         posts and comments from {data.date_range_human}. It maps the emotional vocabulary the community
-        actually uses, the response patterns between posters and commenters, the mood weather across
-        topics over six quarters, and the way theme connections drift quarter by quarter.
+        actually uses, the response patterns between posters and repliers, the mood weather across
+        topics, and the way theme connections drift quarter by quarter.
       </p>
       <p>
-        The finding is summarized in one line: <strong>the dominant emotional register on r/meditation
-        isn't peace, it's struggle wrapped around curiosity</strong>. Joy ranks 25th of 28 emotions in
+        The surprising finding: the dominant emotion of reddit posts is
+        <strong>struggle wrapped around curiosity</strong>. Joy ranks 25th of 28 emotions in
         the <a href={goEmotions.blog} target="_blank" rel="noopener">GoEmotions</a> classification. Amusement is dead last. The vocabulary that dominates is
         <em>"I'm trying again."</em>
-      </p>
-      <p>
-        Two long-form essays unpack the findings:
-        <a href={data.subreddit ? "https://minyansh.substack.com/p/what-48000-reddit-posts-on-meditation" : "#"}>
-          What 3,000 Reddit posts on meditation actually sound like</a> (the thesis essay) and
-        <a href="https://minyansh.substack.com/p/the-emotion-map-of-meditation-online">
-          Meditation communities are not as calm as they look</a> (the response-pattern essay).
       </p>
     </div>
 
@@ -65,6 +58,14 @@ const goEmotions = citations.find((c) => c.id === 'goemotions')!;
       <p>A few things to keep in mind when reading the findings:</p>
       <ul class="list-disc pl-6 space-y-3 my-6">
         {limitations.map((l) => <li>{l}</li>)}
+      </ul>
+    </div>
+
+    <h2 class="h-section mt-16 mb-6" id="readings">Readings.</h2>
+    <div class="prose-editorial">
+      <ul class="list-disc pl-6 space-y-3 my-6">
+        <li><a href="https://minyansh.substack.com/p/what-48000-reddit-posts-on-meditation" target="_blank" rel="noopener">What 3,000 Reddit posts on meditation actually sound like</a></li>
+        <li><a href="https://minyansh.substack.com/p/the-emotion-map-of-meditation-online" target="_blank" rel="noopener">Meditation communities are not as calm as they look</a></li>
       </ul>
     </div>
 
