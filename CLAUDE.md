@@ -12,22 +12,71 @@ MindSpace OS ships two sibling deliverables from this repo:
    experience. Lives at `site/dist/` after `npm run build`. Hosted on
    Cloudflare Pages (project `mindspace-os`, account
    `985e6531724a5e9ce8670a37ead0d6f1`):
-   - Production: https://mindspace-os.pages.dev (built from `main`)
+   - Current live URL: https://minyansh7-mindspace-os-publi.mindspace-os.pages.dev
+     (canonical domain `mindspaceos.com` once DNS lands).
    - Branch previews: `https://<branch>.mindspace-os.pages.dev`
      auto-built per push when Cloudflare Git integration is connected.
-2. **Streamlit interactive app** (`Homepage.py` + `pages/*.py`). The live
-   chart surface the editorial site iframes / links to. Hosted on
-   Streamlit Cloud at https://mindspaceos.streamlit.app .
+2. **Streamlit interactive app** (`Homepage.py` + `pages/*.py`). Source of
+   truth for chart logic. Hosted on Streamlit Cloud at
+   https://mindspaceos.streamlit.app . **The editorial site no longer
+   iframes the Streamlit app at runtime** — see "Streamlit-to-static
+   migration" below.
 
 Canonical data shared by both surfaces lives in `data/canonical.json`
 (post counts, archetype palette, page metadata, essay listings). Python
 reads it directly; the Astro site reads it via `site/src/lib/canonical.ts`.
 A vitest in `site/tests/canonical.test.mjs` enforces no-inline-duplicates.
 
-Static chart embeds (`site/public/charts/*.html`) are baked by
-`python3 scripts/build_chart_figures.py`. Re-run that script whenever the
-palette or chart logic changes; the Astro site iframes those HTML files
-directly so it never has to talk to the Streamlit app at runtime.
+## Streamlit-to-static migration (2026-04-26)
+
+Originally the editorial site iframed `mindspaceos.streamlit.app/<page>`
+for each chart, which meant Streamlit Cloud cold-starts (10–30s) and
+Streamlit chrome (sidebar, "Built with Streamlit" footer) leaked into the
+reading experience. As of 2026-04-26 all four chart pages render from
+self-contained static HTML at `site/public/charts/*.html`, baked by
+`python3 scripts/build_chart_figures.py`:
+
+- **`emotion-pulse.html`** (~1.7 MB) — full UMAP scatter with all 2,899
+  hover_text strings inlined, archetype radar overlay updates on
+  `plotly_hover`. Plotly trace JSON pre-built from
+  `precomputed/emotion_clusters_slim.parquet`.
+- **`community-dynamics.html`** (~22 KB) — Sankey from
+  `precomputed/figures/community_dynamics_sankey.json`. POSTER/COMMENTER
+  column eyebrows relabeled to POST/COMMENT and customdata strings
+  patched in-place at build time. `layout.height` stripped so the flow
+  fills the iframe; `autosize: true` set so it responds to container.
+- **`inner-life-currents.html`** (~563 KB) — temporal theme network with
+  all 6 quarters' payloads inlined and a JS Time-Travel state machine
+  swapping the active payload via `Plotly.react`. Top-10 edges by weight
+  rendered with full opacity + hover; the rest fade back as visual
+  texture. Cluster labels distributed around the full 2π circle with a
+  collision-avoidance pass so adjacent labels don't overlap.
+- **`community-weather-report.html`** (~63 KB) — stats bar, weather map
+  with seven CSS-animated regions (sunny-pulse, hope-breathe,
+  contemplative-drift, gentle-rain-shake, storm-alert), per-condition
+  hover ripple bloom, and a Sentiment River Flow Analysis section
+  (per-topic cards with QoQ change badge + top-3 challenges by severity).
+  Meditation & Mindfulness gets a 0.85x size multiplier so it doesn't
+  crowd neighbors. Region positions tuned to keep satellites clear of
+  the legend and edges.
+
+Re-run `python3 scripts/build_chart_figures.py` whenever:
+- The canonical archetype palette in `data/canonical.json` or the
+  `TOPIC_MAPPING` / `WEATHER_TOPIC_COLORS` dicts in the build script change.
+- A Streamlit page changes its figure construction or hover template
+  (the build script re-implements the Plotly/HTML output rather than
+  importing from the Streamlit modules, since they have `st.set_page_config`
+  side effects).
+- The underlying parquet aggregates in `precomputed/` change.
+
+`<StaticChart src="emotion-pulse.html" />` in
+`site/src/components/StaticChart.astro` iframes the local file (zero CORS,
+zero cold-start) and appends `?tod=<dawn|morning|...|night>` so each chart
+HTML can theme itself in lockstep with the homepage gradient.
+
+The Streamlit Cloud app at `mindspaceos.streamlit.app` still works for
+direct-link visitors and remains the development surface for chart
+iteration, but the editorial site never depends on it at runtime.
 
 ## Deploy
 
@@ -42,6 +91,11 @@ The Astro site goes live on Cloudflare Pages two ways:
   deploy dist --project-name=mindspace-os --branch=<git-branch>`. Used
   when Git integration isn't wired or for ad-hoc previews. Requires
   `wrangler login` first.
+
+**Important:** the chart bake (`python3 scripts/build_chart_figures.py`)
+must run BEFORE the Astro build, since the Astro static iframes reference
+`site/public/charts/*.html` files. If you forget, the chart pages will
+404. Add this to any CI pipeline that builds the site.
 
 ## Page-by-page editorial notes
 

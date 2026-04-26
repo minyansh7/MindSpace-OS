@@ -4,10 +4,12 @@
 
 MindSpace OS turns **2,899 posts and comments from r/meditation** (Jan 2024 – Jun 2025) into a navigable field guide — emotional maps, sentiment weather, theme networks, and quarterly shifts. Built to see what a practice community sounds like when nobody's selling anything.
 
+**Live site:** [https://minyansh7-mindspace-os-publi.mindspace-os.pages.dev](https://minyansh7-mindspace-os-publi.mindspace-os.pages.dev) (canonical domain `mindspaceos.com` once DNS lands).
+
 The project ships as two sibling surfaces from one repo:
 
-- **Editorial site** (`site/`) — Astro static build, the public reading experience. Hosted on Cloudflare Pages: [https://mindspace-os.pages.dev](https://mindspace-os.pages.dev) (canonical domain `mindspaceos.com` once DNS lands).
-- **Interactive Streamlit app** (`Homepage.py` + `pages/`) — the live charts the editorial site embeds and links into. Hosted on Streamlit Cloud: [https://mindspaceos.streamlit.app](https://mindspaceos.streamlit.app).
+- **Editorial site** (`site/`) — Astro static build, the public reading experience. Hosted on Cloudflare Pages. **All four interactive chart pages are baked into self-contained static HTML at build time**, so the editorial site has zero runtime dependency on Streamlit (no cold-start, no hibernation, ~1.5s first load).
+- **Streamlit app** (`Homepage.py` + `pages/`) — the source of truth for chart logic (Plotly figures, custom JS visualizations, data wiring). The static `site/public/charts/*.html` embeds are regenerated from this code by `scripts/build_chart_figures.py`. The Streamlit app at [mindspaceos.streamlit.app](https://mindspaceos.streamlit.app) still works for direct-link visitors and as a development surface, but the editorial site no longer iframes it.
 
 ---
 
@@ -36,12 +38,38 @@ That's what a practice community actually sounds like.
 
 ## Tech stack
 
-- **Editorial site** (`site/`): [Astro](https://astro.build) static build with Tailwind, `@astrojs/sitemap`. Hosted on Cloudflare Pages (project `mindspace-os`). Imports the canonical archetype + post-count data from `data/canonical.json` so Python and TS read from one source of truth.
-- **Streamlit app** (`Homepage.py` + `pages/`): multipage Streamlit, [Plotly](https://plotly.com/python/) for interactive charts, custom `components.html` iframes for the network pages.
-- **Static chart bake** (`scripts/build_chart_figures.py`): regenerates the standalone `site/public/charts/*.html` embeds the Astro site iframes when the live Streamlit app is unreachable.
-- **Data**: [DuckDB](https://duckdb.org/) (`reddit_progress.duckdb`) + precomputed Parquet aggregates in `precomputed/`.
-- **NLP**: [GoEmotions](https://github.com/google-research/google-research/tree/master/goemotions) for emotion classification; [UMAP](https://umap-learn.readthedocs.io/) for dimensionality reduction.
-- **Language**: Python 3.11 (Streamlit + data pipeline), TypeScript / Astro (editorial site).
+### Production (everything the live site depends on at runtime)
+
+- **[Astro 6](https://astro.build)** — static-site framework. `output: 'static'`, every page rendered to plain HTML at build time. Component model + content collections power the editorial pages; `getStaticPaths` generates the four `/explore/*` routes from `data/canonical.json`.
+- **[Tailwind CSS 4](https://tailwindcss.com)** (via `@tailwindcss/vite`) — utility-first styling, theme tokens declared in `@theme` blocks rather than a separate config file. Time-of-day gradient theming + ripple-on-hover animations ported from the original meditation-circle design language.
+- **[@fontsource/*](https://fontsource.org/)** — self-hosted webfonts: **Inter** (UI + display), **Source Serif 4** (editorial body + pull-quotes), **JetBrains Mono** (eyebrows + brand mark). Imported in the layout so they're inlined and don't pop in.
+- **[@astrojs/sitemap](https://docs.astro.build/en/guides/integrations-guide/sitemap/)** — generates `sitemap-index.xml` + per-section sitemaps at build.
+- **[@astrojs/cloudflare](https://docs.astro.build/en/guides/integrations-guide/cloudflare/)** — Cloudflare Pages adapter (declared in deps; ready to flip from `static` → `server` when dynamic OG cards land).
+- **[Plotly.js](https://plotly.com/javascript/)** — loaded from CDN (`cdn.plot.ly/plotly-2.35.2.min.js`) by the four static chart HTMLs. Cached across pages after first load. Powers Emotion Pulse (UMAP scatter + radar overlay), Community Dynamics (Sankey), and Inner Life Currents (force-directed temporal network). Community Weather Report uses pure CSS animations + a hand-rolled Cardinal-spline sparkline; no Plotly.
+- **[Cloudflare Pages](https://pages.cloudflare.com/)** — static hosting. Project `mindspace-os`. Connected to GitHub for build-on-push.
+
+### Build (runs locally + in CI; not served at runtime)
+
+- **[Bun](https://bun.sh) + `bun:test`** — JS test runner for build-output assertions (route presence, OG meta, canonical-data sync, no-Streamlit-leak guard, static chart self-containment). 52 tests across `site/tests/`.
+- **Python 3.11** + **[pandas](https://pandas.pydata.org/)** + **[numpy](https://numpy.org/)** + **[pyarrow](https://arrow.apache.org/)** — drive `scripts/build_chart_figures.py` which bakes the four static chart HTMLs (Plotly trace construction, hover-text formatting, weather-region positioning, all 6 quarters of temporal-network payloads inlined into one file).
+- **[Plotly](https://plotly.com/python/) (Python)** — only used at build time, to construct trace JSON consumed by the static HTMLs. No Plotly Python in production.
+- **[DuckDB](https://duckdb.org/)** + Parquet aggregates in `precomputed/` — the data layer feeding the chart bake.
+
+### Source of truth (development surface, not in production path)
+
+- **[Streamlit](https://streamlit.io/)** + **Plotly** — `Homepage.py` + `pages/*.py` are the canonical home for chart logic (figure construction, hover templates, custom JS visualizations). Hosted at [mindspaceos.streamlit.app](https://mindspaceos.streamlit.app) for direct-link visitors and as a development surface. **The editorial site does not iframe Streamlit at runtime** — `scripts/build_chart_figures.py` re-implements the Plotly/HTML output and writes self-contained files into `site/public/charts/`. When chart logic changes in `pages/*.py`, the build script needs the same change applied (it deliberately doesn't `import` from the Streamlit modules to avoid `st.set_page_config` side effects).
+
+### NLP / data analysis (one-time pipeline, outputs land in `precomputed/`)
+
+- **[GoEmotions](https://github.com/google-research/google-research/tree/master/goemotions)** — Google Research's 27-emotion classifier; ran over the r/meditation corpus to produce per-post emotion scores.
+- **[UMAP](https://umap-learn.readthedocs.io/)** — dimensionality reduction on the GoEmotions embeddings → the `umap_x` / `umap_y` columns Emotion Pulse plots.
+- **[Gaussian Mixture Model](https://scikit-learn.org/stable/modules/mixture.html)** — clustered the UMAP embedding into the 5 emotional archetypes.
+
+### Languages
+
+- **TypeScript / Astro** — the editorial site (`site/`).
+- **Python 3.11** — chart-bake script + Streamlit app + data pipeline.
+- **CSS / HTML** — hand-tuned for the four chart HTMLs (CSS keyframe animations, flex layouts, custom Cardinal-spline sparkline).
 
 ---
 
@@ -50,12 +78,12 @@ That's what a practice community actually sounds like.
 ```bash
 cd site
 npm install
-npm run dev      # http://localhost:4321 with HMR
+npm run dev      # local dev server with HMR
 npm run build    # static build into site/dist/
-npm run preview  # serve the prod build at http://localhost:4321
+npm run preview  # serve the prod build locally
 ```
 
-The Astro build is what ships to Cloudflare Pages. The static chart embeds it iframes are baked by `python3 scripts/build_chart_figures.py` and live under `site/public/charts/*.html`.
+The Astro build is what ships to Cloudflare Pages. The four static chart embeds it serves are baked by `python3 scripts/build_chart_figures.py` and live under `site/public/charts/*.html` — re-run that script whenever the chart palette, layout, or data changes.
 
 ### Docker
 
