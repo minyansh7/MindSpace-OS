@@ -77,7 +77,7 @@ const staticHeight: Record<string, number> = {
     )}
     <p class="footnote mt-4 max-w-3xl">
       Based on {data.post_count_canonical.toLocaleString()} r/meditation posts and comments,
-      {data.date_range_human}. Emotion classification via Google Research's GoEmotions
+      {data.date_range_human}. Emotion classification via Google Research's <a href={goEmotions.blog} target="_blank" rel="noopener">GoEmotions</a>
       ({goEmotions.authors.split(',')[0]} et al. {goEmotions.year}), trained on Reddit comments —
       see <a href="/about#methodology">methodology</a> for limitations.
     </p>

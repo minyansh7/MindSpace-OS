@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { project, data, citations, limitations } from '../lib/canonical.ts';
+const goEmotions = citations.find((c) => c.id === 'goemotions')!;
 ---
 <Base
   title={`About — ${project.name}`}
@@ -27,7 +28,7 @@ import { project, data, citations, limitations } from '../lib/canonical.ts';
       <p>
         The finding is summarized in one line: <strong>the dominant emotional register on r/meditation
         isn't peace, it's struggle wrapped around curiosity</strong>. Joy ranks 25th of 28 emotions in
-        the GoEmotions classification. Amusement is dead last. The vocabulary that dominates is
+        the <a href={goEmotions.blog} target="_blank" rel="noopener">GoEmotions</a> classification. Amusement is dead last. The vocabulary that dominates is
         <em>"I'm trying again."</em>
       </p>
       <p>
@@ -47,7 +48,7 @@ import { project, data, citations, limitations } from '../lib/canonical.ts';
         spanning {data.date_range_human}.
       </p>
       <p>
-        Each post and comment is classified by Google Research's <strong>GoEmotions</strong> model
+        Each post and comment is classified by Google Research's <a href={goEmotions.blog} target="_blank" rel="noopener"><strong>GoEmotions</strong></a> model
         (Demszky et al. 2020), which scores text against a 27-emotion taxonomy plus neutral. Embeddings
         from the classifier are projected to two dimensions via UMAP and clustered
         with a Gaussian Mixture Model into the five emotional archetypes shown on the
