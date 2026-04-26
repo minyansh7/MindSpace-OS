@@ -140,7 +140,7 @@
       "slug": "community-weather-report",
       "title": "Community weather report",
       "subtitle": "How the community mood shifts over time",
-      "intro": "Each region is one of seven topic clusters across six quarters of meditation discourse, January 2024 through June 2025. Region size scales with how many pain-points landed in that cluster that quarter; the weather icon comes from the cluster's mean sentiment score, bucketed into five bands (sunny above +0.40, partly cloudy above +0.30, cloudy from \u20130.30 to +0.30, rainy below). The river-flow analysis underneath surfaces the top three pain-points per topic, color-coded by share of the quarter's posts. Some topics run sunny, some cloudy \u2014 luckily, nothing stormy.",
+      "intro": "Each region is one of seven topic clusters across six quarters of meditation discourse, January 2024 through June 2025. The cluster's mean sentiment score is bucketed into five bands \u2014 sunny, clearing up, cloudy, light showers, storm warning \u2014 luckily, nothing stormy. The breakdown underneath surfaces the top three pain points within each topic.",
       "callout": "",
       "streamlit_path": "/Community_Weather_Report",
       "screenshot": "/screenshots/community-weather-report.svg"
