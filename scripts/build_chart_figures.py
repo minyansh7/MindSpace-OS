@@ -85,6 +85,43 @@ MOBILE_CSS = """
         @media (max-width: 480px) {
             .plot-wrap { height: clamp(520px, 78vh, 660px) !important; }
         }
+        /* Small-mobile (≤360px): Galaxy Fold folded, older Androids,
+           iPhone SE 1st gen. Seed + radar previously consumed the chart's
+           horizontal space; shrink both, swap to ultra-terse seed payload,
+           and tighten chip legend so all 5 fit on one row. Bumps radar bg
+           transparency so chart shows through where they overlap. */
+        @media (max-width: 360px) {
+            #radar-wrap, .radar-overlay {
+                width: 110px !important;
+                height: 110px !important;
+                background: rgba(255, 255, 255, 0.78) !important;
+            }
+            #initial-hover-box {
+                right: 124px !important;
+                max-width: 50vw !important;
+                font-size: 10px !important;
+                padding: 5px 8px !important;
+                line-height: 1.3 !important;
+                background-color: rgba(106, 90, 205, 0.92) !important;
+            }
+            /* Single-line seed at the smallest screens. The mobile variant
+               still wraps to 4 lines at 280-320px; tiny variant is one
+               headline + one hint, ~50px tall. */
+            .seed-content-mobile { display: none !important; }
+            .seed-content-tiny   { display: block !important; }
+            #archetype-legend {
+                gap: 4px !important;
+                padding: 8px 6px 2px !important;
+                font-size: 10px !important;
+            }
+            #archetype-legend .chip {
+                padding: 2px 6px !important;
+                gap: 4px !important;
+            }
+            #archetype-legend .chip::before {
+                width: 8px !important; height: 8px !important;
+            }
+        }
 """
 
 
@@ -272,14 +309,17 @@ def build_emotion_pulse_html() -> str:
             transition: opacity 0.6s ease;
             pointer-events: none;
         }}
-        /* Two seed-box content variants: full text on desktop, terse on
-           mobile. Avoids the long emotion + post-quote payload getting
-           clipped at 80px max-height on phones. */
-        .seed-content-mobile {{ display: none; }}
+        /* Three seed-box content variants:
+             - desktop:  full emotion list + post-quote (>1024px)
+             - mobile:   archetype + 3 emotions + tap hint (361-1024px)
+             - tiny:     archetype + tap hint, single line (≤360px)
+           Swapped via @media to avoid clipping at narrow widths. */
         .seed-content-desktop {{ display: block; }}
+        .seed-content-mobile  {{ display: none; }}
+        .seed-content-tiny    {{ display: none; }}
         @media (max-width: 1024px) {{
-            .seed-content-mobile {{ display: block; }}
             .seed-content-desktop {{ display: none; }}
+            .seed-content-mobile  {{ display: block; }}
         }}
         /* HTML archetype legend below the chart on mobile/tablet. The
            in-chart text-trace labels get hidden via Plotly.restyle so the
@@ -333,6 +373,10 @@ def build_emotion_pulse_html() -> str:
                 <b>Tender Uncertainty</b><br>
                 caring 75% &middot; annoying 71% &middot; desire 70%<br>
                 <span style="color: inherit; border-bottom: 3px solid #FFD700; font-weight: 700;">Tap a point</span> to update the radar.
+            </div>
+            <div class="seed-content-tiny">
+                <b>Tender Uncertainty</b><br>
+                <span style="color: inherit; border-bottom: 2px solid #FFD700; font-weight: 700;">Tap</span> for radar.
             </div>
         </div>
     </div>
