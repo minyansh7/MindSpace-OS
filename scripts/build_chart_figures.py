@@ -58,16 +58,20 @@ MOBILE_CSS = """
                 height: clamp(140px, 25vw, 240px) !important;
                 top: 4px !important; right: 4px !important;
             }
-            /* Seed box right offset stays clear of radar's left edge:
-               radar width + small buffer at every breakpoint. */
+            /* Seed box: right offset stays clear of radar's left edge.
+               Drop the max-height clamp so the box auto-sizes to its
+               (terse) mobile content; the previous 70-120px ceiling
+               clipped text when it wrapped to more lines at narrow
+               widths. The mobile content is 3 short lines, will sit
+               naturally around 60-90px depending on wrap. */
             #initial-hover-box {
                 right: clamp(155px, 30vw, 270px) !important;
                 max-width: clamp(160px, 55vw, 600px) !important;
-                max-height: clamp(70px, 14vw, 120px) !important;
+                max-height: none !important;
                 font-size: clamp(10px, 2.4vw, 13px) !important;
-                padding: clamp(4px, 1.4vw, 10px) clamp(8px, 2vw, 14px) !important;
-                line-height: 1.3 !important;
-                overflow: hidden !important;
+                padding: clamp(6px, 1.6vw, 10px) clamp(8px, 2vw, 14px) !important;
+                line-height: 1.35 !important;
+                overflow: visible !important;
             }
             .stats-bar, .legend, .quarter-strip {
                 font-size: clamp(11px, 1.8vw, 14px) !important;
