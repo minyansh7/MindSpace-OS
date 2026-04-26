@@ -268,6 +268,49 @@ def build_emotion_pulse_html() -> str:
             transition: opacity 0.6s ease;
             pointer-events: none;
         }}
+        /* Two seed-box content variants: full text on desktop, terse on
+           mobile. Avoids the long emotion + post-quote payload getting
+           clipped at 80px max-height on phones. */
+        .seed-content-mobile {{ display: none; }}
+        .seed-content-desktop {{ display: block; }}
+        @media (max-width: 1024px) {{
+            .seed-content-mobile {{ display: block; }}
+            .seed-content-desktop {{ display: none; }}
+        }}
+        /* HTML archetype legend below the chart on mobile/tablet. The
+           in-chart text-trace labels get hidden via Plotly.restyle so the
+           data points read clean; this strip carries the cluster→color
+           legend instead. */
+        #archetype-legend {{
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            padding: 12px 14px 4px;
+            font-family: Arial, sans-serif;
+            font-size: clamp(11px, 2.4vw, 13px);
+        }}
+        #archetype-legend .chip {{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.85);
+            border: 1px solid rgba(0,0,0,0.06);
+            color: #1e293b;
+            white-space: nowrap;
+        }}
+        #archetype-legend .chip::before {{
+            content: '';
+            display: inline-block;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--c);
+        }}
+        @media (max-width: 1024px) {{
+            #archetype-legend {{ display: flex; }}
+        }}
 {MOBILE_CSS}
     </style>
 </head>
@@ -276,11 +319,25 @@ def build_emotion_pulse_html() -> str:
         <div id="umap-plot"></div>
         <div id="radar-wrap"><div id="radar-plot"></div></div>
         <div id="initial-hover-box">
-            <b>Emotion Pulse: Tender Uncertainty</b><br>
-            <b>Top Emotions:</b> caring: 75% annoying: 71% desire: 70% disapproval: 62% realization: 60% remorse: 60% curiosity: 59% approval: 56% excitement: 54% confusion: 53%<br>
-            <b>Post/Comment:</b> Insight Timer used to be amazing. While the community content is a nice-to-have, I mostly used it for the timer feature. However in the past few months the number of disruptive...<br><br>
-            <span style="color: inherit; border-bottom: 4px solid #FFD700; padding-bottom: 1px; font-weight: 700;">Hover</span> to discover details - and watch its emotion radar.
+            <div class="seed-content-desktop">
+                <b>Emotion Pulse: Tender Uncertainty</b><br>
+                <b>Top Emotions:</b> caring: 75% annoying: 71% desire: 70% disapproval: 62% realization: 60% remorse: 60% curiosity: 59% approval: 56% excitement: 54% confusion: 53%<br>
+                <b>Post/Comment:</b> Insight Timer used to be amazing. While the community content is a nice-to-have, I mostly used it for the timer feature. However in the past few months the number of disruptive...<br><br>
+                <span style="color: inherit; border-bottom: 4px solid #FFD700; padding-bottom: 1px; font-weight: 700;">Hover</span> to discover details - and watch its emotion radar.
+            </div>
+            <div class="seed-content-mobile">
+                <b>Tender Uncertainty</b><br>
+                caring 75% &middot; annoying 71% &middot; desire 70%<br>
+                <span style="color: inherit; border-bottom: 3px solid #FFD700; font-weight: 700;">Tap a point</span> to update the radar.
+            </div>
         </div>
+    </div>
+    <div id="archetype-legend" aria-label="Archetype legend">
+        <span class="chip" style="--c: #ff5e78">Reflective</span>
+        <span class="chip" style="--c: #00c49a">Soothing</span>
+        <span class="chip" style="--c: #6a5acd">Tender</span>
+        <span class="chip" style="--c: #9a32cd">Melancholic</span>
+        <span class="chip" style="--c: #ffc300">Anxious</span>
     </div>
 
     <script>
@@ -317,16 +374,14 @@ def build_emotion_pulse_html() -> str:
     function applyArchetypeLabelMode() {{
         const w = window.innerWidth;
         const narrow = w <= 1024;
-        // Offset scale: 0.15 at 320 (just enough to lift labels off the
-        // densest cluster pixels without falling off-chart), 1.0 at 1100+
-        // (full desktop offset). Floor 0.15 keeps labels readable above the
-        // data points; the small data-coord offset still fits inside the
-        // chart's auto-scaled range at narrow widths.
+        // On narrow viewports the text-trace labels overplot the data
+        // points and are hard to read no matter where they sit. Hide them
+        // entirely; the HTML #archetype-legend strip below the chart
+        // carries the cluster→color mapping instead.
         const offsetScale = Math.max(0.15, Math.min(1.0, 0.15 + (w - 320) / 800 * 0.85));
-        // Font size: 13 at 320, 20 at 1100+
         const fontSize = Math.round(lerp(13, 20, Math.max(0, Math.min(1, (w - 320) / (1100 - 320)))));
         const traces = PAYLOAD.traces;
-        const updates = {{ text: [], 'textfont.size': [], x: [], y: [] }};
+        const updates = {{ text: [], 'textfont.size': [], x: [], y: [], visible: [] }};
         const indices = [];
         traces.forEach((t, i) => {{
             if (t.mode !== 'text' || !Array.isArray(t.text) || t.text.length !== 1) return;
@@ -336,10 +391,7 @@ def build_emotion_pulse_html() -> str:
             indices.push(i);
             updates.text.push([narrow ? `<b>${{short}}</b>` : `<b>${{raw}}</b>`]);
             updates['textfont.size'].push(fontSize);
-            // Use the desktop x/y as (centroid + full_offset). Recompute
-            // mobile position by interpolating between centroid and full.
-            // _centroid_x/y is the raw cluster center; (t.x[0] - centroid)
-            // is the desktop offset.
+            updates.visible.push(narrow ? false : true);
             if (t._centroid_x != null && t._centroid_y != null) {{
                 const dx = t.x[0] - t._centroid_x;
                 const dy = t.y[0] - t._centroid_y;
@@ -400,6 +452,12 @@ def build_emotion_pulse_html() -> str:
         setTimeout(() => seedBox.remove(), 600);
     }}
 
+    // Touch detection: hover is emulated as fire-once on tap, then unhover
+    // immediately fires when the touch ends. On touch devices we want the
+    // radar to persist after a tap (the user just lifted their finger;
+    // resetting the radar means they can never see what they tapped).
+    // Skip the unhover handler on touch-only devices.
+    const isTouch = window.matchMedia('(hover: none)').matches;
     umapDiv.on('plotly_hover', (evt) => {{
         const pt = evt.points[0];
         if (!pt || !pt.customdata) return;
@@ -408,8 +466,18 @@ def build_emotion_pulse_html() -> str:
         Plotly.react('radar-plot', buildRadarTrace(scores, archetype), radarLayout, radarConfig);
         dismissSeedBox();
     }});
-    umapDiv.on('plotly_unhover', () => {{
-        Plotly.react('radar-plot', seedRadar, radarLayout, radarConfig);
+    if (!isTouch) {{
+        umapDiv.on('plotly_unhover', () => {{
+            Plotly.react('radar-plot', seedRadar, radarLayout, radarConfig);
+        }});
+    }}
+    // Plotly fires plotly_click reliably on tap. Belt-and-suspenders so
+    // the radar updates even if hover doesn't fire on the platform.
+    umapDiv.on('plotly_click', (evt) => {{
+        const pt = evt.points[0];
+        if (!pt || !pt.customdata) return;
+        Plotly.react('radar-plot', buildRadarTrace(pt.customdata, pt.data.name), radarLayout, radarConfig);
+        dismissSeedBox();
     }});
     </script>
 </body>
