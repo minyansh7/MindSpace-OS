@@ -149,7 +149,7 @@
       "slug": "inner-life-currents",
       "title": "Inner life currents",
       "subtitle": "How theme connections shift over time",
-      "intro": "Each node is a theme drawn from the high-engagement, strong-sentiment subset of meditation posts (engagement above 30, sentiment intensity above 0.3). Node size scales with how often that theme appeared; color marks its parent topic cluster. Each line connects two themes that co-occurred in the same post; thickness scales with the post's engagement score (upvotes plus comment activity). The ten strongest connections per quarter render bold and hoverable; the rest stay as faint threads. Drag the Time Travel slider through six quarters: Anxiety & Mental Health bonded tightly to Self-Regulation early in the period, then loosened as Concentration & Flow took its place.",
+      "intro": "",
       "callout": "",
       "streamlit_path": "/Inner_Life_Currents",
       "screenshot": "/screenshots/inner-life-currents.svg"
