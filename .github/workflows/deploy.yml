@@ -54,6 +54,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Astro 6 requires Node >= 22.12. Bun in CI spoofs an older Node version,
+      # so install real Node 22 first; bun picks it up on PATH.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
