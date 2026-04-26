@@ -135,11 +135,12 @@
     function applyArchetypeLabelMode() {
         const w = window.innerWidth;
         const narrow = w <= 1024;
-        // Offset scale: 0 at 320 (label sits ON cluster), 1.0 at 1100+ (full
-        // desktop offset). Linear interpolation keeps labels within the
-        // visible chart bounds at small viewports where text-center
-        // anchoring + outward offsets used to push labels off-screen.
-        const offsetScale = Math.max(0, Math.min(1.0, (w - 320) / 800));
+        // Offset scale: 0.15 at 320 (just enough to lift labels off the
+        // densest cluster pixels without falling off-chart), 1.0 at 1100+
+        // (full desktop offset). Floor 0.15 keeps labels readable above the
+        // data points; the small data-coord offset still fits inside the
+        // chart's auto-scaled range at narrow widths.
+        const offsetScale = Math.max(0.15, Math.min(1.0, 0.15 + (w - 320) / 800 * 0.85));
         // Font size: 13 at 320, 20 at 1100+
         const fontSize = Math.round(lerp(13, 20, Math.max(0, Math.min(1, (w - 320) / (1100 - 320)))));
         const traces = PAYLOAD.traces;
