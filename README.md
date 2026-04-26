@@ -13,7 +13,7 @@ The project ships as two sibling surfaces from one repo:
 
 ## What's inside
 
-Six interactive pages, accessible from the sidebar:
+FOr interactive pages, accessible from the sidebar:
 
 | Page | What it shows |
 |---|---|
@@ -30,7 +30,7 @@ Community Dynamics and Community Weather Report together show *who meets whom* a
 
 The dominant emotional register on r/meditation isn't peace. It's **struggle tightly coupled with curiosity**. The community's shared vocabulary is closer to *"trying again"* than *"finding bliss."*
 
-That's not a failure mode — that's what a practice community actually sounds like when nobody's selling anything.
+That's what a practice community actually sounds like.
 
 ---
 
@@ -44,23 +44,6 @@ That's not a failure mode — that's what a practice community actually sounds l
 - **Language**: Python 3.11 (Streamlit + data pipeline), TypeScript / Astro (editorial site).
 
 ---
-
-## Local development
-
-### Streamlit app
-
-```bash
-git clone https://github.com/minyansh7/MindSpace-OS.git
-cd MindSpace-OS
-
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-streamlit run Homepage.py
-```
-
-Open http://localhost:8501. Navigate between pages via the sidebar.
 
 ### Editorial site (Astro)
 
