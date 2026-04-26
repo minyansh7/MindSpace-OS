@@ -40,6 +40,7 @@ export type Citation = {
   venue?: string;
   arxiv?: string;
   url: string;
+  blog?: string;
   huggingface?: string;
 };
 

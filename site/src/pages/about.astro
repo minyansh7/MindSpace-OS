@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { project, data, citations, limitations } from '../lib/canonical.ts';
+const goEmotions = citations.find((c) => c.id === 'goemotions')!;
 ---
 <Base
   title={`About — ${project.name}`}
@@ -27,7 +28,7 @@ import { project, data, citations, limitations } from '../lib/canonical.ts';
       <p>
         The finding is summarized in one line: <strong>the dominant emotional register on r/meditation
         isn't peace, it's struggle wrapped around curiosity</strong>. Joy ranks 25th of 28 emotions in
-        the GoEmotions classification. Amusement is dead last. The vocabulary that dominates is
+        the <a href={goEmotions.blog} target="_blank" rel="noopener">GoEmotions</a> classification. Amusement is dead last. The vocabulary that dominates is
         <em>"I'm trying again."</em>
       </p>
       <p>
@@ -49,7 +50,7 @@ import { project, data, citations, limitations } from '../lib/canonical.ts';
         The canonical figure used on every public surface is <strong>{data.post_count_canonical.toLocaleString()}</strong>.
       </p>
       <p>
-        Each post and comment is classified by Google Research's <strong>GoEmotions</strong> model
+        Each post and comment is classified by Google Research's <a href={goEmotions.blog} target="_blank" rel="noopener"><strong>GoEmotions</strong></a> model
         (Demszky et al. 2020), which scores text against a 27-emotion taxonomy plus neutral. Embeddings
         from the classifier are projected to two dimensions via UMAP (McInnes et al. 2018) and clustered
         with a Gaussian Mixture Model into the five emotional archetypes shown on the
@@ -72,11 +73,11 @@ import { project, data, citations, limitations } from '../lib/canonical.ts';
         {limitations.map((l) => <li>{l}</li>)}
       </ul>
       <p>
-        The most consequential of these is the <strong>model circularity</strong>. GoEmotions was
+        The most consequential of these is the <strong>model circularity</strong>. <a href={goEmotions.blog} target="_blank" rel="noopener">GoEmotions</a> was
         trained on Reddit comments. Applying it to r/meditation Reddit posts means part of what we
         see is what Reddit emotion looks like in general, not specifically what meditation talk looks
         like. The thesis ("struggle wrapped around curiosity") is robust to this — both struggle
-        words and curiosity words are well-distributed in the GoEmotions training set — but specific
+        words and curiosity words are well-distributed in the <a href={goEmotions.blog} target="_blank" rel="noopener">GoEmotions</a> training set — but specific
         rankings (e.g. "joy ranks 25th of 28") should be read as <em>relative within this corpus</em>,
         not as a universal claim about meditation.
       </p>
