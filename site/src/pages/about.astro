@@ -99,7 +99,6 @@ const goEmotions = citations.find((c) => c.id === 'goemotions')!;
             <strong>{c.label}</strong> — {c.authors} ({c.year}). <em>{c.title}.</em>
             {c.venue && <span> {c.venue}.</span>}
             {c.arxiv && <span> arXiv:<a href={c.url} target="_blank" rel="noopener">{c.arxiv}</a>.</span>}
-            {c.huggingface && <span> <a href={c.huggingface} target="_blank" rel="noopener">HuggingFace</a>.</span>}
           </li>
         ))}
       </ul>
