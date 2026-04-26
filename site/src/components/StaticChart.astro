@@ -20,7 +20,10 @@ interface Props {
 }
 
 const { src, height, title } = Astro.props;
-const baseSrc = `/charts/${src}`;
+// Cloudflare Pages strips `.html` and 308-redirects /foo.html → /foo. Drop the
+// extension so the iframe hits the canonical URL on the first request and
+// skips a ~900ms cold-start round-trip.
+const baseSrc = `/charts/${src.replace(/\.html$/, '')}`;
 ---
 <figure class="w-full" data-static-chart>
   <div
@@ -31,7 +34,8 @@ const baseSrc = `/charts/${src}`;
       src={baseSrc}
       data-base-src={baseSrc}
       title={title}
-      loading="lazy"
+      loading="eager"
+      fetchpriority="high"
       class="w-full border-0 block"
       style={`height: ${height}px; background: transparent;`}
       allowfullscreen
