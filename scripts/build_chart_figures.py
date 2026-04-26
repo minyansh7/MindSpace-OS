@@ -493,11 +493,23 @@ def build_community_dynamics_html() -> str:
             padding-bottom: 1px;
             font-weight: 700;
         }}
+        /* Hint-text toggle — touch devices don't hover. The (hover: none) media
+           query swaps "Hover" copy for "Tap" so the prompt teaches the right
+           gesture per input modality. */
+        .hint-mouse {{ display: inline; }}
+        .hint-touch {{ display: none; }}
+        @media (hover: none) {{
+            .hint-mouse {{ display: none; }}
+            .hint-touch {{ display: inline; }}
+        }}
 {MOBILE_CSS}
     </style>
 </head>
 <body>
-    <div class="hover-hint-row"><span class="hover-hint">Hover</span> to see how emotions flow from posts to replies</div>
+    <div class="hover-hint-row">
+      <span class="hint-mouse"><span class="hover-hint">Hover</span> to see how emotions flow from posts to replies</span>
+      <span class="hint-touch"><span class="hover-hint">Tap</span> a ribbon to see how emotions flow from posts to replies</span>
+    </div>
     <div class="column-eyebrows"><span>Posts</span><span>Replies</span></div>
     <div id="sankey-plot"></div>
     <script>

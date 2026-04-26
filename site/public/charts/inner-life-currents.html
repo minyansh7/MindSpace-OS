@@ -114,14 +114,18 @@
                 min-height: 44px;
                 touch-action: manipulation;
             }
+            /* Radar floor at 140px so all 8 emotion axes render legibly.
+               Below ~140 Plotly clips most axis labels. */
             #radar-wrap, .radar-overlay {
-                width: clamp(100px, 22vw, 240px) !important;
-                height: clamp(100px, 22vw, 240px) !important;
+                width: clamp(140px, 25vw, 240px) !important;
+                height: clamp(140px, 25vw, 240px) !important;
                 top: 4px !important; right: 4px !important;
             }
+            /* Seed box right offset stays clear of radar's left edge:
+               radar width + small buffer at every breakpoint. */
             #initial-hover-box {
-                right: clamp(120px, 28vw, 360px) !important;
-                max-width: clamp(180px, 60vw, 600px) !important;
+                right: clamp(155px, 30vw, 270px) !important;
+                max-width: clamp(160px, 55vw, 600px) !important;
                 max-height: clamp(70px, 14vw, 120px) !important;
                 font-size: clamp(10px, 2.4vw, 13px) !important;
                 padding: clamp(4px, 1.4vw, 10px) clamp(8px, 2vw, 14px) !important;
