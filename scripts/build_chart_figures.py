@@ -49,6 +49,15 @@ MOBILE_CSS = """
                 width: 160px !important; height: 160px !important;
                 top: 4px !important; right: 4px !important;
             }
+            #initial-hover-box {
+                right: 12px !important;
+                max-width: 60vw !important;
+                max-height: 80px !important;
+                overflow: hidden !important;
+                font-size: 11px !important;
+                padding: 6px 10px !important;
+                line-height: 1.3 !important;
+            }
             .stats-bar, .legend, .quarter-strip {
                 font-size: 12px !important;
                 padding: 8px !important;
@@ -57,9 +66,8 @@ MOBILE_CSS = """
         @media (max-width: 480px) {
             body { font-size: 13px; }
             .plot-wrap { height: 600px !important; }
-            #radar-wrap, .radar-overlay {
-                width: 130px !important; height: 130px !important;
-            }
+            #radar-wrap, .radar-overlay { display: none !important; }
+            #initial-hover-box { display: none !important; }
         }
 """
 
@@ -86,6 +94,16 @@ ARCHETYPE_COLORS = {
     "Tender Uncertainty": "#6a5acd",
     "Melancholic Confusion": "#9a32cd",
     "Anxious Concern": "#ffc300",
+}
+# Mobile-friendly short forms of archetype labels for narrow viewports
+# (<768px). The full label is positioned for a 1100px desktop canvas;
+# at phone width the trailing word truncates ("Soothing E..." / "Anxious C...").
+ARCHETYPE_SHORT_LABELS = {
+    "Reflective Caring": "Reflective",
+    "Soothing Empathy": "Soothing",
+    "Tender Uncertainty": "Tender",
+    "Melancholic Confusion": "Melancholic",
+    "Anxious Concern": "Anxious",
 }
 ARCHETYPE_SYMBOLS = {
     "Reflective Caring": ("circle", 8),
@@ -180,6 +198,7 @@ def build_emotion_pulse_payload() -> dict[str, Any]:
         "traces": traces,
         "y_range": [y_min - y_range_pad_bot, y_max + y_range_pad_top],
         "archetype_colors": ARCHETYPE_COLORS,
+        "short_labels": ARCHETYPE_SHORT_LABELS,
         "theta_labels": RADAR_THETA_LABELS,
         "seed_radar_values": seed_radar_values,
         "seed_archetype": seed_archetype,
@@ -265,6 +284,35 @@ def build_emotion_pulse_html() -> str:
     }};
     const umapConfig = {{ displayModeBar: false, displaylogo: false, scrollZoom: false, doubleClick: false, responsive: true }};
     Plotly.newPlot('umap-plot', PAYLOAD.traces, umapLayout, umapConfig);
+
+    // Mobile-aware archetype label swap. The full labels were positioned
+    // for a 1100px canvas; at narrow widths the trailing word truncates.
+    // Swap to short labels and shrink the font so they read clean on phone.
+    const SHORT_LABELS = PAYLOAD.short_labels || {{}};
+    function applyArchetypeLabelMode() {{
+        const w = window.innerWidth;
+        const narrow = w <= 768;
+        const traces = PAYLOAD.traces;
+        const updates = {{ text: [], 'textfont.size': [] }};
+        const indices = [];
+        traces.forEach((t, i) => {{
+            if (t.mode !== 'text' || !Array.isArray(t.text) || t.text.length !== 1) return;
+            // text[0] is `<b>{{archetype}}</b>` — strip tags to find the key
+            const raw = String(t.text[0]).replace(/<[^>]+>/g, '');
+            const short = SHORT_LABELS[raw];
+            if (!short) return;
+            indices.push(i);
+            updates.text.push([narrow ? `<b>${{short}}</b>` : `<b>${{raw}}</b>`]);
+            updates['textfont.size'].push(narrow ? 14 : 20);
+        }});
+        if (indices.length) Plotly.restyle('umap-plot', updates, indices);
+    }}
+    applyArchetypeLabelMode();
+    let resizeTimer;
+    window.addEventListener('resize', () => {{
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(applyArchetypeLabelMode, 150);
+    }});
 
     const radarLayout = {{
         polar: {{

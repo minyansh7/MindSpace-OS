@@ -36,14 +36,15 @@ const staticHeight: Record<string, number> = {
   'inner-life-currents': 1000,
   'community-weather-report': 1200,
 };
-/* Mobile iframe heights — match the per-chart `.plot-wrap` height
-   set by MOBILE_CSS in scripts/build_chart_figures.py (720px at <=768px,
-   600px at <=480px), plus padding for surrounding chart chrome. */
+/* Mobile iframe heights — match each chart's `.plot-wrap` height clamp
+   set by MOBILE_CSS in scripts/build_chart_figures.py. The base CSS
+   clamps plot-wrap to 600px at <=480px and 720px at <=768px. Add small
+   padding for surrounding chart chrome (stats bar, quarter selector). */
 const mobileHeight: Record<string, number> = {
-  'emotion-pulse': 780,
-  'community-dynamics': 780,
-  'inner-life-currents': 820,
-  'community-weather-report': 980,
+  'emotion-pulse': 640,
+  'community-dynamics': 640,
+  'inner-life-currents': 760,
+  'community-weather-report': 920,
 };
 ---
 <Base
