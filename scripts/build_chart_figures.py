@@ -169,9 +169,17 @@ def build_emotion_pulse_payload() -> dict[str, Any]:
                 "showlegend": False,
             })
 
+    # Mobile centroid offset scale. Desktop offsets push labels 3–4 units from
+    # the cluster center for visual breathing room on a 1100px canvas. At
+    # narrow widths (<768px) those same data offsets push labels off-screen
+    # or into neighboring clusters. Multiply by 0.35 so labels stay near
+    # their clusters but still off the densest point.
+    MOBILE_OFFSET_SCALE = 0.35
     centroids = df.groupby("archetype_label")[["umap_x", "umap_y"]].mean()
     for archetype, (cx, cy) in centroids.iterrows():
         dx, dy = CENTROID_OFFSETS.get(archetype, (0, 0))
+        mx = float(cx + dx * MOBILE_OFFSET_SCALE)
+        my = float(cy + dy * MOBILE_OFFSET_SCALE)
         traces.append({
             "x": [cx + dx], "y": [cy + dy],
             "mode": "text",
@@ -179,6 +187,10 @@ def build_emotion_pulse_payload() -> dict[str, Any]:
             "textfont": {"size": 20, "color": ARCHETYPE_COLORS[archetype], "family": "sans-serif"},
             "hoverinfo": "skip",
             "showlegend": False,
+            # Custom keys consumed by applyArchetypeLabelMode JS at runtime.
+            # Plotly ignores unknown top-level trace keys.
+            "_mobile_x": [mx],
+            "_mobile_y": [my],
         })
 
     y_min, y_max = float(df["umap_y"].min()), float(df["umap_y"].max())
@@ -286,24 +298,28 @@ def build_emotion_pulse_html() -> str:
     Plotly.newPlot('umap-plot', PAYLOAD.traces, umapLayout, umapConfig);
 
     // Mobile-aware archetype label swap. The full labels were positioned
-    // for a 1100px canvas; at narrow widths the trailing word truncates.
-    // Swap to short labels and shrink the font so they read clean on phone.
+    // for a 1100px canvas; at narrow widths the trailing word truncates
+    // AND the data-coordinate offsets push labels off-screen. Swap to:
+    //   - short labels ("Anxious" not "Anxious Concern")
+    //   - smaller font (14 vs 20)
+    //   - mobile x/y coords near the cluster centroid (offset × 0.35)
     const SHORT_LABELS = PAYLOAD.short_labels || {{}};
     function applyArchetypeLabelMode() {{
         const w = window.innerWidth;
         const narrow = w <= 768;
         const traces = PAYLOAD.traces;
-        const updates = {{ text: [], 'textfont.size': [] }};
+        const updates = {{ text: [], 'textfont.size': [], x: [], y: [] }};
         const indices = [];
         traces.forEach((t, i) => {{
             if (t.mode !== 'text' || !Array.isArray(t.text) || t.text.length !== 1) return;
-            // text[0] is `<b>{{archetype}}</b>` — strip tags to find the key
             const raw = String(t.text[0]).replace(/<[^>]+>/g, '');
             const short = SHORT_LABELS[raw];
             if (!short) return;
             indices.push(i);
             updates.text.push([narrow ? `<b>${{short}}</b>` : `<b>${{raw}}</b>`]);
             updates['textfont.size'].push(narrow ? 14 : 20);
+            updates.x.push(narrow && t._mobile_x ? t._mobile_x : t.x);
+            updates.y.push(narrow && t._mobile_y ? t._mobile_y : t.y);
         }});
         if (indices.length) Plotly.restyle('umap-plot', updates, indices);
     }}
