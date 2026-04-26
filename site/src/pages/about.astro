@@ -2,7 +2,9 @@
 import Base from '../layouts/Base.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import JsonLd from '../components/JsonLd.astro';
 import { project, data, citations, limitations } from '../lib/canonical.ts';
+import { identity } from '../data/identity';
 const goEmotions = citations.find((c) => c.id === 'goemotions')!;
 ---
 <Base
@@ -11,6 +13,13 @@ const goEmotions = citations.find((c) => c.id === 'goemotions')!;
   ogImage="/og/about.png"
   pathname="/about/"
 >
+  <JsonLd
+    slot="head"
+    type="CreativeWork"
+    pageUrl={`${project.domain}/about/`}
+    pageTitle={`About — ${project.name}`}
+    pageDescription="Methodology, limitations, citations, and how to cite."
+  />
   <Nav />
 
   <main id="main">
@@ -104,15 +113,22 @@ const goEmotions = citations.find((c) => c.id === 'goemotions')!;
       </ul>
     </div>
 
-    <h2 class="h-section mt-16 mb-6">Built by.</h2>
+    <h2 class="h-section mt-16 mb-6" id="built-by">Built by.</h2>
     <div class="prose-editorial">
       <p>
-        MindSpace OS is built by <a href={project.linkedin} target="_blank" rel="noopener">Minyan Shi</a>
-        at MinyanLabs — experiments with AI and life.
+        {project.name} is built by <a href={identity.links.resume} target="_blank" rel="noopener"><strong>{identity.person.name}</strong></a>,
+        founder of <a href={identity.links.resume} target="_blank" rel="noopener"><strong>{identity.org.name}</strong></a> &mdash; a one-person studio doing
+        editorial data storytelling and AI work, based in {identity.person.location}.
       </p>
       <p>
-        Subscribe to the <a href={project.substack_pub} target="_blank" rel="noopener">Substack</a>
-        for more of my work. Reach out at <a href={`mailto:${project.contact}`}>{project.contact}</a>.
+        Past work includes audience and data strategy for McDonald&apos;s, Pfizer, Adobe, Audi, and Didi at Digitas (Publicis Group), Didi Beijing, and Newmark Knight Frank Chicago.
+        Won SXSW Sydney AI 2024 (Build Club &times; National AI Centre) and the 2023 GPT Hackathon.
+        Harvard Business School Data Privacy and Technology certificate (2024).
+      </p>
+      <p>
+        <strong>Available for select 2026 consulting engagements.</strong>
+        Subscribe to the <a href={identity.links.substack} target="_blank" rel="noopener">Substack</a> for new work.
+        Reach out at <a href={`mailto:${identity.person.email}`}>{identity.person.email}</a>.
       </p>
     </div>
   </article>

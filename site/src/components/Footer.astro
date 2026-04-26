@@ -1,5 +1,6 @@
 ---
 import { project } from '../lib/canonical.ts';
+import { identity } from '../data/identity';
 ---
 <footer class="w-full border-t border-[var(--color-hairline)] mt-24">
   <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12 grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -11,7 +12,7 @@ import { project } from '../lib/canonical.ts';
         {project.tagline}.
       </p>
       <p class="mt-3 text-xs text-[var(--color-text-tertiary)]">
-        By MinyanLabs · ©2026
+        Made by <a href={identity.links.resume} target="_blank" rel="noopener" class="underline-offset-2 hover:text-[var(--color-text)] hover:underline">{identity.person.name}</a> at <a href={identity.links.resume} target="_blank" rel="noopener" class="underline-offset-2 hover:text-[var(--color-text)] hover:underline">{identity.org.name}</a> · ©2026
       </p>
     </div>
     <div>

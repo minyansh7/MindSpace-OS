@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-// Generates SVG placeholders for OG cards + chart screenshots.
-// Real screenshots come from a Playwright/kaleido pipeline later (see scripts/build_screenshots.py).
-// These exist so dev preview / build doesn't 404 and the site has fallback imagery.
+// Generates OG cards (SVG + PNG via resvg-js) and chart screenshot SVG placeholders.
+// Twitter/Facebook/LinkedIn OG validators reject SVG — PNG is required for share previews.
+// Real chart screenshots come from scripts/build_screenshots.py (Playwright + kaleido).
 
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { Resvg } from '@resvg/resvg-js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
@@ -57,18 +58,24 @@ function escape(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+async function writeOg(slug, svg) {
+  await writeFile(path.join(root, `public/og/${slug}.svg`), svg);
+  const png = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
+  await writeFile(path.join(root, `public/og/${slug}.png`), png);
+}
+
 // Default OG (landing)
-await writeFile(path.join(root, 'public/og/default.svg'), ogCard({
-  title: "Meditation isn't peaceful.",
-  subtitle: "It's persistent.",
+await writeOg('default', ogCard({
+  title: 'Confusion. Compassion.',
+  subtitle: "The dominant emotion isn't peace. It's struggle, closely wrapped around curiosity.",
 }));
 
 // Per-page OGs
 for (const page of canonical.pages) {
   const archetype = canonical.archetypes[canonical.pages.indexOf(page) % canonical.archetypes.length];
-  await writeFile(path.join(root, `public/og/${page.slug}.svg`), ogCard({
+  await writeOg(page.slug, ogCard({
     title: page.title,
-    subtitle: page.callout,
+    subtitle: page.callout || page.subtitle,
     accentColor: archetype.color_dark,
   }));
   await writeFile(path.join(root, `public/screenshots/${page.slug}.svg`), chartPlaceholder({
@@ -78,10 +85,9 @@ for (const page of canonical.pages) {
 }
 
 // About OG
-await writeFile(path.join(root, 'public/og/about.svg'), ogCard({
+await writeOg('about', ogCard({
   title: 'About',
   subtitle: 'Methodology, limitations, citations.',
 }));
 
-console.log('OG + screenshot placeholders generated.');
-console.log('Real chart screenshots come from scripts/build_screenshots.py (Playwright + kaleido) — wire in week 3.');
+console.log('OG cards (SVG + PNG) and screenshot placeholders generated.');
