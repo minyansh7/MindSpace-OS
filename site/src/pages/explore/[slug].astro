@@ -87,19 +87,19 @@ const staticHeight: Record<string, number> = {
       Based on {data.post_count_canonical.toLocaleString()} posts and comments of meditation on <a href="https://www.reddit.com/" target="_blank" rel="noopener">Reddit</a>,
       {data.date_range_human}.
       {page.slug === 'community-weather-report' && (
-        <span class="block mt-2">
+        <span>
           Each region's mean sentiment is computed from per-pain-topic sentiment scores, averaged across that cluster's posts in the quarter —
           see <a href="/about#methodology">methodology</a> for limitations.
         </span>
       )}
       {page.slug === 'inner-life-currents' && (
-        <span class="block mt-2">
+        <span>
           Edges are filtered to high-engagement, strong-sentiment co-occurrences (engagement &gt; 30, sentiment intensity &gt; 0.3); edge thickness = post engagement score —
           see <a href="/about#methodology">methodology</a> for limitations.
         </span>
       )}
       {(page.slug === 'emotion-pulse' || page.slug === 'community-dynamics') && (
-        <span class="block mt-2">
+        <span>
           Emotion classification via Google Research's <a href={goEmotions.blog} target="_blank" rel="noopener">GoEmotions</a>
           ({goEmotions.authors.split(',')[0]} et al. {goEmotions.year}), trained on Reddit comments —
           see <a href="/about#methodology">methodology</a> for limitations.
