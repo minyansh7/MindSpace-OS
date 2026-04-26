@@ -581,16 +581,15 @@ def build_community_dynamics_html() -> str:
             display: none;
             flex: 0 0 auto;
             margin: 6px 16px 12px;
-            padding: 10px 14px;
-            border-left: 4px solid #FFD700;
-            background: rgba(74, 85, 104, 0.04);
-            font-size: 13px; line-height: 1.45; color: #2c3e50;
-            border-radius: 0 6px 6px 0;
+            padding: 6px 0;
+            font-size: 13px; line-height: 1.5; color: #2c3e50;
         }}
         .tap-readout.empty {{
             color: #94a3b8; font-style: italic;
         }}
         .tap-readout b {{ color: #2c3e50; }}
+        .tap-readout .tr-title {{ display: block; font-weight: 700; margin-bottom: 2px; }}
+        .tap-readout .tr-stats {{ display: block; }}
         @media (hover: none) {{
             .tap-readout {{ display: block; }}
         }}
@@ -625,8 +624,20 @@ def build_community_dynamics_html() -> str:
             const pt = e.points[0];
             const html = pt.customdata || pt.label || '';
             if (!html) return;
+            // Reformat: first <br>-segment is the title (archetype pair or
+            // node name), remaining segments collapse to one " / "-joined
+            // line of stats. Drops the inline color/size styling that the
+            // baked customdata included for the desktop tooltip.
+            const segs = String(html).split(/<br\s*\/?>/i).map(s => s.trim()).filter(Boolean);
+            if (!segs.length) return;
+            const stripStyle = (s) => s.replace(/<b\b[^>]*>/gi, '<b>');
+            const titleRaw = stripStyle(segs[0]);
+            // Strip the outer <b>...</b> from the title segment so we wrap it
+            // ourselves via .tr-title (consistent weight, no nested bold).
+            const titleText = titleRaw.replace(/^<b>(.*?)<\/b>$/i, '$1');
+            const statsLine = segs.slice(1).map(stripStyle).join(' / ');
             readout.classList.remove('empty');
-            readout.innerHTML = html;
+            readout.innerHTML = `<span class="tr-title">${{titleText}}</span><span class="tr-stats">${{statsLine}}</span>`;
         }});
     }});
     let resizeTimer = null;

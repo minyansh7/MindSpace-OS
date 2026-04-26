@@ -54,16 +54,15 @@
             display: none;
             flex: 0 0 auto;
             margin: 6px 16px 12px;
-            padding: 10px 14px;
-            border-left: 4px solid #FFD700;
-            background: rgba(74, 85, 104, 0.04);
-            font-size: 13px; line-height: 1.45; color: #2c3e50;
-            border-radius: 0 6px 6px 0;
+            padding: 6px 0;
+            font-size: 13px; line-height: 1.5; color: #2c3e50;
         }
         .tap-readout.empty {
             color: #94a3b8; font-style: italic;
         }
         .tap-readout b { color: #2c3e50; }
+        .tap-readout .tr-title { display: block; font-weight: 700; margin-bottom: 2px; }
+        .tap-readout .tr-stats { display: block; }
         @media (hover: none) {
             .tap-readout { display: block; }
         }
@@ -91,16 +90,20 @@
                 height: clamp(140px, 25vw, 240px) !important;
                 top: 4px !important; right: 4px !important;
             }
-            /* Seed box right offset stays clear of radar's left edge:
-               radar width + small buffer at every breakpoint. */
+            /* Seed box: right offset stays clear of radar's left edge.
+               Drop the max-height clamp so the box auto-sizes to its
+               (terse) mobile content; the previous 70-120px ceiling
+               clipped text when it wrapped to more lines at narrow
+               widths. The mobile content is 3 short lines, will sit
+               naturally around 60-90px depending on wrap. */
             #initial-hover-box {
                 right: clamp(155px, 30vw, 270px) !important;
                 max-width: clamp(160px, 55vw, 600px) !important;
-                max-height: clamp(70px, 14vw, 120px) !important;
+                max-height: none !important;
                 font-size: clamp(10px, 2.4vw, 13px) !important;
-                padding: clamp(4px, 1.4vw, 10px) clamp(8px, 2vw, 14px) !important;
-                line-height: 1.3 !important;
-                overflow: hidden !important;
+                padding: clamp(6px, 1.6vw, 10px) clamp(8px, 2vw, 14px) !important;
+                line-height: 1.35 !important;
+                overflow: visible !important;
             }
             .stats-bar, .legend, .quarter-strip {
                 font-size: clamp(11px, 1.8vw, 14px) !important;
@@ -145,8 +148,20 @@
             const pt = e.points[0];
             const html = pt.customdata || pt.label || '';
             if (!html) return;
+            // Reformat: first <br>-segment is the title (archetype pair or
+            // node name), remaining segments collapse to one " / "-joined
+            // line of stats. Drops the inline color/size styling that the
+            // baked customdata included for the desktop tooltip.
+            const segs = String(html).split(/<br\s*\/?>/i).map(s => s.trim()).filter(Boolean);
+            if (!segs.length) return;
+            const stripStyle = (s) => s.replace(/<b[^>]*>/gi, '<b>');
+            const titleRaw = stripStyle(segs[0]);
+            // Strip the outer <b>...</b> from the title segment so we wrap it
+            // ourselves via .tr-title (consistent weight, no nested bold).
+            const titleText = titleRaw.replace(/^<b>(.*?)<\/b>$/i, '$1');
+            const statsLine = segs.slice(1).map(stripStyle).join(' / ');
             readout.classList.remove('empty');
-            readout.innerHTML = html;
+            readout.innerHTML = `<span class="tr-title">${titleText}</span><span class="tr-stats">${statsLine}</span>`;
         });
     });
     let resizeTimer = null;
