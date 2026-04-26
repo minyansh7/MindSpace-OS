@@ -56,14 +56,18 @@
                 min-height: 44px;
                 touch-action: manipulation;
             }
+            /* Radar floor at 140px so all 8 emotion axes render legibly.
+               Below ~140 Plotly clips most axis labels. */
             #radar-wrap, .radar-overlay {
-                width: clamp(100px, 22vw, 240px) !important;
-                height: clamp(100px, 22vw, 240px) !important;
+                width: clamp(140px, 25vw, 240px) !important;
+                height: clamp(140px, 25vw, 240px) !important;
                 top: 4px !important; right: 4px !important;
             }
+            /* Seed box right offset stays clear of radar's left edge:
+               radar width + small buffer at every breakpoint. */
             #initial-hover-box {
-                right: clamp(120px, 28vw, 360px) !important;
-                max-width: clamp(180px, 60vw, 600px) !important;
+                right: clamp(155px, 30vw, 270px) !important;
+                max-width: clamp(160px, 55vw, 600px) !important;
                 max-height: clamp(70px, 14vw, 120px) !important;
                 font-size: clamp(10px, 2.4vw, 13px) !important;
                 padding: clamp(4px, 1.4vw, 10px) clamp(8px, 2vw, 14px) !important;
@@ -131,8 +135,11 @@
     function applyArchetypeLabelMode() {
         const w = window.innerWidth;
         const narrow = w <= 1024;
-        // Offset scale: 0.25 at 320, 1.0 at 1100+. Smooth in between.
-        const offsetScale = Math.max(0.25, Math.min(1.0, w / 1100));
+        // Offset scale: 0 at 320 (label sits ON cluster), 1.0 at 1100+ (full
+        // desktop offset). Linear interpolation keeps labels within the
+        // visible chart bounds at small viewports where text-center
+        // anchoring + outward offsets used to push labels off-screen.
+        const offsetScale = Math.max(0, Math.min(1.0, (w - 320) / 800));
         // Font size: 13 at 320, 20 at 1100+
         const fontSize = Math.round(lerp(13, 20, Math.max(0, Math.min(1, (w - 320) / (1100 - 320)))));
         const traces = PAYLOAD.traces;
