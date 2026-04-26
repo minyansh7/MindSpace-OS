@@ -15,7 +15,7 @@ The project ships as two sibling surfaces from one repo:
 
 ## What's inside
 
-Six interactive pages, accessible from the sidebar:
+FOr interactive pages, accessible from the sidebar:
 
 | Page | What it shows |
 |---|---|
@@ -32,7 +32,7 @@ Community Dynamics and Community Weather Report together show *who meets whom* a
 
 The dominant emotional register on r/meditation isn't peace. It's **struggle tightly coupled with curiosity**. The community's shared vocabulary is closer to *"trying again"* than *"finding bliss."*
 
-That's not a failure mode — that's what a practice community actually sounds like when nobody's selling anything.
+That's what a practice community actually sounds like.
 
 ---
 
@@ -71,9 +71,15 @@ That's not a failure mode — that's what a practice community actually sounds l
 - **Python 3.11** — chart-bake script + Streamlit app + data pipeline.
 - **CSS / HTML** — hand-tuned for the four chart HTMLs (CSS keyframe animations, flex layouts, custom Cardinal-spline sparkline).
 
----
+- **[Astro 6](https://astro.build)** — static-site framework. `output: 'static'`, every page rendered to plain HTML at build time. Component model + content collections power the editorial pages; `getStaticPaths` generates the four `/explore/*` routes from `data/canonical.json`.
+- **[Tailwind CSS 4](https://tailwindcss.com)** (via `@tailwindcss/vite`) — utility-first styling, theme tokens declared in `@theme` blocks rather than a separate config file. Time-of-day gradient theming + ripple-on-hover animations ported from the original meditation-circle design language.
+- **[@fontsource/*](https://fontsource.org/)** — self-hosted webfonts: **Inter** (UI + display), **Source Serif 4** (editorial body + pull-quotes), **JetBrains Mono** (eyebrows + brand mark). Imported in the layout so they're inlined and don't pop in.
+- **[@astrojs/sitemap](https://docs.astro.build/en/guides/integrations-guide/sitemap/)** — generates `sitemap-index.xml` + per-section sitemaps at build.
+- **[@astrojs/cloudflare](https://docs.astro.build/en/guides/integrations-guide/cloudflare/)** — Cloudflare Pages adapter (declared in deps; ready to flip from `static` → `server` when dynamic OG cards land).
+- **[Plotly.js](https://plotly.com/javascript/)** — loaded from CDN (`cdn.plot.ly/plotly-2.35.2.min.js`) by the four static chart HTMLs. Cached across pages after first load. Powers Emotion Pulse (UMAP scatter + radar overlay), Community Dynamics (Sankey), and Inner Life Currents (force-directed temporal network). Community Weather Report uses pure CSS animations + a hand-rolled Cardinal-spline sparkline; no Plotly.
+- **[Cloudflare Pages](https://pages.cloudflare.com/)** — static hosting. Project `mindspace-os`. Connected to GitHub for build-on-push.
 
-## Local development
+### Build (runs locally + in CI; not served at runtime)
 
 ### Streamlit app
 
