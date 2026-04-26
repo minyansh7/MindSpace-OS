@@ -71,8 +71,12 @@ test('landing has updated thesis copy', async () => {
 });
 
 test('GoEmotions citation includes Google Research prefix', async () => {
+  // The "GoEmotions" word is wrapped in an <a> tag linking to Google Research's
+  // blog post, so a literal substring match across the link tag fails. Match
+  // tolerantly: "Google Research's" must precede "GoEmotions" with only HTML
+  // tags / whitespace between.
   const html = await readFile(path.join(DIST, 'index.html'), 'utf8');
-  expect(html).toContain('Google Research\'s GoEmotions');
+  expect(html).toMatch(/Google Research's[^A-Za-z]*<a[^>]*>\s*GoEmotions/);
 });
 
 test('brand mark renders as MINDSPACE OS with space', async () => {
