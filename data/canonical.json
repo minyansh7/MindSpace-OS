@@ -131,7 +131,7 @@
       "slug": "community-dynamics",
       "title": "Community dynamics",
       "subtitle": "Who responds to whom, emotionally",
-      "intro": "Each ribbon shows how a poster's emotional tone flows into the commenter's tone. Grief gets mirrored: about 1 in 4 people reply with grief themselves. Anxiety doesn't \u2014 only 7 out of 100 reply with anxiety; more than half offer warm reassurance instead. The community has unwritten response rules.",
+      "intro": "Each ribbon shows how a post's emotional tone flows into its reply's tone. Grief gets mirrored: about 1 in 4 people reply with grief themselves. Anxiety doesn't \u2014 only 7 out of 100 reply with anxiety; more than half offer warm reassurance instead. The community has unwritten response rules.",
       "callout": "Grief gets mirrored. Anxiety gets reassurance. Soothing Empathy leads in the replies.",
       "streamlit_path": "/Community_Dynamics",
       "screenshot": "/screenshots/community-dynamics.svg"
