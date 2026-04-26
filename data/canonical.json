@@ -149,7 +149,7 @@
       "slug": "inner-life-currents",
       "title": "Inner life currents",
       "subtitle": "How theme connections shift over time",
-      "intro": "",
+      "intro": "Theme co-occurrences within the most active threads, quarter by quarter.",
       "callout": "",
       "streamlit_path": "/Inner_Life_Currents",
       "screenshot": "/screenshots/inner-life-currents.svg"
