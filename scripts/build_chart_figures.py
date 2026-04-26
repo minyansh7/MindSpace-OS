@@ -35,39 +35,47 @@ PLOTLY_CDN_URL = "https://cdn.plot.ly/plotly-2.35.2.min.js"
 # Per-chart polish (label collision tuning, region repositioning, etc.) lives
 # in each chart's own <style>. This is the floor.
 MOBILE_CSS = """
-        @media (max-width: 768px) {
-            body { font-size: 14px; }
-            .plot-wrap { height: 720px !important; }
+        /* Tablet-and-below fluid scaling. clamp() lets sizes flex across
+           the full phone-to-tablet range (320px iPhone SE → 1024px iPad
+           landscape) without step breakpoints. The radar overlay and
+           seed pop-up stay visible but scale down proportionally. */
+        @media (max-width: 1024px) {
+            body { font-size: clamp(13px, 1.6vw, 16px); }
             .modebar { display: none !important; }
-            .hovertext { font-size: 12px !important; max-width: 280px !important; }
+            .hovertext {
+                font-size: clamp(11px, 2.2vw, 14px) !important;
+                max-width: clamp(220px, 60vw, 360px) !important;
+            }
             button, [role="button"], input[type="checkbox"] + label,
             .quarter-btn, .nav-btn, .toggle-btn, .quarter-chip {
                 min-height: 44px;
                 touch-action: manipulation;
             }
             #radar-wrap, .radar-overlay {
-                width: 160px !important; height: 160px !important;
+                width: clamp(100px, 22vw, 240px) !important;
+                height: clamp(100px, 22vw, 240px) !important;
                 top: 4px !important; right: 4px !important;
             }
             #initial-hover-box {
-                right: 12px !important;
-                max-width: 60vw !important;
-                max-height: 80px !important;
-                overflow: hidden !important;
-                font-size: 11px !important;
-                padding: 6px 10px !important;
+                right: clamp(120px, 28vw, 360px) !important;
+                max-width: clamp(180px, 60vw, 600px) !important;
+                max-height: clamp(70px, 14vw, 120px) !important;
+                font-size: clamp(10px, 2.4vw, 13px) !important;
+                padding: clamp(4px, 1.4vw, 10px) clamp(8px, 2vw, 14px) !important;
                 line-height: 1.3 !important;
+                overflow: hidden !important;
             }
             .stats-bar, .legend, .quarter-strip {
-                font-size: 12px !important;
-                padding: 8px !important;
+                font-size: clamp(11px, 1.8vw, 14px) !important;
+                padding: clamp(6px, 1.5vw, 10px) !important;
             }
         }
+        /* Phone heights — vh-based so chart fits the device, not pixel ladder. */
+        @media (max-width: 768px) {
+            .plot-wrap { height: clamp(560px, 80vh, 720px) !important; }
+        }
         @media (max-width: 480px) {
-            body { font-size: 13px; }
-            .plot-wrap { height: 600px !important; }
-            #radar-wrap, .radar-overlay { display: none !important; }
-            #initial-hover-box { display: none !important; }
+            .plot-wrap { height: clamp(520px, 78vh, 660px) !important; }
         }
 """
 
@@ -169,28 +177,23 @@ def build_emotion_pulse_payload() -> dict[str, Any]:
                 "showlegend": False,
             })
 
-    # Mobile centroid offset scale. Desktop offsets push labels 3–4 units from
-    # the cluster center for visual breathing room on a 1100px canvas. At
-    # narrow widths (<768px) those same data offsets push labels off-screen
-    # or into neighboring clusters. Multiply by 0.35 so labels stay near
-    # their clusters but still off the densest point.
-    MOBILE_OFFSET_SCALE = 0.35
+    # Bake the raw cluster centroid alongside each label trace so the JS
+    # label-mode handler can compute viewport-proportional positions
+    # (centroid + offset × scale, where scale is fluid 0.25 → 1.0 across
+    # 320px → 1100px viewport widths). Plotly ignores unknown top-level
+    # trace keys, so these pass through harmlessly.
     centroids = df.groupby("archetype_label")[["umap_x", "umap_y"]].mean()
     for archetype, (cx, cy) in centroids.iterrows():
         dx, dy = CENTROID_OFFSETS.get(archetype, (0, 0))
-        mx = float(cx + dx * MOBILE_OFFSET_SCALE)
-        my = float(cy + dy * MOBILE_OFFSET_SCALE)
         traces.append({
-            "x": [cx + dx], "y": [cy + dy],
+            "x": [float(cx + dx)], "y": [float(cy + dy)],
             "mode": "text",
             "text": [f"<b>{archetype}</b>"],
             "textfont": {"size": 20, "color": ARCHETYPE_COLORS[archetype], "family": "sans-serif"},
             "hoverinfo": "skip",
             "showlegend": False,
-            # Custom keys consumed by applyArchetypeLabelMode JS at runtime.
-            # Plotly ignores unknown top-level trace keys.
-            "_mobile_x": [mx],
-            "_mobile_y": [my],
+            "_centroid_x": float(cx),
+            "_centroid_y": float(cy),
         })
 
     y_min, y_max = float(df["umap_y"].min()), float(df["umap_y"].max())
@@ -297,16 +300,23 @@ def build_emotion_pulse_html() -> str:
     const umapConfig = {{ displayModeBar: false, displaylogo: false, scrollZoom: false, doubleClick: false, responsive: true }};
     Plotly.newPlot('umap-plot', PAYLOAD.traces, umapLayout, umapConfig);
 
-    // Mobile-aware archetype label swap. The full labels were positioned
-    // for a 1100px canvas; at narrow widths the trailing word truncates
-    // AND the data-coordinate offsets push labels off-screen. Swap to:
-    //   - short labels ("Anxious" not "Anxious Concern")
-    //   - smaller font (14 vs 20)
-    //   - mobile x/y coords near the cluster centroid (offset × 0.35)
+    // Viewport-aware archetype label sizing + positioning. Three things
+    // scale with viewport width across the 320px → 1280px range:
+    //   - text: full label vs short ("Anxious Concern" → "Anxious") at <=1024
+    //   - font size: lerp from 13 (320px) up to 20 (>=1100px)
+    //   - data-coordinate position: offset × scale, where scale = clamp(0.25, w/1100, 1.0)
+    // The fluid scale keeps labels close to their cluster centroid on small
+    // phones (iPhone SE 320px → 0.29 scale) and pushes them outward as the
+    // canvas grows toward desktop.
     const SHORT_LABELS = PAYLOAD.short_labels || {{}};
+    function lerp(a, b, t) {{ return a + (b - a) * t; }}
     function applyArchetypeLabelMode() {{
         const w = window.innerWidth;
-        const narrow = w <= 768;
+        const narrow = w <= 1024;
+        // Offset scale: 0.25 at 320, 1.0 at 1100+. Smooth in between.
+        const offsetScale = Math.max(0.25, Math.min(1.0, w / 1100));
+        // Font size: 13 at 320, 20 at 1100+
+        const fontSize = Math.round(lerp(13, 20, Math.max(0, Math.min(1, (w - 320) / (1100 - 320)))));
         const traces = PAYLOAD.traces;
         const updates = {{ text: [], 'textfont.size': [], x: [], y: [] }};
         const indices = [];
@@ -317,9 +327,20 @@ def build_emotion_pulse_html() -> str:
             if (!short) return;
             indices.push(i);
             updates.text.push([narrow ? `<b>${{short}}</b>` : `<b>${{raw}}</b>`]);
-            updates['textfont.size'].push(narrow ? 14 : 20);
-            updates.x.push(narrow && t._mobile_x ? t._mobile_x : t.x);
-            updates.y.push(narrow && t._mobile_y ? t._mobile_y : t.y);
+            updates['textfont.size'].push(fontSize);
+            // Use the desktop x/y as (centroid + full_offset). Recompute
+            // mobile position by interpolating between centroid and full.
+            // _centroid_x/y is the raw cluster center; (t.x[0] - centroid)
+            // is the desktop offset.
+            if (t._centroid_x != null && t._centroid_y != null) {{
+                const dx = t.x[0] - t._centroid_x;
+                const dy = t.y[0] - t._centroid_y;
+                updates.x.push([t._centroid_x + dx * offsetScale]);
+                updates.y.push([t._centroid_y + dy * offsetScale]);
+            }} else {{
+                updates.x.push(t.x);
+                updates.y.push(t.y);
+            }}
         }});
         if (indices.length) Plotly.restyle('umap-plot', updates, indices);
     }}
@@ -1429,6 +1450,11 @@ def build_weather_report_html() -> str:
             gap: 14px;
             margin-top: 6px;
             width: 100%;
+        }}
+        @media (max-width: 768px) {{
+            .topic-grid {{
+                grid-template-columns: 1fr !important;
+            }}
         }}
         .topic-card {{
             min-width: 0;

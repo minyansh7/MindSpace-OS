@@ -39,39 +39,47 @@
             font-weight: 700;
         }
 
-        @media (max-width: 768px) {
-            body { font-size: 14px; }
-            .plot-wrap { height: 720px !important; }
+        /* Tablet-and-below fluid scaling. clamp() lets sizes flex across
+           the full phone-to-tablet range (320px iPhone SE → 1024px iPad
+           landscape) without step breakpoints. The radar overlay and
+           seed pop-up stay visible but scale down proportionally. */
+        @media (max-width: 1024px) {
+            body { font-size: clamp(13px, 1.6vw, 16px); }
             .modebar { display: none !important; }
-            .hovertext { font-size: 12px !important; max-width: 280px !important; }
+            .hovertext {
+                font-size: clamp(11px, 2.2vw, 14px) !important;
+                max-width: clamp(220px, 60vw, 360px) !important;
+            }
             button, [role="button"], input[type="checkbox"] + label,
             .quarter-btn, .nav-btn, .toggle-btn, .quarter-chip {
                 min-height: 44px;
                 touch-action: manipulation;
             }
             #radar-wrap, .radar-overlay {
-                width: 160px !important; height: 160px !important;
+                width: clamp(100px, 22vw, 240px) !important;
+                height: clamp(100px, 22vw, 240px) !important;
                 top: 4px !important; right: 4px !important;
             }
             #initial-hover-box {
-                right: 12px !important;
-                max-width: 60vw !important;
-                max-height: 80px !important;
-                overflow: hidden !important;
-                font-size: 11px !important;
-                padding: 6px 10px !important;
+                right: clamp(120px, 28vw, 360px) !important;
+                max-width: clamp(180px, 60vw, 600px) !important;
+                max-height: clamp(70px, 14vw, 120px) !important;
+                font-size: clamp(10px, 2.4vw, 13px) !important;
+                padding: clamp(4px, 1.4vw, 10px) clamp(8px, 2vw, 14px) !important;
                 line-height: 1.3 !important;
+                overflow: hidden !important;
             }
             .stats-bar, .legend, .quarter-strip {
-                font-size: 12px !important;
-                padding: 8px !important;
+                font-size: clamp(11px, 1.8vw, 14px) !important;
+                padding: clamp(6px, 1.5vw, 10px) !important;
             }
         }
+        /* Phone heights — vh-based so chart fits the device, not pixel ladder. */
+        @media (max-width: 768px) {
+            .plot-wrap { height: clamp(560px, 80vh, 720px) !important; }
+        }
         @media (max-width: 480px) {
-            body { font-size: 13px; }
-            .plot-wrap { height: 600px !important; }
-            #radar-wrap, .radar-overlay { display: none !important; }
-            #initial-hover-box { display: none !important; }
+            .plot-wrap { height: clamp(520px, 78vh, 660px) !important; }
         }
 
     </style>

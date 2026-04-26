@@ -61,9 +61,19 @@ const mobileH = mobileHeight ?? Math.max(600, Math.round(height * 0.7));
 </figure>
 
 <style define:vars={{ desktopHeight: `${height}px`, mobileHeight: `${mobileH}px` }}>
-  .static-chart-frame { min-height: var(--mobileHeight); }
-  .static-chart-iframe { height: var(--mobileHeight); background: transparent; }
-  @media (min-width: 768px) {
+  /* Phone heights flex with the device via clamp(min, 80vh, max) so the
+     chart fits a 320px iPhone SE (667vh = 533) and a 430px iPhone Pro Max
+     (932vh = 745) without a step ladder. The chart HTML's own .plot-wrap
+     uses a matching clamp; iframe stays tall enough to host whichever
+     end of the range applies. */
+  .static-chart-frame {
+    min-height: clamp(560px, 82vh, var(--mobileHeight));
+  }
+  .static-chart-iframe {
+    height: clamp(560px, 82vh, var(--mobileHeight));
+    background: transparent;
+  }
+  @media (min-width: 1024px) {
     .static-chart-frame { min-height: var(--desktopHeight); }
     .static-chart-iframe { height: var(--desktopHeight); }
   }
