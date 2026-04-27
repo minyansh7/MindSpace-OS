@@ -33,7 +33,6 @@ const expectedAssets = [
   'robots.txt',
   'favicon.svg',
   'sitemap-index.xml',
-  // Phase 1 + 2: all chart pages self-hosted, no Streamlit runtime dependency.
   'charts/emotion-pulse.html',
   'charts/community-dynamics.html',
   'charts/inner-life-currents.html',
@@ -44,11 +43,22 @@ if (!existsSync(DIST)) {
   throw new Error(`No dist/ — run 'bun run build' before tests`);
 }
 
+// Read each rendered HTML and chart HTML once at module load. Tests below
+// reference the cached strings; saves ~10 MB of redundant disk reads across
+// the suite (chart HTMLs alone are ~3.5 MB combined).
+const CHART_SLUGS = ['emotion-pulse', 'community-dynamics', 'inner-life-currents', 'community-weather-report'];
+const routeHtml = Object.fromEntries(
+  await Promise.all(expectedRoutes.map(async (r) => [r, await readFile(path.join(DIST, r), 'utf8')]))
+);
+const chartHtml = Object.fromEntries(
+  await Promise.all(CHART_SLUGS.map(async (s) => [s, await readFile(path.join(DIST, `charts/${s}.html`), 'utf8')]))
+);
+const indexHtml = routeHtml['index.html'];
+const aboutHtml = routeHtml['about/index.html'];
+
 for (const route of expectedRoutes) {
   test(`route exists: ${route}`, async () => {
-    const full = path.join(DIST, route);
-    expect(existsSync(full)).toBe(true);
-    const s = await stat(full);
+    const s = await stat(path.join(DIST, route));
     expect(s.size).toBeGreaterThan(500);
   });
 }
@@ -59,143 +69,106 @@ for (const asset of expectedAssets) {
   });
 }
 
-test('landing has thesis H1', async () => {
-  const html = await readFile(path.join(DIST, 'index.html'), 'utf8');
-  expect(html).toContain('Confusion');
-  expect(html).toContain('Compassion');
+test('landing has thesis H1', () => {
+  expect(indexHtml).toContain('Confusion');
+  expect(indexHtml).toContain('Compassion');
 });
 
-test('landing has updated thesis copy', async () => {
-  const html = await readFile(path.join(DIST, 'index.html'), 'utf8');
-  expect(html).toContain('struggle closely wrapped around curiosity');
+test('landing has updated thesis copy', () => {
+  expect(indexHtml).toContain('struggle closely wrapped around curiosity');
 });
 
-test('GoEmotions citation includes Google Research prefix', async () => {
-  // The "GoEmotions" word is wrapped in an <a> tag linking to Google Research's
-  // blog post, so a literal substring match across the link tag fails. Match
+test('GoEmotions citation includes Google Research prefix', () => {
+  // "GoEmotions" is wrapped in an <a> linking to Google Research's blog. Match
   // tolerantly: "Google Research's" must precede "GoEmotions" with only HTML
   // tags / whitespace between.
-  const html = await readFile(path.join(DIST, 'index.html'), 'utf8');
-  expect(html).toMatch(/Google Research's[^A-Za-z]*<a[^>]*>\s*GoEmotions/);
+  expect(indexHtml).toMatch(/Google Research's[^A-Za-z]*<a[^>]*>\s*GoEmotions/);
 });
 
-test('brand mark renders as MINDSPACE OS with space', async () => {
-  const html = await readFile(path.join(DIST, 'index.html'), 'utf8');
-  expect(html).toContain('MINDSPACE OS');
-  expect(html).not.toContain('MINDSPACEOS');
+test('brand mark renders as MINDSPACE OS with space', () => {
+  expect(indexHtml).toContain('MINDSPACE OS');
+  expect(indexHtml).not.toContain('MINDSPACEOS');
 });
 
-test('landing has Schema.org Dataset JSON-LD', async () => {
-  const html = await readFile(path.join(DIST, 'index.html'), 'utf8');
-  expect(html).toContain('"@type":"Dataset"');
-  expect(html).toContain('"@context":"https://schema.org"');
+test('landing has Schema.org Dataset JSON-LD', () => {
+  expect(indexHtml).toContain('"@type":"Dataset"');
+  expect(indexHtml).toContain('"@context":"https://schema.org"');
 });
 
-test('all pages have og:image meta', async () => {
+test('all pages have og:image meta', () => {
   for (const route of expectedRoutes) {
-    const html = await readFile(path.join(DIST, route), 'utf8');
-    expect(html).toMatch(/<meta property="og:image" content="[^"]+"/);
-    expect(html).toMatch(/<meta name="twitter:card" content="summary_large_image"/);
+    expect(routeHtml[route]).toMatch(/<meta property="og:image" content="[^"]+"/);
+    expect(routeHtml[route]).toMatch(/<meta name="twitter:card" content="summary_large_image"/);
   }
 });
 
-test('all pages have canonical link', async () => {
+test('all pages have canonical link', () => {
   for (const route of expectedRoutes) {
-    const html = await readFile(path.join(DIST, route), 'utf8');
-    expect(html).toMatch(/<link rel="canonical" href="[^"]+"/);
+    expect(routeHtml[route]).toMatch(/<link rel="canonical" href="[^"]+"/);
   }
 });
 
-test('about page has methodology + limitations sections', async () => {
-  const html = await readFile(path.join(DIST, 'about/index.html'), 'utf8');
-  expect(html).toContain('id="methodology"');
-  expect(html).toContain('id="limitations"');
-  expect(html).toContain('id="ethics"');
-  expect(html).toContain('id="cite"');
+test('about page has methodology + limitations sections', () => {
+  expect(aboutHtml).toContain('id="methodology"');
+  expect(aboutHtml).toContain('id="limitations"');
+  expect(aboutHtml).toContain('id="ethics"');
+  expect(aboutHtml).toContain('id="cite"');
 });
 
-test('chart pages link to GoEmotions methodology', async () => {
-  const html = await readFile(path.join(DIST, 'explore/emotion-pulse/index.html'), 'utf8');
+test('chart pages link to GoEmotions methodology', () => {
+  const html = routeHtml['explore/emotion-pulse/index.html'];
   expect(html.toLowerCase()).toContain('goemotions');
   expect(html).toContain('/about#methodology');
 });
 
-test('community-dynamics page embeds the static chart, not Streamlit', async () => {
-  // Phase 1 migration: this page uses StaticChart (iframe to /charts/*.html), not ChartFrame.
-  const html = await readFile(path.join(DIST, 'explore/community-dynamics/index.html'), 'utf8');
-  expect(html).toContain('/charts/community-dynamics.html');
-  expect(html).not.toContain('mindspaceos.streamlit.app/Community_Dynamics');
-});
-
-test('emotion-pulse page embeds the static chart, not Streamlit', async () => {
-  const html = await readFile(path.join(DIST, 'explore/emotion-pulse/index.html'), 'utf8');
-  expect(html).toContain('/charts/emotion-pulse.html');
-  expect(html).not.toContain('mindspaceos.streamlit.app/Emotion_Pulse');
-});
-
-test('inner-life-currents page embeds the static chart, not Streamlit', async () => {
-  const html = await readFile(path.join(DIST, 'explore/inner-life-currents/index.html'), 'utf8');
-  expect(html).toContain('/charts/inner-life-currents.html');
-  expect(html).not.toContain('mindspaceos.streamlit.app/Inner_Life_Currents');
-});
-
-test('community-weather-report page embeds the static chart, not Streamlit', async () => {
-  const html = await readFile(path.join(DIST, 'explore/community-weather-report/index.html'), 'utf8');
-  expect(html).toContain('/charts/community-weather-report.html');
-  expect(html).not.toContain('mindspaceos.streamlit.app/Community_Weather_Report');
-});
-
-test('no chart page falls back to Streamlit iframe (Phase 2 complete)', async () => {
-  for (const slug of ['emotion-pulse', 'community-dynamics', 'community-weather-report', 'inner-life-currents']) {
-    const html = await readFile(path.join(DIST, `explore/${slug}/index.html`), 'utf8');
+for (const slug of CHART_SLUGS) {
+  test(`${slug} page embeds the static chart, not Streamlit`, () => {
+    const html = routeHtml[`explore/${slug}/index.html`];
+    expect(html).toContain(`/charts/${slug}.html`);
     expect(html).not.toContain('streamlit.app');
+  });
+}
+
+test('all four static chart HTMLs are self-contained (no Streamlit references)', () => {
+  for (const slug of CHART_SLUGS) {
+    expect(chartHtml[slug]).not.toContain('streamlit.app');
+    expect(chartHtml[slug]).not.toContain('streamlit.io');
   }
 });
 
-test('all four static chart HTMLs are self-contained (no Streamlit references)', async () => {
-  for (const slug of ['emotion-pulse', 'community-dynamics', 'inner-life-currents', 'community-weather-report']) {
-    const html = await readFile(path.join(DIST, `charts/${slug}.html`), 'utf8');
-    expect(html).not.toContain('streamlit.app');
-    expect(html).not.toContain('streamlit.io');
-  }
-});
-
-test('all four static chart HTMLs include mobile breakpoints', async () => {
+test('all four static chart HTMLs include mobile breakpoints', () => {
   // MOBILE_CSS in scripts/build_chart_figures.py injects @media (max-width: 768px)
   // and @media (max-width: 480px) into every chart's <style>. Re-run the bake
   // script if these break.
-  for (const slug of ['emotion-pulse', 'community-dynamics', 'inner-life-currents', 'community-weather-report']) {
-    const html = await readFile(path.join(DIST, `charts/${slug}.html`), 'utf8');
-    expect(html).toContain('@media (max-width: 768px)');
-    expect(html).toContain('@media (max-width: 480px)');
-    expect(html).toContain('min-height: 44px');
+  for (const slug of CHART_SLUGS) {
+    expect(chartHtml[slug]).toContain('@media (max-width: 768px)');
+    expect(chartHtml[slug]).toContain('@media (max-width: 480px)');
+    expect(chartHtml[slug]).toContain('min-height: 44px');
   }
 });
 
-test('explore page renders responsive iframe heights via StaticChart', async () => {
+test('explore page renders responsive iframe heights via StaticChart', () => {
   // StaticChart.astro injects desktop (768+) and mobile (<768) heights via CSS
   // custom properties. Astro/Vite minifies, so the @media rule loses the space
   // and the selector gets a data-astro-cid suffix.
-  const html = await readFile(path.join(DIST, 'explore/emotion-pulse/index.html'), 'utf8');
+  const html = routeHtml['explore/emotion-pulse/index.html'];
   expect(html).toMatch(/@media\s*\(min-width:\s*768px\)/);
   expect(html).toMatch(/--mobileHeight:\s*\d+px/);
   expect(html).toMatch(/--desktopHeight:\s*\d+px/);
 });
 
-test('Plotly-based static charts load Plotly.js from CDN', async () => {
+test('Plotly-based static charts load Plotly.js from CDN', () => {
   // Weather Report uses pure HTML/CSS — no Plotly. The other three use Plotly.
   for (const slug of ['emotion-pulse', 'community-dynamics', 'inner-life-currents']) {
-    const html = await readFile(path.join(DIST, `charts/${slug}.html`), 'utf8');
-    expect(html).toContain('cdn.plot.ly/plotly');
+    expect(chartHtml[slug]).toContain('cdn.plot.ly/plotly');
   }
 });
 
-test('inner-life-currents static chart embeds all 6 quarters of data', async () => {
-  const html = await readFile(path.join(DIST, 'charts/inner-life-currents.html'), 'utf8');
+test('inner-life-currents static chart embeds all 6 quarters of data', () => {
+  const html = chartHtml['inner-life-currents'];
   for (const q of ['2024Q1', '2024Q2', '2024Q3', '2024Q4', '2025Q1', '2025Q2']) {
     expect(html).toContain(q);
   }
-  // Time Travel UI controls present.
   expect(html).toContain('Previous Quarter');
   expect(html).toContain('Next Quarter');
 });
@@ -211,12 +184,11 @@ test('sitemap includes all routes', async () => {
   // sitemap-index.xml may reference one or more sitemap-N.xml files
   const indexXml = await readFile(path.join(DIST, 'sitemap-index.xml'), 'utf8');
   expect(indexXml).toContain('<sitemap>');
-  // Find the actual sitemap file
   const match = indexXml.match(/<loc>([^<]+sitemap-0\.xml)<\/loc>/);
   if (match) {
     const sitemapPath = match[1].replace('https://mindspaceos.com/', '');
     const sitemap = await readFile(path.join(DIST, sitemapPath), 'utf8');
-    for (const slug of ['emotion-pulse', 'community-dynamics', 'community-weather-report', 'inner-life-currents']) {
+    for (const slug of CHART_SLUGS) {
       expect(sitemap).toContain(`/explore/${slug}/`);
     }
     expect(sitemap).toContain('/about/');

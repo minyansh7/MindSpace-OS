@@ -2,7 +2,6 @@
 import Base from '../../layouts/Base.astro';
 import Nav from '../../components/Nav.astro';
 import Footer from '../../components/Footer.astro';
-import ChartFrame from '../../components/ChartFrame.astro';
 import StaticChart from '../../components/StaticChart.astro';
 import PageCard from '../../components/PageCard.astro';
 import JsonLd from '../../components/JsonLd.astro';
@@ -15,39 +14,6 @@ export function getStaticPaths() {
 const { page } = Astro.props;
 const goEmotions = citations.find((c) => c.id === 'goemotions')!;
 const otherPages = pages.filter((p) => p.slug !== page.slug);
-
-/* Streamlit migration: complete.
-   Phase 1 — emotion-pulse, community-dynamics → self-hosted static HTML.
-   Phase 2a — inner-life-currents → self-hosted static HTML (Time Travel inlined).
-   Phase 2b — community-weather-report → self-hosted static HTML (quarter selector,
-              7 animated weather regions, full hover tooltips).
-   All four chart pages now render without Streamlit at runtime.
-   See scripts/build_chart_figures.py. */
-const STATIC_CHART_SLUGS = new Set([
-  'emotion-pulse',
-  'community-dynamics',
-  'inner-life-currents',
-  'community-weather-report',
-]);
-const isStatic = STATIC_CHART_SLUGS.has(page.slug);
-const staticHeight: Record<string, number> = {
-  'emotion-pulse': 1100,
-  'community-dynamics': 1000,
-  'inner-life-currents': 1000,
-  'community-weather-report': 1200,
-};
-/* Mobile iframe heights — match each chart's `.plot-wrap` height clamp
-   set by MOBILE_CSS in scripts/build_chart_figures.py. The base CSS
-   clamps plot-wrap to 600px at <=480px and 720px at <=768px. Add small
-   padding for surrounding chart chrome (stats bar, quarter selector). */
-const mobileHeight: Record<string, number> = {
-  'emotion-pulse': 640,
-  'community-dynamics': 860,
-  'inner-life-currents': 760,
-  // Weather report is taller because the river-flow grid stacks to 1 column at
-  // <=768px (7 topic cards + header + summary badge + sparkline + map = ~1800px).
-  'community-weather-report': 1800,
-};
 ---
 <Base
   title={`${page.title} — ${project.name}`}
@@ -72,12 +38,9 @@ const mobileHeight: Record<string, number> = {
       {page.subtitle}.
     </p>
 
-    <!-- 1 paragraph + 1 callout per design review -->
-    {page.intro && (
-      <div class="prose-editorial mb-10">
-        <p>{page.intro}</p>
-      </div>
-    )}
+    <div class="prose-editorial mb-10">
+      <p>{page.intro}</p>
+    </div>
 
     {page.callout && (
       <blockquote class="pull-quote max-w-3xl mb-12">
@@ -86,34 +49,29 @@ const mobileHeight: Record<string, number> = {
     )}
   </article>
 
-  <!-- Chart -->
   <section class="max-w-7xl mx-auto px-5 sm:px-8 pb-12">
-    {isStatic ? (
-      <StaticChart
-        src={`${page.slug}.html`}
-        height={staticHeight[page.slug] ?? 900}
-        mobileHeight={mobileHeight[page.slug] ?? 700}
-        title={`${page.title} — interactive chart`}
-      />
-    ) : (
-      <ChartFrame page={page} />
-    )}
+    <StaticChart
+      src={`${page.slug}.html`}
+      height={page.desktop_height}
+      mobileHeight={page.mobile_height}
+      title={`${page.title} — interactive chart`}
+    />
     <p class="footnote mt-4 max-w-3xl">
       Based on {data.post_count_canonical.toLocaleString()} posts and comments of meditation on <a href="https://www.reddit.com/" target="_blank" rel="noopener">Reddit</a>,
       {data.date_range_human}.
-      {page.slug === 'community-weather-report' && (
+      {page.footnote_variant === 'weather' && (
         <span>
           Each region is sized by the number of posts in that topic; the breakdown surfaces the top three audience pain points raised when the topic comes up, color-coded by share of the quarter's posts —
           see <a href="/about#methodology">methodology</a> for limitations.
         </span>
       )}
-      {page.slug === 'inner-life-currents' && (
+      {page.footnote_variant === 'currents' && (
         <span>
           Lines pair themes from busy, emotional threads (engagement &gt; 30, intensity &gt; 0.3); thicker line = more engagement —
           see <a href="/about#methodology">methodology</a> for limitations.
         </span>
       )}
-      {(page.slug === 'emotion-pulse' || page.slug === 'community-dynamics') && (
+      {page.footnote_variant === 'goemotions' && (
         <span>
           Emotion classification via Google Research's <a href={goEmotions.blog} target="_blank" rel="noopener">GoEmotions</a>
           ({goEmotions.authors.split(',')[0]} et al. {goEmotions.year}), trained on Reddit comments —
