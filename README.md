@@ -2,7 +2,7 @@
 
 > A visual field guide to how people actually talk about meditation.
 
-MindSpace OS turns **2,899 posts and comments from r/meditation** (Jan 2024 – Jun 2025) into a navigable field guide — emotional maps, sentiment weather, theme networks, and quarterly shifts. Built to see what a practice community sounds like when nobody's selling anything.
+MindSpace OS turns **2,899 posts and comments from meditation on Reddit** (Jan 2024 – Jun 2025) into a navigable field guide — emotional maps, sentiment weather, theme networks, and quarterly shifts. Built to see what a practice community sounds like when nobody's selling anything.
 
 **Live site:** [https://mindspace-os.pages.dev](https://mindspace-os.pages.dev) (canonical domain `mindspaceos.com` once DNS lands).
 
@@ -166,7 +166,7 @@ Raw Reddit data is **not redistributed**. The `precomputed/*.parquet` files cont
 
 - Built by **Min** at [MinyanLabs](https://open.substack.com/pub/minyansh)
 - Emotion classification based on Google Research's [GoEmotions](https://arxiv.org/abs/2005.00547) taxonomy
-- Data sourced from [r/meditation](https://reddit.com/r/meditation) community posts
+- Data sourced from [Reddit](https://reddit.com/) community posts
 
 ---
 
