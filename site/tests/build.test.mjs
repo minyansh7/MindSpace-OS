@@ -191,6 +191,20 @@ test('_headers file ships with HTML route cache rules (Phase 1 perf)', async () 
   expect(headers).toMatch(/\/_astro\/\*[\s\S]*?immutable/);
 });
 
+test('above-the-fold fonts are preloaded (Phase 2 perf)', () => {
+  // Phase 2: preload Inter 700 (H1) + Inter 500 (nav + hero thesis) woff2.
+  // Asserts both <link rel="preload"> tags are emitted into <head> with
+  // crossorigin (required by spec) and font/woff2 type, and that the href
+  // resolves to a hashed _astro path so the immutable cache rule applies.
+  for (const route of expectedRoutes) {
+    const html = routeHtml[route];
+    const preloads = html.match(/<link rel="preload"[^>]*as="font"[^>]*>/g) || [];
+    expect(preloads.length).toBeGreaterThanOrEqual(2);
+    expect(html).toMatch(/<link rel="preload"[^>]*as="font"[^>]*type="font\/woff2"[^>]*crossorigin[^>]*href="\/_astro\/inter-latin-700-normal\.[A-Za-z0-9_-]+\.woff2"/);
+    expect(html).toMatch(/<link rel="preload"[^>]*as="font"[^>]*type="font\/woff2"[^>]*crossorigin[^>]*href="\/_astro\/inter-latin-500-normal\.[A-Za-z0-9_-]+\.woff2"/);
+  }
+});
+
 test('robots.txt allows all and points to sitemap', async () => {
   const robots = await readFile(path.join(DIST, 'robots.txt'), 'utf8');
   expect(robots).toMatch(/User-agent: \*/);
