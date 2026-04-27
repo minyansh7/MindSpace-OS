@@ -30,6 +30,100 @@ CHARTS_DIR = SITE_PUBLIC / "charts"
 
 PLOTLY_CDN_URL = "https://cdn.plot.ly/plotly-2.35.2.min.js"
 
+# Mobile baseline injected into every chart's <style>. Keeps each chart
+# readable + tappable at narrow viewports without dedicated per-chart logic.
+# Per-chart polish (label collision tuning, region repositioning, etc.) lives
+# in each chart's own <style>. This is the floor.
+MOBILE_CSS = """
+        /* Tablet-and-below fluid scaling. clamp() lets sizes flex across
+           the full phone-to-tablet range (320px iPhone SE → 1024px iPad
+           landscape) without step breakpoints. The radar overlay and
+           seed pop-up stay visible but scale down proportionally. */
+        @media (max-width: 1024px) {
+            body { font-size: clamp(13px, 1.6vw, 16px); }
+            .modebar { display: none !important; }
+            .hovertext {
+                font-size: clamp(11px, 2.2vw, 14px) !important;
+                max-width: clamp(220px, 60vw, 360px) !important;
+            }
+            button, [role="button"], input[type="checkbox"] + label,
+            .quarter-btn, .nav-btn, .toggle-btn, .quarter-chip {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            /* Radar floor at 140px so all 8 emotion axes render legibly.
+               Below ~140 Plotly clips most axis labels. */
+            #radar-wrap, .radar-overlay {
+                width: clamp(140px, 25vw, 240px) !important;
+                height: clamp(140px, 25vw, 240px) !important;
+                top: 4px !important; right: 4px !important;
+            }
+            /* Seed box: right offset stays clear of radar's left edge.
+               Drop the max-height clamp so the box auto-sizes to its
+               (terse) mobile content; the previous 70-120px ceiling
+               clipped text when it wrapped to more lines at narrow
+               widths. The mobile content is 3 short lines, will sit
+               naturally around 60-90px depending on wrap. */
+            #initial-hover-box {
+                right: clamp(155px, 30vw, 270px) !important;
+                max-width: clamp(160px, 55vw, 600px) !important;
+                max-height: none !important;
+                font-size: clamp(10px, 2.4vw, 13px) !important;
+                padding: clamp(6px, 1.6vw, 10px) clamp(8px, 2vw, 14px) !important;
+                line-height: 1.35 !important;
+                overflow: visible !important;
+            }
+            .stats-bar, .legend, .quarter-strip {
+                font-size: clamp(11px, 1.8vw, 14px) !important;
+                padding: clamp(6px, 1.5vw, 10px) !important;
+            }
+        }
+        /* Phone heights — vh-based so chart fits the device, not pixel ladder. */
+        @media (max-width: 768px) {
+            .plot-wrap { height: clamp(560px, 80vh, 720px) !important; }
+        }
+        @media (max-width: 480px) {
+            .plot-wrap { height: clamp(520px, 78vh, 660px) !important; }
+        }
+        /* Small-mobile (≤360px): Galaxy Fold folded, older Androids,
+           iPhone SE 1st gen. Seed + radar previously consumed the chart's
+           horizontal space; shrink both, swap to ultra-terse seed payload,
+           and tighten chip legend so all 5 fit on one row. Bumps radar bg
+           transparency so chart shows through where they overlap. */
+        @media (max-width: 360px) {
+            #radar-wrap, .radar-overlay {
+                width: 110px !important;
+                height: 110px !important;
+                background: rgba(255, 255, 255, 0.78) !important;
+            }
+            #initial-hover-box {
+                right: 124px !important;
+                max-width: 50vw !important;
+                font-size: 10px !important;
+                padding: 5px 8px !important;
+                line-height: 1.3 !important;
+                background-color: rgba(106, 90, 205, 0.92) !important;
+            }
+            /* Single-line seed at the smallest screens. The mobile variant
+               still wraps to 4 lines at 280-320px; tiny variant is one
+               headline + one hint, ~50px tall. */
+            .seed-content-mobile { display: none !important; }
+            .seed-content-tiny   { display: block !important; }
+            #archetype-legend {
+                gap: 4px !important;
+                padding: 8px 6px 2px !important;
+                font-size: 10px !important;
+            }
+            #archetype-legend .chip {
+                padding: 2px 6px !important;
+                gap: 4px !important;
+            }
+            #archetype-legend .chip::before {
+                width: 8px !important; height: 8px !important;
+            }
+        }
+"""
+
 
 # ----------------------------------------------------------------------------
 # Emotion Pulse — UMAP scatter + radar overlay + initial hover seed box
@@ -53,6 +147,16 @@ ARCHETYPE_COLORS = {
     "Tender Uncertainty": "#6a5acd",
     "Melancholic Confusion": "#9a32cd",
     "Anxious Concern": "#ffc300",
+}
+# Mobile-friendly short forms of archetype labels for narrow viewports
+# (<768px). The full label is positioned for a 1100px desktop canvas;
+# at phone width the trailing word truncates ("Soothing E..." / "Anxious C...").
+ARCHETYPE_SHORT_LABELS = {
+    "Reflective Caring": "Reflective",
+    "Soothing Empathy": "Soothing",
+    "Tender Uncertainty": "Tender",
+    "Melancholic Confusion": "Melancholic",
+    "Anxious Concern": "Anxious",
 }
 ARCHETYPE_SYMBOLS = {
     "Reflective Caring": ("circle", 8),
@@ -118,16 +222,23 @@ def build_emotion_pulse_payload() -> dict[str, Any]:
                 "showlegend": False,
             })
 
+    # Bake the raw cluster centroid alongside each label trace so the JS
+    # label-mode handler can compute viewport-proportional positions
+    # (centroid + offset × scale, where scale is fluid 0.25 → 1.0 across
+    # 320px → 1100px viewport widths). Plotly ignores unknown top-level
+    # trace keys, so these pass through harmlessly.
     centroids = df.groupby("archetype_label")[["umap_x", "umap_y"]].mean()
     for archetype, (cx, cy) in centroids.iterrows():
         dx, dy = CENTROID_OFFSETS.get(archetype, (0, 0))
         traces.append({
-            "x": [cx + dx], "y": [cy + dy],
+            "x": [float(cx + dx)], "y": [float(cy + dy)],
             "mode": "text",
             "text": [f"<b>{archetype}</b>"],
             "textfont": {"size": 20, "color": ARCHETYPE_COLORS[archetype], "family": "sans-serif"},
             "hoverinfo": "skip",
             "showlegend": False,
+            "_centroid_x": float(cx),
+            "_centroid_y": float(cy),
         })
 
     y_min, y_max = float(df["umap_y"].min()), float(df["umap_y"].max())
@@ -147,6 +258,7 @@ def build_emotion_pulse_payload() -> dict[str, Any]:
         "traces": traces,
         "y_range": [y_min - y_range_pad_bot, y_max + y_range_pad_top],
         "archetype_colors": ARCHETYPE_COLORS,
+        "short_labels": ARCHETYPE_SHORT_LABELS,
         "theta_labels": RADAR_THETA_LABELS,
         "seed_radar_values": seed_radar_values,
         "seed_archetype": seed_archetype,
@@ -197,6 +309,53 @@ def build_emotion_pulse_html() -> str:
             transition: opacity 0.6s ease;
             pointer-events: none;
         }}
+        /* Three seed-box content variants:
+             - desktop:  full emotion list + post-quote (>1024px)
+             - mobile:   archetype + 3 emotions + tap hint (361-1024px)
+             - tiny:     archetype + tap hint, single line (≤360px)
+           Swapped via @media to avoid clipping at narrow widths. */
+        .seed-content-desktop {{ display: block; }}
+        .seed-content-mobile  {{ display: none; }}
+        .seed-content-tiny    {{ display: none; }}
+        @media (max-width: 1024px) {{
+            .seed-content-desktop {{ display: none; }}
+            .seed-content-mobile  {{ display: block; }}
+        }}
+        /* HTML archetype legend below the chart on mobile/tablet. The
+           in-chart text-trace labels get hidden via Plotly.restyle so the
+           data points read clean; this strip carries the cluster→color
+           legend instead. */
+        #archetype-legend {{
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            padding: 12px 14px;
+            font-family: Arial, sans-serif;
+            font-size: clamp(11px, 2.4vw, 13px);
+        }}
+        #archetype-legend .chip {{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.85);
+            border: 1px solid rgba(0,0,0,0.06);
+            color: #1e293b;
+            white-space: nowrap;
+        }}
+        #archetype-legend .chip::before {{
+            content: '';
+            display: inline-block;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--c);
+        }}
+        @media (max-width: 1024px) {{
+            #archetype-legend {{ display: flex; }}
+        }}
+{MOBILE_CSS}
     </style>
 </head>
 <body>
@@ -204,11 +363,29 @@ def build_emotion_pulse_html() -> str:
         <div id="umap-plot"></div>
         <div id="radar-wrap"><div id="radar-plot"></div></div>
         <div id="initial-hover-box">
-            <b>Emotion Pulse: Tender Uncertainty</b><br>
-            <b>Top Emotions:</b> caring: 75% annoying: 71% desire: 70% disapproval: 62% realization: 60% remorse: 60% curiosity: 59% approval: 56% excitement: 54% confusion: 53%<br>
-            <b>Post/Comment:</b> Insight Timer used to be amazing. While the community content is a nice-to-have, I mostly used it for the timer feature. However in the past few months the number of disruptive...<br><br>
-            <span style="color: inherit; border-bottom: 4px solid #FFD700; padding-bottom: 1px; font-weight: 700;">Hover</span> to discover details - and watch its emotion radar.
+            <div class="seed-content-desktop">
+                <b>Emotion Pulse: Tender Uncertainty</b><br>
+                <b>Top Emotions:</b> caring: 75% annoying: 71% desire: 70% disapproval: 62% realization: 60% remorse: 60% curiosity: 59% approval: 56% excitement: 54% confusion: 53%<br>
+                <b>Post/Comment:</b> Insight Timer used to be amazing. While the community content is a nice-to-have, I mostly used it for the timer feature. However in the past few months the number of disruptive...<br><br>
+                <span style="color: inherit; border-bottom: 4px solid #FFD700; padding-bottom: 1px; font-weight: 700;">Hover</span> to discover details - and watch its emotion radar.
+            </div>
+            <div class="seed-content-mobile">
+                <b>Tender Uncertainty</b><br>
+                caring 75% &middot; annoying 71% &middot; desire 70%<br>
+                <span style="color: inherit; border-bottom: 3px solid #FFD700; font-weight: 700;">Tap a point</span> to update the radar.
+            </div>
+            <div class="seed-content-tiny">
+                <b>Tender Uncertainty</b><br>
+                <span style="color: inherit; border-bottom: 2px solid #FFD700; font-weight: 700;">Tap</span> for radar.
+            </div>
         </div>
+    </div>
+    <div id="archetype-legend" aria-label="Archetype legend">
+        <span class="chip" style="--c: #ff5e78">Reflective Caring</span>
+        <span class="chip" style="--c: #00c49a">Soothing Empathy</span>
+        <span class="chip" style="--c: #6a5acd">Tender Uncertainty</span>
+        <span class="chip" style="--c: #9a32cd">Melancholic Confusion</span>
+        <span class="chip" style="--c: #ffc300">Anxious Concern</span>
     </div>
 
     <script>
@@ -231,6 +408,88 @@ def build_emotion_pulse_html() -> str:
     }};
     const umapConfig = {{ displayModeBar: false, displaylogo: false, scrollZoom: false, doubleClick: false, responsive: true }};
     Plotly.newPlot('umap-plot', PAYLOAD.traces, umapLayout, umapConfig);
+
+    // Viewport-aware archetype label sizing + positioning. Three things
+    // scale with viewport width across the 320px → 1280px range:
+    //   - text: full label vs short ("Anxious Concern" → "Anxious") at <=1024
+    //   - font size: lerp from 13 (320px) up to 20 (>=1100px)
+    //   - data-coordinate position: offset × scale, where scale = clamp(0.25, w/1100, 1.0)
+    // The fluid scale keeps labels close to their cluster centroid on small
+    // phones (iPhone SE 320px → 0.29 scale) and pushes them outward as the
+    // canvas grows toward desktop.
+    const SHORT_LABELS = PAYLOAD.short_labels || {{}};
+    function lerp(a, b, t) {{ return a + (b - a) * t; }}
+    function applyArchetypeLabelMode() {{
+        const w = window.innerWidth;
+        const narrow = w <= 1024;
+        // On narrow viewports the text-trace labels overplot the data
+        // points and are hard to read no matter where they sit. Hide them
+        // entirely; the HTML #archetype-legend strip below the chart
+        // carries the cluster→color mapping instead.
+        const offsetScale = Math.max(0.15, Math.min(1.0, 0.15 + (w - 320) / 800 * 0.85));
+        const fontSize = Math.round(lerp(13, 20, Math.max(0, Math.min(1, (w - 320) / (1100 - 320)))));
+        const traces = PAYLOAD.traces;
+        const updates = {{ text: [], 'textfont.size': [], x: [], y: [], visible: [] }};
+        const indices = [];
+        traces.forEach((t, i) => {{
+            if (t.mode !== 'text' || !Array.isArray(t.text) || t.text.length !== 1) return;
+            const raw = String(t.text[0]).replace(/<[^>]+>/g, '');
+            const short = SHORT_LABELS[raw];
+            if (!short) return;
+            indices.push(i);
+            updates.text.push([narrow ? `<b>${{short}}</b>` : `<b>${{raw}}</b>`]);
+            updates['textfont.size'].push(fontSize);
+            updates.visible.push(narrow ? false : true);
+            if (t._centroid_x != null && t._centroid_y != null) {{
+                const dx = t.x[0] - t._centroid_x;
+                const dy = t.y[0] - t._centroid_y;
+                updates.x.push([t._centroid_x + dx * offsetScale]);
+                updates.y.push([t._centroid_y + dy * offsetScale]);
+            }} else {{
+                updates.x.push(t.x);
+                updates.y.push(t.y);
+            }}
+        }});
+        if (indices.length) Plotly.restyle('umap-plot', updates, indices);
+    }}
+    applyArchetypeLabelMode();
+
+    // Viewport-aware hover content. Desktop hover text is pre-wrapped to
+    // 75 chars/line and lists 10 emotions + a 200-char post excerpt.
+    // On phones that overflows the chart canvas: text gets cut off
+    // ("exciteme...") and the tooltip covers the entire plot. On <=768px
+    // replace each marker trace's text with just the first line
+    // (archetype name) + a hint pointing to the radar for emotion detail.
+    function applyHoverContentMode() {{
+        const w = window.innerWidth;
+        const narrow = w <= 768;
+        const traces = PAYLOAD.traces;
+        const updates = {{ text: [] }};
+        const indices = [];
+        traces.forEach((t, i) => {{
+            if (t.mode !== 'markers' || !Array.isArray(t.text) || t.hoverinfo === 'skip') return;
+            indices.push(i);
+            if (narrow) {{
+                updates.text.push(t.text.map((s) => {{
+                    const first = String(s || '').split('<br>')[0];
+                    return first + '<br><i style="opacity:.7;font-size:.92em">See radar →</i>';
+                }}));
+            }} else {{
+                updates.text.push(t.text);
+            }}
+        }});
+        if (indices.length) Plotly.restyle('umap-plot', updates, indices);
+    }}
+    applyHoverContentMode();
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {{
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {{
+            applyArchetypeLabelMode();
+            applyHoverContentMode();
+        }}, 150);
+    }});
 
     const radarLayout = {{
         polar: {{
@@ -273,6 +532,12 @@ def build_emotion_pulse_html() -> str:
         setTimeout(() => seedBox.remove(), 600);
     }}
 
+    // Touch detection: hover is emulated as fire-once on tap, then unhover
+    // immediately fires when the touch ends. On touch devices we want the
+    // radar to persist after a tap (the user just lifted their finger;
+    // resetting the radar means they can never see what they tapped).
+    // Skip the unhover handler on touch-only devices.
+    const isTouch = window.matchMedia('(hover: none)').matches;
     umapDiv.on('plotly_hover', (evt) => {{
         const pt = evt.points[0];
         if (!pt || !pt.customdata) return;
@@ -281,8 +546,18 @@ def build_emotion_pulse_html() -> str:
         Plotly.react('radar-plot', buildRadarTrace(scores, archetype), radarLayout, radarConfig);
         dismissSeedBox();
     }});
-    umapDiv.on('plotly_unhover', () => {{
-        Plotly.react('radar-plot', seedRadar, radarLayout, radarConfig);
+    if (!isTouch) {{
+        umapDiv.on('plotly_unhover', () => {{
+            Plotly.react('radar-plot', seedRadar, radarLayout, radarConfig);
+        }});
+    }}
+    // Plotly fires plotly_click reliably on tap. Belt-and-suspenders so
+    // the radar updates even if hover doesn't fire on the platform.
+    umapDiv.on('plotly_click', (evt) => {{
+        const pt = evt.points[0];
+        if (!pt || !pt.customdata) return;
+        Plotly.react('radar-plot', buildRadarTrace(pt.customdata, pt.data.name), radarLayout, radarConfig);
+        dismissSeedBox();
     }});
     </script>
 </body>
@@ -366,12 +641,50 @@ def build_community_dynamics_html() -> str:
             padding-bottom: 1px;
             font-weight: 700;
         }}
+        /* Hint-text toggle — touch devices don't hover. The (hover: none) media
+           query swaps "Hover" copy for "Tap" so the prompt teaches the right
+           gesture per input modality. */
+        .hint-mouse {{ display: inline; }}
+        .hint-touch {{ display: none; }}
+        @media (hover: none) {{
+            .hint-mouse {{ display: none; }}
+            .hint-touch {{ display: inline; }}
+        }}
+        /* Tap readout — Plotly Sankey doesn't fire hover on touch devices,
+           only click. Show the customdata in this panel below the chart on
+           touch so mobile users get the same info desktop hover provides. */
+        .tap-readout {{
+            display: none;
+            flex: 0 0 auto;
+            margin: 6px 16px 12px;
+            padding: 6px 0;
+            font-size: 13px; line-height: 1.5; color: #2c3e50;
+            /* Reserve a fixed slot at the bottom of the iframe so the
+               readout never gets clipped when populated. Worst case is
+               1 title + 3 share lines × ~20px line-height + padding. */
+            min-height: 100px;
+            box-sizing: border-box;
+        }}
+        .tap-readout.empty {{
+            color: #94a3b8; font-style: italic;
+        }}
+        .tap-readout b {{ color: #2c3e50; }}
+        .tap-readout .tr-title {{ display: block; font-weight: 700; margin-bottom: 2px; }}
+        .tap-readout .tr-stat {{ display: block; }}
+        @media (hover: none) {{
+            .tap-readout {{ display: block; }}
+        }}
+{MOBILE_CSS}
     </style>
 </head>
 <body>
-    <div class="hover-hint-row"><span class="hover-hint">Hover</span> to see how emotions flow from posts to replies</div>
+    <div class="hover-hint-row">
+      <span class="hint-mouse"><span class="hover-hint">Hover</span> to see how emotions flow from posts to replies</span>
+      <span class="hint-touch"><span class="hover-hint">Tap</span> a ribbon to see how emotions flow from posts to replies</span>
+    </div>
     <div class="column-eyebrows"><span>Posts</span><span>Replies</span></div>
     <div id="sankey-plot"></div>
+    <div id="tap-readout" class="tap-readout empty">Tap a ribbon or node above for details.</div>
     <script>
     const FIG = {fig_json};
     const config = {{
@@ -379,10 +692,42 @@ def build_community_dynamics_html() -> str:
         modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d']
     }};
     // The serialized figure already has its own layout. Pass through unchanged.
-    Plotly.newPlot('sankey-plot', FIG.data, FIG.layout, config).then(() => {{
+    Plotly.newPlot('sankey-plot', FIG.data, FIG.layout, config).then((gd) => {{
         // Force Plotly to measure the flex-sized container after first paint and on resize,
         // otherwise the Sankey can underdraw on tall iframes.
         Plotly.Plots.resize('sankey-plot');
+        // Touch fallback: Plotly Sankey hover is mouseenter-only, so phones
+        // never see the tooltip. Wire plotly_click to render the same
+        // customdata into the #tap-readout panel below the chart.
+        const readout = document.getElementById('tap-readout');
+        gd.on('plotly_click', (e) => {{
+            if (!e || !e.points || !e.points.length) return;
+            const pt = e.points[0];
+            const html = pt.customdata || pt.label || '';
+            if (!html) return;
+            // Reformat: first <br>-segment is the title (archetype pair or
+            // node name), remaining segments collapse to one " / "-joined
+            // line of stats. Drops the inline color/size styling that the
+            // baked customdata included for the desktop tooltip.
+            const segs = String(html).split(/<br\s*\/?>/i).map(s => s.trim()).filter(Boolean);
+            if (!segs.length) return;
+            const stripStyle = (s) => s.replace(/<b\b[^>]*>/gi, '<b>');
+            const titleRaw = stripStyle(segs[0]);
+            // Strip the outer <b>...</b> from the title segment so we wrap it
+            // ourselves via .tr-title (consistent weight, no nested bold).
+            const titleText = titleRaw.replace(/^<b>(.*?)<\/b>$/i, '$1');
+            // Drop raw-count segments (Count, Posts, Comments, Connected
+            // comments). The normalized share views (Global / Post / Comment)
+            // carry the same info in % form, which scales cleaner on mobile.
+            const dropRegex = /^(Count|Posts|Comments|Connected comments)\s*:/i;
+            const stats = segs.slice(1)
+                .filter(s => !dropRegex.test(s.replace(/<[^>]+>/g, '')))
+                .map(stripStyle);
+            // Each remaining segment renders on its own line for scannability.
+            const statsHtml = stats.map(s => `<span class="tr-stat">${{s}}</span>`).join('');
+            readout.classList.remove('empty');
+            readout.innerHTML = `<span class="tr-title">${{titleText}}</span>${{statsHtml}}`;
+        }});
     }});
     let resizeTimer = null;
     window.addEventListener('resize', () => {{
@@ -676,6 +1021,7 @@ def build_inner_life_currents_html() -> str:
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
             backdrop-filter: blur(10px);
         }}
+{MOBILE_CSS}
     </style>
 </head>
 <body>
@@ -1330,6 +1676,11 @@ def build_weather_report_html() -> str:
             margin-top: 6px;
             width: 100%;
         }}
+        @media (max-width: 768px) {{
+            .topic-grid {{
+                grid-template-columns: 1fr !important;
+            }}
+        }}
         .topic-card {{
             min-width: 0;
             background: #ffffff;
@@ -1443,6 +1794,7 @@ def build_weather_report_html() -> str:
             font-style: italic;
             padding: 4px 0;
         }}
+{MOBILE_CSS}
     </style>
 </head>
 <body>
