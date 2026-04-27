@@ -271,10 +271,42 @@
         if (indices.length) Plotly.restyle('umap-plot', updates, indices);
     }
     applyArchetypeLabelMode();
+
+    // Viewport-aware hover content. Desktop hover text is pre-wrapped to
+    // 75 chars/line and lists 10 emotions + a 200-char post excerpt.
+    // On phones that overflows the chart canvas: text gets cut off
+    // ("exciteme...") and the tooltip covers the entire plot. On <=768px
+    // replace each marker trace's text with just the first line
+    // (archetype name) + a hint pointing to the radar for emotion detail.
+    function applyHoverContentMode() {
+        const w = window.innerWidth;
+        const narrow = w <= 768;
+        const traces = PAYLOAD.traces;
+        const updates = { text: [] };
+        const indices = [];
+        traces.forEach((t, i) => {
+            if (t.mode !== 'markers' || !Array.isArray(t.text) || t.hoverinfo === 'skip') return;
+            indices.push(i);
+            if (narrow) {
+                updates.text.push(t.text.map((s) => {
+                    const first = String(s || '').split('<br>')[0];
+                    return first + '<br><i style="opacity:.7;font-size:.92em">See radar →</i>';
+                }));
+            } else {
+                updates.text.push(t.text);
+            }
+        });
+        if (indices.length) Plotly.restyle('umap-plot', updates, indices);
+    }
+    applyHoverContentMode();
+
     let resizeTimer;
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(applyArchetypeLabelMode, 150);
+        resizeTimer = setTimeout(() => {
+            applyArchetypeLabelMode();
+            applyHoverContentMode();
+        }, 150);
     });
 
     const radarLayout = {
