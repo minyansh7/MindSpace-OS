@@ -47,60 +47,6 @@ const goEmotions = citations.find((c) => c.id === 'goemotions')!;
     </p>
   </section>
 
-  <!-- Findings — citation-extractable facts. Each H3 + sentence is LLM-quotable. -->
-  <section id="findings" class="max-w-7xl mx-auto px-5 sm:px-8 py-16 sm:py-24 border-t border-[var(--color-hairline)]">
-    <div class="max-w-3xl mb-10">
-      <p class="eyebrow mb-3">Six findings</p>
-      <h2 class="h-section mb-4">What 2,899 r/meditation posts actually said.</h2>
-      <p class="leading-relaxed max-w-2xl section-prose">
-        Six headline findings from 18 months of analysis. Each links to the chart that backs it.
-      </p>
-    </div>
-    <ol class="space-y-8 max-w-3xl list-none">
-      <li>
-        <h3 class="h-finding mb-2"><span class="text-[var(--color-text-tertiary)] mr-3 font-mono text-base">01</span>The dominant emotion isn't peace. It's struggle, closely wrapped around curiosity.</h3>
-        <p class="text-[var(--color-text-secondary)] leading-relaxed">
-          Across {data.post_count_canonical.toLocaleString()} posts and comments, the strongest signal is people returning to a difficult practice with persistent curiosity, not arriving at calm.
-          <a href="/explore/emotion-pulse/" class="link-finding">See Emotion Pulse →</a>
-        </p>
-      </li>
-      <li>
-        <h3 class="h-finding mb-2"><span class="text-[var(--color-text-tertiary)] mr-3 font-mono text-base">02</span>Joy ranks 25th of 28 emotions. Amusement is dead last.</h3>
-        <p class="text-[var(--color-text-secondary)] leading-relaxed">
-          Under <a href={goEmotions.blog} target="_blank" rel="noopener">GoEmotions</a>' 27-class model plus neutral, the emotional vocabulary that surfaces most is closer to <em>caring</em>, <em>realization</em>, and <em>nervousness</em> than to anything pleasurable.
-          <a href="/explore/emotion-pulse/" class="link-finding">See Emotion Pulse →</a>
-        </p>
-      </li>
-      <li>
-        <h3 class="h-finding mb-2"><span class="text-[var(--color-text-tertiary)] mr-3 font-mono text-base">03</span>About 1 in 4 replies to grief posts mirror grief themselves.</h3>
-        <p class="text-[var(--color-text-secondary)] leading-relaxed">
-          When someone posts in melancholy, roughly a quarter of comments respond in the same emotional register. The community has unwritten response rules.
-          <a href="/explore/community-dynamics/" class="link-finding">See Community Dynamics →</a>
-        </p>
-      </li>
-      <li>
-        <h3 class="h-finding mb-2"><span class="text-[var(--color-text-tertiary)] mr-3 font-mono text-base">04</span>Only 7 out of 100 replies to anxious posts mirror anxiety. More than half offer warm reassurance.</h3>
-        <p class="text-[var(--color-text-secondary)] leading-relaxed">
-          Anxiety doesn't get matched. It gets soothed. <em>Soothing Empathy</em> is the most-upvoted commenter type, the reason the subreddit feels safer than its emotional content suggests it should.
-          <a href="/explore/community-dynamics/" class="link-finding">See Community Dynamics →</a>
-        </p>
-      </li>
-      <li>
-        <h3 class="h-finding mb-2"><span class="text-[var(--color-text-tertiary)] mr-3 font-mono text-base">05</span>The community mood holds steady across 18 months. Most topics run partly-cloudy, none stormy.</h3>
-        <p class="text-[var(--color-text-secondary)] leading-relaxed">
-          Six quarters from January 2024 to June 2025 show modest mood shifts, no community-wide deterioration. The weather metaphor reads more honestly than a heatmap because mood, like weather, is uneven.
-          <a href="/explore/community-weather-report/" class="link-finding">See Community Weather Report →</a>
-        </p>
-      </li>
-      <li>
-        <h3 class="h-finding mb-2"><span class="text-[var(--color-text-tertiary)] mr-3 font-mono text-base">06</span>The community's emotional vocabulary clusters into five recurring archetypes.</h3>
-        <p class="text-[var(--color-text-secondary)] leading-relaxed">
-          UMAP + Gaussian Mixture clustering of the GoEmotions embedding produces five interpretable types: Reflective Caring, Soothing Empathy, Tender Uncertainty, Melancholic Confusion, Anxious Concern. Posters and commenters drift between them.
-          <a href="#archetypes" class="link-finding">Meet the archetypes ↓</a>
-        </p>
-      </li>
-    </ol>
-  </section>
 
   <!-- Five archetypes -->
   <section id="archetypes" class="max-w-7xl mx-auto px-5 sm:px-8 py-16 sm:py-24 border-t border-[var(--color-hairline)]">
@@ -108,9 +54,7 @@ const goEmotions = citations.find((c) => c.id === 'goemotions')!;
       <p class="eyebrow mb-3">Five emotion archetypes</p>
       <h2 class="h-section mb-4">The shape of struggle wrapped with curiosity.</h2>
       <p class="leading-relaxed max-w-2xl section-prose">
-        The community's emotional vocabulary clusters into five recurring types — not a personality
-        test, a structure. People who post and reply drift between them, but most of what's said
-        about meditation lives inside one of these five neighborhoods.
+        The community's emotional vocabulary clusters into five recurring types &mdash; not a personality test, a structure. People who post and reply drift between them, but most of what's said about meditation lives inside one of these five neighborhoods.
       </p>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
