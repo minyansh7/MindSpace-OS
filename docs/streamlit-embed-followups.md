@@ -1,5 +1,13 @@
 # Streamlit chart pages — embed follow-ups
 
+> **Status: RESOLVED (2026-04-26).** The Astro editorial site no longer iframes
+> Streamlit at runtime — all four chart pages now render from self-contained
+> static HTML at `site/public/charts/*.html`, baked by
+> `python3 scripts/build_chart_figures.py`. The issues catalogued below were
+> fixed by the static-HTML migration. Kept for historical reference. See
+> `CLAUDE.md` → "Streamlit-to-static migration (2026-04-26)" for the new
+> rendering path.
+
 The new `mindspaceos.com` Astro shell embeds the existing four Streamlit chart pages
 via iframe at `/explore/<slug>/`. A live audit (2026-04-25) of the iframes at
 1280×800 desktop revealed several issues that originate in the Streamlit pages
