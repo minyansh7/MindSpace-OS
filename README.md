@@ -164,7 +164,7 @@ Raw Reddit data is **not redistributed**. The `precomputed/*.parquet` files cont
 
 ## Credits
 
-- Built by **Min** at [MinyanLabs](https://open.substack.com/pub/minyansh)
+- Built by **Minyan Shi** at [MinyanLabs](https://open.substack.com/pub/minyansh)
 - Emotion classification based on Google Research's [GoEmotions](https://arxiv.org/abs/2005.00547) taxonomy
 - Data sourced from [Reddit](https://reddit.com/) community posts
 
