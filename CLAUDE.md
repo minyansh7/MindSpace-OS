@@ -12,10 +12,11 @@ MindSpace OS ships two sibling deliverables from this repo:
    experience. Lives at `site/dist/` after `npm run build`. Hosted on
    Cloudflare Pages (project `mindspace-os`, account
    `985e6531724a5e9ce8670a37ead0d6f1`):
-   - Current live URL: https://minyansh7-mindspace-os-publi.mindspace-os.pages.dev
+   - Current live URL: https://mindspace-os.pages.dev
      (canonical domain `mindspaceos.com` once DNS lands).
    - Branch previews: `https://<branch>.mindspace-os.pages.dev`
-     auto-built per push when Cloudflare Git integration is connected.
+     auto-built per push by `.github/workflows/deploy.yml` (chart bake +
+     Astro build + Cloudflare Pages deploy on every branch push).
 2. **Streamlit interactive app** (`Homepage.py` + `pages/*.py`). Source of
    truth for chart logic. Hosted on Streamlit Cloud at
    https://mindspaceos.streamlit.app . **The editorial site no longer
@@ -61,13 +62,20 @@ self-contained static HTML at `site/public/charts/*.html`, baked by
   the legend and edges.
 
 Re-run `python3 scripts/build_chart_figures.py` whenever:
-- The canonical archetype palette in `data/canonical.json` or the
-  `TOPIC_MAPPING` / `WEATHER_TOPIC_COLORS` dicts in the build script change.
+- The canonical palette in `data/canonical.json` changes (`archetypes[].color`
+  or `clusters[].color`). Both palettes flow through `scripts/_canonical.py`,
+  which the bake script imports as `ARCHETYPE_COLORS` and `TOPIC_MAPPING`.
+  `WEATHER_TOPIC_COLORS` is derived from `TOPIC_MAPPING` via `_shift_rgb`
+  (+25/-30 RGB shifts for the gradient pair and border).
 - A Streamlit page changes its figure construction or hover template
   (the build script re-implements the Plotly/HTML output rather than
   importing from the Streamlit modules, since they have `st.set_page_config`
   side effects).
 - The underlying parquet aggregates in `precomputed/` change.
+
+CI auto-runs the bake before every Astro build, so a forgotten manual
+re-run on local will not ship a stale chart to the deployed site (see
+`.github/workflows/deploy.yml`).
 
 `<StaticChart src="emotion-pulse.html" />` in
 `site/src/components/StaticChart.astro` iframes the local file (zero CORS,
@@ -117,9 +125,14 @@ caps metadata (same typographic treatment as the "TIME TRAVEL" eyebrow),
 matching the source screenshot.
 
 Node ordering: descending volume per side. Node colors pull from
-`ARCHETYPE_COLORS` in `pages/0_Emotion_Pulse.py` (canonical archetype
-palette — must stay in sync across the two pages). Link ribbons are
-colored by the poster's archetype at `rgba(..., 0.4)`.
+`ARCHETYPE_COLORS`. SOT chain: `data/canonical.json archetypes[].color`
+→ `scripts/_canonical.py` (Python loader) → `scripts/build_chart_figures.py`
+and `scripts/build_precomputed.py` import it. The Streamlit page
+`pages/0_Emotion_Pulse.py` keeps a local `ARCHETYPE_COLORS` dict so the
+Streamlit Cloud deployment is independent — that local copy must match
+canonical. A test in `site/tests/canonical.test.mjs` blocks any new
+inline `ARCHETYPE_COLORS = {` in the Python build scripts. Link ribbons
+are colored by the poster's archetype at `rgba(..., 0.4)`.
 
 Link hover shows three normalized views of the same count: Global Share
 (of all pairs), Poster Share (of that poster's outgoing flow), and
@@ -191,11 +204,15 @@ terracotta for embodied warmth.
 | Practice, Retreat, & Meta    | `#8B6F47` | walnut brown   |
 | Self-Regulation              | `#D97757` | terracotta     |
 
-Pages using this palette (must stay in sync):
-- `pages/3_Inner_Life_Currents.py` → `topic_mapping` dict
-- `scripts/build_chart_figures.py` → `TOPIC_MAPPING` (Inner Life Currents
-  static build) and `WEATHER_TOPIC_COLORS` (Community Weather Report —
-  primary is canonical, secondary/border derived for gradient/border use)
+SOT chain for cluster palette:
+- `data/canonical.json` `clusters[].color` is the canonical hex.
+- `scripts/_canonical.py` exposes it as `TOPIC_MAPPING`.
+- `scripts/build_chart_figures.py` imports `TOPIC_MAPPING` and derives
+  `WEATHER_TOPIC_COLORS` from it (`primary` = canonical, `secondary` =
+  `_shift_rgb(+25)`, `border` = `_shift_rgb(-30)`).
+- `pages/3_Inner_Life_Currents.py` keeps a local `topic_mapping` dict
+  for the Streamlit Cloud deployment — that local copy must match
+  canonical.
 
 Legibility caveat: the earth palette sits ~35–55% luminance, so on the
 homepage's time-of-day gradient backgrounds two pairings can be tight
@@ -242,7 +259,7 @@ that the site loads directly, so the runtime never rebuilds them:
 - **`precomputed/emotion_clusters_slim.parquet`** — the 4 columns the
   Emotion Pulse page actually reads (`umap_x`, `umap_y`, `hover_text`,
   `archetype_label`) with `hover_text` already wrapped to the 75-char
-  tooltip width. Shrinks the source parquet from 3.7 MB to ~420 KB and
+  tooltip width. Shrinks the source parquet from 3.84 MB to ~480 KB and
   removes the 2,977-row Python wrap loop from cold-start cost.
 - **`precomputed/figures/community_dynamics_sankey.json`** — the full
   Plotly figure JSON for the Community Dynamics Sankey (poster → commenter
@@ -266,7 +283,9 @@ top-of-card metadata.
 
 **Page title h1**: `font-size: 3rem; font-weight: 800`.
 
-**Footers**: powered-by-Terramare mark is intentional brand; keep.
+**Footer credit line**: "Made by Minyan Shi at Minyan Labs · ©2026" —
+both names link to `identity.links.resume`. Drives the Person/Organization
+knowledge-graph signal (see `JsonLd.astro`); keep.
 
 ## Hover/tooltip policy
 
@@ -281,22 +300,30 @@ Time-trend pages share `st.session_state.slider_index` so switching
 between pages preserves the selected quarter. Default is
 `len(quarter_labels) - 1` (the latest quarter, currently 2025Q2).
 
-## Target viewport: desktop only
+## Target viewport: desktop + mobile
 
-As of commit `62b4a11b`, all mobile optimization was deliberately removed
-(`mobile.py`, `is_mobile()` branches in Plotly pages, and
-`@media (max-width: 768|480|320px)` blocks in `components.html` iframes).
+Mobile interactivity was re-introduced in PR #43 (Apr 2026) and the
+≤360px hover/radar fix in PR #46. The site now ships full mobile support
+for both the editorial shell and the chart pages.
 
-Design intent: this is a data-storytelling site meant to be read on a
-desktop-sized viewport. The mobile pass shipped briefly and was pulled
-back because the cost of maintaining two render paths (and the risk of
-leaking mobile tweaks into desktop) wasn't justified by the mobile
-traffic the site was actually getting. The `@media (max-width: 1200px)`
-blocks remain — those handle narrow-but-still-desktop sizing.
+- **Editorial shell** (`site/`): every Astro page is responsive. `StaticChart.astro`
+  takes `desktopHeight` (≥1024px viewport) and `mobileHeight` (<1024px) per
+  chart, sourced from `data/canonical.json` `pages[].desktop_height` and
+  `mobile_height`. Below 1024px the iframe height clamps to `clamp(560px, 82vh, var(--mobileHeight))`.
+- **Chart HTMLs** (`scripts/build_chart_figures.py`): every baked HTML
+  injects a shared `MOBILE_CSS` block (lines 38+) that handles ≤1024px,
+  ≤768px, ≤480px, and ≤360px breakpoints. Modebar hidden on touch,
+  hover tooltips font-clamped, radar overlay scaled, seed pop-up tucked.
+  The Emotion Pulse page has additional ≤360px tuning (PR #46) so the
+  radar populates and hover tooltips stay readable on Galaxy Fold /
+  iPhone SE 1st gen / older Android.
+- **Streamlit pages** (`pages/*.py`): desktop-only. The mobile pass was
+  pulled back from the Streamlit side at commit `62b4a11b` and not
+  re-introduced — the Astro shell carries mobile, the Streamlit Cloud
+  app stays as the development surface for desktop iteration.
 
-If mobile ever returns, the previous implementation is in the git
-history (see the diff of `62b4a11b`) and the retrospective is in
-`docs/publish_draft.md`.
+Retrospective on the original mobile pass (and why it was first removed):
+`docs/publish_draft.md`. Re-introduction scoping doc: `docs/mobile-interactive-scoping.md`.
 
 ## Related writeups (`docs/`)
 
