@@ -4,7 +4,7 @@
 
 MindSpace OS turns **2,899 posts and comments from r/meditation** (Jan 2024 – Jun 2025) into a navigable field guide — emotional maps, sentiment weather, theme networks, and quarterly shifts. Built to see what a practice community sounds like when nobody's selling anything.
 
-**Live site:** [https://minyansh7-mindspace-os-publi.mindspace-os.pages.dev](https://minyansh7-mindspace-os-publi.mindspace-os.pages.dev) (canonical domain `mindspaceos.com` once DNS lands).
+**Live site:** [https://mindspace-os.pages.dev](https://mindspace-os.pages.dev) (canonical domain `mindspaceos.com` once DNS lands).
 
 The project ships as two sibling surfaces from one repo:
 
@@ -50,7 +50,7 @@ That's what a practice community actually sounds like.
 
 ### Build (runs locally + in CI; not served at runtime)
 
-- **[Bun](https://bun.sh) + `bun:test`** — JS test runner for build-output assertions (route presence, OG meta, canonical-data sync, no-Streamlit-leak guard, static chart self-containment). 31 tests across `site/tests/`.
+- **[Bun](https://bun.sh) + `bun:test`** — JS test runner for build-output assertions (route presence, OG meta, canonical-data sync, no-Streamlit-leak guard, static chart self-containment, no-inline-`ARCHETYPE_COLORS`-in-Python). 54 tests across `site/tests/`.
 - **Python 3.11** + **[pandas](https://pandas.pydata.org/)** + **[numpy](https://numpy.org/)** + **[pyarrow](https://arrow.apache.org/)** — drive `scripts/build_chart_figures.py` which bakes the four static chart HTMLs (Plotly trace construction, hover-text formatting, weather-region positioning, all 6 quarters of temporal-network payloads inlined into one file).
 - **[Plotly](https://plotly.com/python/) (Python)** — only used at build time, to construct trace JSON consumed by the static HTMLs. No Plotly Python in production.
 - **[DuckDB](https://duckdb.org/)** + Parquet aggregates in `precomputed/` — the data layer feeding the chart bake.
@@ -121,10 +121,11 @@ A `Dockerfile` is included for containerized deploys of the Streamlit app. **Not
 ├── site/                          # Astro editorial site (Cloudflare Pages)
 │   ├── src/                       # pages, components, layouts, lib
 │   ├── public/                    # static assets, OG cards, baked chart embeds
-│   ├── tests/                     # vitest build + canonical-data assertions
+│   ├── tests/                     # bun:test build + canonical-data assertions
 │   └── astro.config.mjs
 ├── data/canonical.json            # single source of truth — archetypes, post counts, page metadata, essays. Read by both Streamlit (Python) and Astro (TS).
 ├── scripts/
+│   ├── _canonical.py              # shared loader: ARCHETYPE_COLORS / TOPIC_MAPPING from canonical.json
 │   ├── build_chart_figures.py     # bakes site/public/charts/*.html embeds
 │   └── build_precomputed.py       # generates precomputed/ Parquet aggregates
 ├── precomputed/                   # Parquet aggregates (topics, clusters, timeseries)
