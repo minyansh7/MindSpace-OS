@@ -627,6 +627,11 @@ def build_community_dynamics_html() -> str:
             margin: 6px 16px 12px;
             padding: 6px 0;
             font-size: 13px; line-height: 1.5; color: #2c3e50;
+            /* Reserve a fixed slot at the bottom of the iframe so the
+               readout never gets clipped when populated. ~3 lines of text
+               + padding = enough for any title + stats combination. */
+            min-height: 64px;
+            box-sizing: border-box;
         }}
         .tap-readout.empty {{
             color: #94a3b8; font-style: italic;
@@ -679,7 +684,11 @@ def build_community_dynamics_html() -> str:
             // Strip the outer <b>...</b> from the title segment so we wrap it
             // ourselves via .tr-title (consistent weight, no nested bold).
             const titleText = titleRaw.replace(/^<b>(.*?)<\/b>$/i, '$1');
-            const statsLine = segs.slice(1).map(stripStyle).join(' / ');
+            // Drop the "Count: N" segment — raw count is redundant with the
+            // three normalized share views below it.
+            const statsLine = segs.slice(1)
+                .filter(s => !/^Count\s*:/i.test(s.replace(/<[^>]+>/g, '')))
+                .map(stripStyle).join(' / ');
             readout.classList.remove('empty');
             readout.innerHTML = `<span class="tr-title">${{titleText}}</span><span class="tr-stats">${{statsLine}}</span>`;
         }});
