@@ -117,8 +117,10 @@
       "subtitle": "Where the conversation's emotional vocabulary lands",
       "intro": "A UMAP map of every post, colored by its dominant emotion (GoEmotions, 27 categories). Posts using similar emotional language sit close together. Five recurring archetypes emerge as distinct neighborhoods: Reflective Caring, Soothing Empathy, Tender Uncertainty, Melancholic Confusion, Anxious Concern.",
       "callout": "Joy ranks 25th of 28 emotions. Amusement is dead last.",
-      "streamlit_path": "/Emotion_Pulse",
-      "screenshot": "/screenshots/emotion-pulse.svg"
+      "screenshot": "/screenshots/emotion-pulse.svg",
+      "desktop_height": 1100,
+      "mobile_height": 640,
+      "footnote_variant": "goemotions"
     },
     {
       "slug": "community-dynamics",
@@ -126,8 +128,10 @@
       "subtitle": "Who responds to whom, emotionally",
       "intro": "Each ribbon shows how a post's emotional tone flows into its reply's tone. Grief gets mirrored: about 1 in 4 people reply with grief themselves. Anxiety doesn't \u2014 only 7 out of 100 reply with anxiety; more than half offer warm reassurance instead. The community has unwritten response rules.",
       "callout": "Grief gets mirrored. Anxiety gets reassurance. Soothing Empathy leads in the replies.",
-      "streamlit_path": "/Community_Dynamics",
-      "screenshot": "/screenshots/community-dynamics.svg"
+      "screenshot": "/screenshots/community-dynamics.svg",
+      "desktop_height": 1000,
+      "mobile_height": 860,
+      "footnote_variant": "goemotions"
     },
     {
       "slug": "community-weather-report",
@@ -135,8 +139,10 @@
       "subtitle": "How the community mood shifts over time",
       "intro": "Each region is one of seven topic clusters across six quarters of meditation discourse, January 2024 through June 2025. The cluster's mean sentiment score is bucketed into five bands \u2014 sunny, clearing up, cloudy, light showers, storm warning \u2014 luckily, nothing stormy. The breakdown underneath surfaces the top three pain points within each topic.",
       "callout": "",
-      "streamlit_path": "/Community_Weather_Report",
-      "screenshot": "/screenshots/community-weather-report.svg"
+      "screenshot": "/screenshots/community-weather-report.svg",
+      "desktop_height": 1200,
+      "mobile_height": 1800,
+      "footnote_variant": "weather"
     },
     {
       "slug": "inner-life-currents",
@@ -144,8 +150,10 @@
       "subtitle": "How theme connections shift over time",
       "intro": "Theme co-occurrences within the most active threads, quarter by quarter.",
       "callout": "",
-      "streamlit_path": "/Inner_Life_Currents",
-      "screenshot": "/screenshots/inner-life-currents.svg"
+      "screenshot": "/screenshots/inner-life-currents.svg",
+      "desktop_height": 1000,
+      "mobile_height": 760,
+      "footnote_variant": "currents"
     }
   ],
   "essays": [

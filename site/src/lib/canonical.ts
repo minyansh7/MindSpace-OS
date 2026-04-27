@@ -17,8 +17,10 @@ export type Page = {
   subtitle: string;
   intro: string;
   callout: string;
-  streamlit_path: string;
   screenshot: string;
+  desktop_height: number;
+  mobile_height: number;
+  footnote_variant: 'goemotions' | 'weather' | 'currents';
 };
 
 export type Essay = {
@@ -52,5 +54,3 @@ export const pages = canonical.pages as Page[];
 export const essays = canonical.essays as Essay[];
 export const citations = canonical.citations as Citation[];
 export const limitations = canonical.limitations as string[];
-
-export const STREAMLIT_BASE = 'https://mindspaceos.streamlit.app';
