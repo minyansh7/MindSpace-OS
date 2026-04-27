@@ -32,8 +32,14 @@ const { src, height, mobileHeight, title } = Astro.props;
 /* Chart HTMLs change only when the bake script re-runs, which is part of
    the deploy. CF Pages assigns a fresh deployment URL per build, so no
    per-component cachebuster is needed — the underlying file's path is
-   already stable for the lifetime of the deploy. */
-const baseSrc = `/charts/${src}`;
+   already stable for the lifetime of the deploy.
+
+   Strip the .html extension: CF Pages serves chart files at the
+   extension-stripped path and 308-redirects /foo.html -> /foo. Linking
+   to the canonical path eliminates one round-trip per chart load
+   (~600ms cold). The file on disk stays *.html for build script clarity. */
+const slug = src.replace(/\.html$/, '');
+const baseSrc = `/charts/${slug}`;
 const mobileH = mobileHeight ?? Math.max(600, Math.round(height * 0.7));
 ---
 <figure class="w-full static-chart" data-static-chart>

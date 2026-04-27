@@ -124,7 +124,9 @@ test('chart pages link to GoEmotions methodology', () => {
 for (const slug of CHART_SLUGS) {
   test(`${slug} page embeds the static chart, not Streamlit`, () => {
     const html = routeHtml[`explore/${slug}/index.html`];
-    expect(html).toContain(`/charts/${slug}.html`);
+    // Phase 1: iframe src is extension-stripped to skip the CF Pages 308.
+    expect(html).toContain(`/charts/${slug}`);
+    expect(html).not.toContain(`/charts/${slug}.html`);
     expect(html).not.toContain('streamlit.app');
   });
 }
@@ -171,6 +173,22 @@ test('inner-life-currents static chart embeds all 6 quarters of data', () => {
   }
   expect(html).toContain('Previous Quarter');
   expect(html).toContain('Next Quarter');
+});
+
+test('_headers file ships with HTML route cache rules (Phase 1 perf)', async () => {
+  // Without HTML-route rules in _headers, CF Pages applies its no-cache
+  // default and returns cf-cache-status: DYNAMIC on every visit. Phase 1
+  // adds CDN-Cache-Control so the edge actually caches HTML.
+  const headers = await readFile(path.join(DIST, '_headers'), 'utf8');
+  // HTML routes have edge cache directives.
+  expect(headers).toContain('CDN-Cache-Control');
+  for (const route of ['/\n', '/explore/*', '/about/*']) {
+    expect(headers).toContain(route);
+  }
+  // /charts/* keeps existing 24h edge cache, now bumped to 30d via CDN-Cache-Control.
+  expect(headers).toMatch(/\/charts\/\*[\s\S]*?CDN-Cache-Control:\s*public,\s*max-age=2592000/);
+  // /_astro/* is immutable (filename-fingerprinted).
+  expect(headers).toMatch(/\/_astro\/\*[\s\S]*?immutable/);
 });
 
 test('robots.txt allows all and points to sitemap', async () => {
