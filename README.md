@@ -15,7 +15,7 @@ The project ships as two sibling surfaces from one repo:
 
 ## What's inside
 
-FOr interactive pages, accessible from the sidebar:
+Four interactive pages, accessible from the sidebar:
 
 | Page | What it shows |
 |---|---|
@@ -50,7 +50,7 @@ That's what a practice community actually sounds like.
 
 ### Build (runs locally + in CI; not served at runtime)
 
-- **[Bun](https://bun.sh) + `bun:test`** — JS test runner for build-output assertions (route presence, OG meta, canonical-data sync, no-Streamlit-leak guard, static chart self-containment). 52 tests across `site/tests/`.
+- **[Bun](https://bun.sh) + `bun:test`** — JS test runner for build-output assertions (route presence, OG meta, canonical-data sync, no-Streamlit-leak guard, static chart self-containment). 31 tests across `site/tests/`.
 - **Python 3.11** + **[pandas](https://pandas.pydata.org/)** + **[numpy](https://numpy.org/)** + **[pyarrow](https://arrow.apache.org/)** — drive `scripts/build_chart_figures.py` which bakes the four static chart HTMLs (Plotly trace construction, hover-text formatting, weather-region positioning, all 6 quarters of temporal-network payloads inlined into one file).
 - **[Plotly](https://plotly.com/python/) (Python)** — only used at build time, to construct trace JSON consumed by the static HTMLs. No Plotly Python in production.
 - **[DuckDB](https://duckdb.org/)** + Parquet aggregates in `precomputed/` — the data layer feeding the chart bake.
@@ -71,15 +71,9 @@ That's what a practice community actually sounds like.
 - **Python 3.11** — chart-bake script + Streamlit app + data pipeline.
 - **CSS / HTML** — hand-tuned for the four chart HTMLs (CSS keyframe animations, flex layouts, custom Cardinal-spline sparkline).
 
-- **[Astro 6](https://astro.build)** — static-site framework. `output: 'static'`, every page rendered to plain HTML at build time. Component model + content collections power the editorial pages; `getStaticPaths` generates the four `/explore/*` routes from `data/canonical.json`.
-- **[Tailwind CSS 4](https://tailwindcss.com)** (via `@tailwindcss/vite`) — utility-first styling, theme tokens declared in `@theme` blocks rather than a separate config file. Time-of-day gradient theming + ripple-on-hover animations ported from the original meditation-circle design language.
-- **[@fontsource/*](https://fontsource.org/)** — self-hosted webfonts: **Inter** (UI + display), **Source Serif 4** (editorial body + pull-quotes), **JetBrains Mono** (eyebrows + brand mark). Imported in the layout so they're inlined and don't pop in.
-- **[@astrojs/sitemap](https://docs.astro.build/en/guides/integrations-guide/sitemap/)** — generates `sitemap-index.xml` + per-section sitemaps at build.
-- **[@astrojs/cloudflare](https://docs.astro.build/en/guides/integrations-guide/cloudflare/)** — Cloudflare Pages adapter (declared in deps; ready to flip from `static` → `server` when dynamic OG cards land).
-- **[Plotly.js](https://plotly.com/javascript/)** — loaded from CDN (`cdn.plot.ly/plotly-2.35.2.min.js`) by the four static chart HTMLs. Cached across pages after first load. Powers Emotion Pulse (UMAP scatter + radar overlay), Community Dynamics (Sankey), and Inner Life Currents (force-directed temporal network). Community Weather Report uses pure CSS animations + a hand-rolled Cardinal-spline sparkline; no Plotly.
-- **[Cloudflare Pages](https://pages.cloudflare.com/)** — static hosting. Project `mindspace-os`. Connected to GitHub for build-on-push.
+---
 
-### Build (runs locally + in CI; not served at runtime)
+## Quick start
 
 ### Streamlit app
 
@@ -136,9 +130,7 @@ A `Dockerfile` is included for containerized deploys of the Streamlit app. **Not
 ├── precomputed/                   # Parquet aggregates (topics, clusters, timeseries)
 ├── assets/                        # Streamlit page icons, hero images
 ├── archive/                       # historical page versions — not rendered
-├── reddit_progress.duckdb         # source database
 ├── CLAUDE.md                      # design-intent notes (naming, color palette, typography, deploy)
-├── drafts/                        # launch copy + Playwright posting scripts
 ├── docs/                          # long-form writeups
 └── requirements.txt
 ```
@@ -163,9 +155,9 @@ The design pass that produced the current naming family and stripped decorative 
 - **Source**: r/meditation public posts & comments, Jan 2024 – Jun 2025
 - **Count**: 2,899 posts and comments (canonical, post response-pattern filter). 2,977 pre-filter, documented in `data/canonical.json` for reproducibility.
 - **Processing**: emotion classification → UMAP clustering → theme grouping → temporal binning by quarter
-- **Storage**: DuckDB for raw, Parquet aggregates for app runtime
+- **Storage**: Parquet aggregates under `precomputed/` for app runtime
 
-Raw Reddit data is **not redistributed**. The `reddit_progress.duckdb` file contains the processed analytical output used by the app.
+Raw Reddit data is **not redistributed**. The `precomputed/*.parquet` files contain the processed analytical output used by the app.
 
 ---
 

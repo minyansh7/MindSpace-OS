@@ -99,7 +99,7 @@ must run BEFORE the Astro build, since the Astro static iframes reference
 
 ## Page-by-page editorial notes
 
-### Community Dynamics (`pages/2_Community_Dynamics.py`)
+### Community Dynamics (`pages/1_Community_Dynamics.py`)
 
 Previously titled "Main Topics Sankey" / "Main Topics", then "Theme Pathways",
 then "Inner Life Themes" (2026-04-23).
@@ -298,41 +298,9 @@ If mobile ever returns, the previous implementation is in the git
 history (see the diff of `62b4a11b`) and the retrospective is in
 `docs/publish_draft.md`.
 
-## Launch workflow (`drafts/`)
-
-Launch copy and automation for publishing the site live:
-
-- **`drafts/launch-post.md`** — the canonical source of truth for both
-  Substack post and Twitter copy. Has a `## Substack Post` section
-  (title / subtitle / body) and a `## Twitter / X Posts` section with
-  options A/B/C plus thread follow-ups. All posting scripts parse this
-  file, so edit markdown → re-run, no re-coding needed.
-- **`drafts/post_to_substack.py`** — interactive Playwright runner.
-  `--login` flow persists session; `--draft` inserts the draft into
-  the Substack editor. Stops before the Publish click (guardrail).
-- **`drafts/post_to_twitter.py`** — same pattern for X/Twitter. Supports
-  `--option A|B|C`, `--thread` (posts the full chain), `--review` (fills
-  compose but doesn't click Post), and `--link URL` (substitutes
-  `[link]` placeholders).
-- **`drafts/post_all.sh`** — orchestrator. Runs the Substack drafter →
-  waits for the user to publish manually and paste the live URL →
-  runs the Twitter poster with `--link <URL>` substituted. Chains the
-  whole launch in one flow.
-- **`drafts/post_substack_auto.py`** / **`post_twitter_auto.py`** —
-  non-interactive variants. No `input()` pauses; they poll for
-  authenticated state instead. Built for agent-invoked execution.
-  Known limitation: X's anti-automation currently blocks sign-in in
-  a Playwright-controlled Chromium.
-
-Profile directories (`~/.playwright-profiles/substack-<slug>/`,
-`~/.playwright-profiles/twitter/`) persist browser sessions between
-runs — log in once, reuse indefinitely.
-
 ## Related writeups (`docs/`)
 
 - **`docs/publish_draft.md`** — long-form retrospective on the 13-hour
   UX pass that produced the Themes/Trees/Web/Currents naming family
   (later unified as "Inner Life Themes/Trees/Web/Currents"),
   the one-H1 header convergence, and the (now-removed) mobile rollout.
-  Planned as a follow-up post to the r/meditation intro in
-  `drafts/launch-post.md`.
