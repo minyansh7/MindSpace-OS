@@ -5,6 +5,29 @@
 //
 // Why a component, not inline blocks: 5 pages × hand-written JSON-LD = drift.
 // One source of truth = no "MinyanLabs" vs "Minyan Labs" mismatch.
+//
+// All 5 schemas are load-bearing — each feeds a different Google knowledge-graph
+// signal for "Minyan Shi" / "Minyan Labs" sidebar richness:
+//   - Person       → the sidebar card (name, title, links, awards, education)
+//   - Organization → the "Minyan Labs" entity card (founder, founding date, tagline)
+//   - Dataset      → chains MindSpace OS → Minyan Shi (creator) → Minyan Labs
+//                    (publisher); also powers Google Dataset Search inclusion for
+//                    the niche-research distribution strategy
+//   - WebSite      → reinforces site → person/org link (alt name "Minyan Labs",
+//                    author "Minyan Shi")
+//   - CreativeWork → per-page author/publisher edges (every chart page becomes
+//                    another knowledge-graph edge pointing at the brand)
+//
+// REFACTOR NOTE (2026-04-27, post-/simplify pass): the multi-schema-build-then-pick
+// pattern below is wasteful at build time (4 of 5 schemas allocated and discarded
+// per render). Build-time only — the rendered HTML is byte-identical to a clean
+// implementation. Decided not to refactor for a cosmetic-only win.
+//
+// IF YOU ADD A 6TH SCHEMA TYPE (Article, BreadcrumbList, FAQPage, etc.):
+// refactor to per-type pure builders in `site/src/lib/jsonld.ts` first. Plan +
+// required snapshot/unit tests captured at the time of this decision. Without
+// tests, a silent field rename can degrade Google Rich Results without anyone
+// noticing.
 
 import { identity } from '../data/identity';
 import { project, data, citations } from '../lib/canonical.ts';
