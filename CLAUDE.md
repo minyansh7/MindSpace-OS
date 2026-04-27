@@ -12,11 +12,12 @@ MindSpace OS ships two sibling deliverables from this repo:
    experience. Lives at `site/dist/` after `npm run build`. Hosted on
    Cloudflare Pages (project `mindspace-os`, account
    `985e6531724a5e9ce8670a37ead0d6f1`):
-   - Current live URL: https://mindspace-os.pages.dev
-     (canonical domain `mindspaceos.com` once DNS lands).
+   - Canonical live URL: https://mindspaceos.com
+   - Cloudflare Pages preview alias (fallback): https://mindspace-os.pages.dev
    - Branch previews: `https://<branch>.mindspace-os.pages.dev`
      auto-built per push by `.github/workflows/deploy.yml` (chart bake +
      Astro build + Cloudflare Pages deploy on every branch push).
+   - DNS hardening records documented at `docs/dns-hardening-records.md`.
 2. **Streamlit interactive app** (`Homepage.py` + `pages/*.py`). Source of
    truth for chart logic. Hosted on Streamlit Cloud at
    https://mindspaceos.streamlit.app . **The editorial site no longer

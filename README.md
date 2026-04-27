@@ -4,7 +4,7 @@
 
 MindSpace OS turns **2,899 posts and comments from meditation on Reddit** (Jan 2024 – Jun 2025) into a navigable field guide — emotional maps, sentiment weather, theme networks, and quarterly shifts. Built to see what a practice community sounds like when nobody's selling anything.
 
-**Live site:** [https://mindspace-os.pages.dev](https://mindspace-os.pages.dev) (canonical domain `mindspaceos.com` once DNS lands).
+**Live site:** [https://mindspaceos.com](https://mindspaceos.com) (Cloudflare Pages preview at [`mindspace-os.pages.dev`](https://mindspace-os.pages.dev) as fallback).
 
 The project ships as two sibling surfaces from one repo:
 
