@@ -24,6 +24,8 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.colors import hex_to_rgb
 
+from _canonical import ARCHETYPE_COLORS
+
 REPO = pathlib.Path(__file__).resolve().parent.parent
 PRECOMPUTED = REPO / "precomputed"
 FIGURES = PRECOMPUTED / "figures"
@@ -193,17 +195,8 @@ def build_emotion_slim() -> None:
 # Community Dynamics (Sankey) figure JSON
 # --------------------------------------------------------------------------
 # Poster archetype -> Commenter archetype flow, joined via the shared post_id
-# that Reddit encodes in the comment URL. Must stay in lockstep with
-# ``ARCHETYPE_COLORS`` in pages/0_Emotion_Pulse.py so Emotion Pulse and
-# Community Dynamics use one visual language.
-
-ARCHETYPE_COLORS = {
-    "Reflective Caring": "#ff5e78",
-    "Soothing Empathy": "#00c49a",
-    "Tender Uncertainty": "#6a5acd",
-    "Melancholic Confusion": "#9a32cd",
-    "Anxious Concern": "#ffc300",
-}
+# that Reddit encodes in the comment URL. Palette imported from _canonical so
+# Emotion Pulse, Community Dynamics, and the Astro shell share one source.
 
 _POST_ID_RE = re.compile(r"/comments/([a-z0-9]+)/")
 
@@ -285,7 +278,7 @@ def build_community_dynamics_sankey(df: pd.DataFrame) -> go.Figure:
             f"<b style='font-size: 16px; color: #2c3e50'>{a}</b><br>"
             f"Posts: <b>{_format_number(poster_vol[a])}</b><br>"
             f"Global Share: <b>{poster_vol[a]/total*100:.1f}%</b><br>"
-            f"Connected commenters: <b>{int(poster_connected.loc[a])}</b><br>"
+            f"Connected comments: <b>{int(poster_connected.loc[a])}</b><br>"
             f"Top reply: <b>{poster_top_reply.loc[a, 'commenter']}</b> "
             f"(<b>{poster_top_reply.loc[a, 'count']/poster_vol[a]*100:.1f}%</b>)"
         )
@@ -314,8 +307,8 @@ def build_community_dynamics_sankey(df: pd.DataFrame) -> go.Figure:
             f"<b style='font-size: 15px; color: #2c3e50'>{r['poster']} → {r['commenter']}</b><br>"
             f"Count: <b>{_format_number(r['count'])}</b><br>"
             f"Global Share: <b>{r['count']/total*100:.1f}%</b><br>"
-            f"Poster Share: <b>{r['count']/poster_vol[r['poster']]*100:.1f}%</b><br>"
-            f"Commenter Share: <b>{r['count']/commenter_vol[r['commenter']]*100:.1f}%</b>"
+            f"Post Share: <b>{r['count']/poster_vol[r['poster']]*100:.1f}%</b><br>"
+            f"Comment Share: <b>{r['count']/commenter_vol[r['commenter']]*100:.1f}%</b>"
         )
         target_rgb = hex_to_rgb(ARCHETYPE_COLORS[r["commenter"]])
         alpha = (

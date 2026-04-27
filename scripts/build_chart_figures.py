@@ -25,16 +25,13 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from _canonical import ARCHETYPE_COLORS, TOPIC_MAPPING
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SITE_PUBLIC = ROOT / "site" / "public"
 CHARTS_DIR = SITE_PUBLIC / "charts"
 
 PLOTLY_CDN_URL = "https://cdn.plot.ly/plotly-2.35.2.min.js"
-
-# Canonical SOT loaded once at module scope. The Astro site reads this same
-# file via lib/canonical.ts; keeping Python and TS reads aligned to one file
-# prevents palette drift between the editorial shell and the static charts.
-_CANONICAL = json.loads((ROOT / "data" / "canonical.json").read_text())
 
 
 def _shift_rgb(hex_color: str, delta: int) -> str:
@@ -155,13 +152,6 @@ RADAR_THETA_LABELS = [
     "🙏 Gratitude", "😊 Joy", "🤗 Caring", "❤️ Love",
     "😕 Confusion", "😨 Fear", "😢 Sadness", "💔 Grief",
 ]
-ARCHETYPE_COLORS = {
-    "Reflective Caring": "#ff5e78",
-    "Soothing Empathy": "#00c49a",
-    "Tender Uncertainty": "#6a5acd",
-    "Melancholic Confusion": "#9a32cd",
-    "Anxious Concern": "#ffc300",
-}
 # Mobile-friendly short forms of archetype labels for narrow viewports
 # (<768px). The full label is positioned for a 1100px desktop canvas;
 # at phone width the trailing word truncates ("Soothing E..." / "Anxious C...").
@@ -635,19 +625,6 @@ def build_community_dynamics_html() -> str:
     fig_path = ROOT / "precomputed" / "figures" / "community_dynamics_sankey.json"
     fig = json.loads(fig_path.read_text())
 
-    # Patch hover customdata strings: Poster/Commenter → Post/Comment.
-    def relabel(s: str) -> str:
-        return (s
-            .replace("Connected commenters", "Connected comments")
-            .replace("Poster Share", "Post Share")
-            .replace("Commenter Share", "Comment Share")
-        )
-    for trace in fig.get('data', []):
-        for side in ('node', 'link'):
-            cd = trace.get(side, {}).get('customdata')
-            if cd:
-                trace[side]['customdata'] = [relabel(c) if isinstance(c, str) else c for c in cd]
-
     # Free the Sankey from its baked layout.height (670px) so the flow fills whatever
     # vertical space the iframe gives it. Without this the ribbons are clipped at top
     # and bottom regardless of container size. Also tighten margins for more flow room.
@@ -807,9 +784,8 @@ def build_community_dynamics_html() -> str:
 # (Previous Quarter / Next Quarter buttons) without a server.
 # ----------------------------------------------------------------------------
 
-# Editorial earth-pigment palette derived from data/canonical.json (clusters[]).
-# See CLAUDE.md for naming intent (NYT Upshot / Pudding lineage).
-TOPIC_MAPPING = {c["name"]: {"color": c["color"]} for c in _CANONICAL["clusters"]}
+# TOPIC_MAPPING is imported from _canonical above. See CLAUDE.md for naming
+# intent (earth-pigment palette, NYT Upshot / Pudding lineage).
 
 
 def _avoid_label_collisions(labels: list[dict], min_dist: float, push_step: float) -> list[dict]:
@@ -1269,25 +1245,28 @@ WEATHER_TOPIC_COLORS = {
 }
 
 
+# Sentiment-tier ladder. Single source for the per-region weather class
+# (label/emoji), the climate-aggregate badge, and the JS tooltip color.
+# Order: highest threshold first; lookup walks until s >= min.
+WEATHER_TIERS = [
+    {"min":  0.395, "type": "sunny",         "emoji": "☀️", "label": "Sunny",         "label_long": "Sunny and Positive", "color": "lime"},
+    {"min":  0.295, "type": "partly-cloudy", "emoji": "⛅", "label": "Partly Cloudy", "label_long": "Clearing Up",        "color": "yellow"},
+    {"min": -0.3,   "type": "cloudy",        "emoji": "☁️", "label": "Cloudy",        "label_long": "Overcast",           "color": "orange"},
+    {"min": -0.6,   "type": "rainy",         "emoji": "🌧️","label": "Rainy",         "label_long": "Light Showers",      "color": "orange"},
+    {"min": -999.0, "type": "stormy",        "emoji": "⛈️","label": "Stormy",        "label_long": "Storm Warning",      "color": "red"},
+]
+
+
+def _tier_for(s: float) -> dict:
+    return next(t for t in WEATHER_TIERS if s >= t["min"])
+
+
 def _weather_type(s: float) -> str:
-    if s >= 0.395: return 'sunny'
-    if s >= 0.295: return 'partly-cloudy'
-    if s >= -0.3:  return 'cloudy'
-    if s >= -0.6:  return 'rainy'
-    return 'stormy'
+    return _tier_for(s)["type"]
 
 
-_WEATHER_EMOJI = {
-    'sunny': '☀️', 'partly-cloudy': '⛅', 'cloudy': '☁️',
-    'rainy': '🌧️', 'stormy': '⛈️',
-}
-_WEATHER_DESC = {
-    'sunny': 'Sunny and Positive',
-    'partly-cloudy': 'Clearing Up',
-    'cloudy': 'Overcast',
-    'rainy': 'Light Showers',
-    'stormy': 'Storm Warning',
-}
+_WEATHER_EMOJI = {t["type"]: t["emoji"] for t in WEATHER_TIERS}
+_WEATHER_DESC = {t["type"]: t["label_long"] for t in WEATHER_TIERS}
 
 
 def _trend_word(s: float) -> str:
@@ -1388,12 +1367,7 @@ def build_weather_report_html() -> str:
         avg_s   = sum(r['sentiment'] for r in regions) / max(1, len(regions))
         total_v = sum(r['volume'] for r in regions)
 
-        # Aggregate climate label
-        if avg_s >= 0.395:    climate = ("☀️", "Sunny", "lime")
-        elif avg_s >= 0.295:  climate = ("⛅", "Partly Cloudy", "yellow")
-        elif avg_s >= -0.295: climate = ("☁️", "Cloudy", "orange")
-        elif avg_s >= -0.6:   climate = ("🌧️", "Rainy", "orange")
-        else:                 climate = ("⛈️", "Stormy", "red")
+        tier = _tier_for(avg_s)
 
         per_q[q] = {
             'regions':        regions,
@@ -1405,9 +1379,9 @@ def build_weather_report_html() -> str:
             'avg_sentiment':  avg_s,
             'total_volume':   total_v,
             'unique_topics':  len({r['cluster_name'] for r in regions}),
-            'climate_emoji':  climate[0],
-            'climate_label':  climate[1],
-            'sentiment_color': climate[2],
+            'climate_emoji':  tier["emoji"],
+            'climate_label':  tier["label"],
+            'sentiment_color': tier["color"],
         }
 
     # quarterly avg sentiment series for sparkline
@@ -1419,6 +1393,7 @@ def build_weather_report_html() -> str:
         'sentiments':      sentiments,
         'positions':       WEATHER_REGION_POSITIONS,
         'topic_colors':    WEATHER_TOPIC_COLORS,
+        'weather_tiers':   [{k: t[k] for k in ("min", "type", "color")} for t in WEATHER_TIERS],
     }
     payload_json = json.dumps(payload)
 
@@ -1430,18 +1405,12 @@ def build_weather_report_html() -> str:
     <title>Community Weather Report — MindSpace OS</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
-      // Match the homepage's time-of-day gradient. Sets data-time-of-day on
-      // <html> so CSS below can swap --time-gradient. Synchronous to avoid FOUC.
-      // Mirrors site/src/layouts/Base.astro.
+      // Read tod=<slot> from the iframe URL (set by StaticChart.astro from the
+      // host page's data-time-of-day). If absent (e.g. someone opened this file
+      // directly), the CSS fallback in <html> renders the evening palette.
       (function () {{
-        var h = new Date().getHours();
-        var slot =
-          (h >= 5  && h < 8)  ? 'dawn'      :
-          (h >= 8  && h < 12) ? 'morning'   :
-          (h >= 12 && h < 17) ? 'afternoon' :
-          (h >= 17 && h < 20) ? 'evening'   :
-                                'night';
-        document.documentElement.dataset.timeOfDay = slot;
+        var m = location.search.match(/[?&]tod=([^&]+)/);
+        if (m) document.documentElement.dataset.timeOfDay = decodeURIComponent(m[1]);
       }})();
     </script>
     <style>
@@ -2019,7 +1988,7 @@ def build_weather_report_html() -> str:
                 tooltipStyle = 'left: auto; right: -10px;';
             }}
 
-            const sentColor = r.sentiment >= 0.395 ? 'lime' : r.sentiment >= 0.295 ? 'yellow' : 'orange';
+            const sentColor = (PAYLOAD.weather_tiers.find(t => r.sentiment >= t.min) || {{color: 'orange'}}).color;
 
             return `
                 <div class="weather-region ${{r.weather_type}}"
