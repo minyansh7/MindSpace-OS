@@ -83,38 +83,31 @@
   "clusters": [
     {
       "name": "Anxiety & Mental Health",
-      "color": "#1f77b4",
-      "color_dark": "#5BA3E0"
+      "color": "#B23A48"
     },
     {
       "name": "Awareness",
-      "color": "#808000",
-      "color_dark": "#B8B85A"
+      "color": "#E8A93B"
     },
     {
       "name": "Buddhism & Spirituality",
-      "color": "#ff7f0e",
-      "color_dark": "#FF9A3D"
+      "color": "#6B4F8F"
     },
     {
       "name": "Concentration & Flow",
-      "color": "#d62728",
-      "color_dark": "#F25555"
+      "color": "#1F6F8B"
     },
     {
       "name": "Meditation & Mindfulness",
-      "color": "#9467bd",
-      "color_dark": "#B894E0"
+      "color": "#4A7C59"
     },
     {
       "name": "Practice, Retreat, & Meta",
-      "color": "#8c564b",
-      "color_dark": "#C08A75"
+      "color": "#8B6F47"
     },
     {
       "name": "Self-Regulation",
-      "color": "#17becf",
-      "color_dark": "#4FD4E0"
+      "color": "#D97757"
     }
   ],
   "pages": [

@@ -64,6 +64,17 @@ jobs:
         with:
           bun-version: latest
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Bake chart figures
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+          python3 scripts/build_chart_figures.py
+
       - name: Install dependencies
         working-directory: site
         run: bun install --frozen-lockfile

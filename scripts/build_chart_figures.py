@@ -31,6 +31,19 @@ CHARTS_DIR = SITE_PUBLIC / "charts"
 
 PLOTLY_CDN_URL = "https://cdn.plot.ly/plotly-2.35.2.min.js"
 
+# Canonical SOT loaded once at module scope. The Astro site reads this same
+# file via lib/canonical.ts; keeping Python and TS reads aligned to one file
+# prevents palette drift between the editorial shell and the static charts.
+_CANONICAL = json.loads((ROOT / "data" / "canonical.json").read_text())
+
+
+def _shift_rgb(hex_color: str, delta: int) -> str:
+    """Adjust each channel by `delta`, clamped to [0, 255]. +25 lifts; -30 darkens."""
+    h = hex_color.lstrip("#")
+    rgb = [max(0, min(255, int(h[i:i + 2], 16) + delta)) for i in (0, 2, 4)]
+    return "#" + "".join(f"{v:02X}" for v in rgb)
+
+
 # Mobile baseline injected into every chart's <style>. Keeps each chart
 # readable + tappable at narrow viewports without dedicated per-chart logic.
 # Per-chart polish (label collision tuning, region repositioning, etc.) lives
@@ -794,17 +807,9 @@ def build_community_dynamics_html() -> str:
 # (Previous Quarter / Next Quarter buttons) without a server.
 # ----------------------------------------------------------------------------
 
-# Editorial earth-pigment palette (canonical, see CLAUDE.md). NYT Upshot /
-# Pudding lineage. Replaced matplotlib defaults on 2026-04-26.
-TOPIC_MAPPING = {
-    'Anxiety & Mental Health':   {'color': '#B23A48'},  # oxblood red
-    'Awareness':                 {'color': '#E8A93B'},  # mustard ochre
-    'Buddhism & Spirituality':   {'color': '#6B4F8F'},  # muted aubergine
-    'Concentration & Flow':      {'color': '#1F6F8B'},  # deep teal
-    'Meditation & Mindfulness':  {'color': '#4A7C59'},  # forest green
-    'Practice, Retreat, & Meta': {'color': '#8B6F47'},  # walnut brown
-    'Self-Regulation':           {'color': '#D97757'},  # terracotta
-}
+# Editorial earth-pigment palette derived from data/canonical.json (clusters[]).
+# See CLAUDE.md for naming intent (NYT Upshot / Pudding lineage).
+TOPIC_MAPPING = {c["name"]: {"color": c["color"]} for c in _CANONICAL["clusters"]}
 
 
 def _avoid_label_collisions(labels: list[dict], min_dist: float, push_step: float) -> list[dict]:
@@ -1250,20 +1255,17 @@ WEATHER_REGION_POSITIONS = {
     'Practice, Retreat, & Meta': {'left': '42%', 'top': '84%'},
 }
 
-# Weather Report palette synced to canonical (TOPIC_MAPPING) on 2026-04-26.
-# `primary` = canonical hex from CLAUDE.md. `secondary` is +25-RGB lifted for
-# the gradient pair on the weather-map regions. `border` is -30-RGB darkened
-# for the region outline. Keeping the structure (primary/secondary/border)
-# rather than collapsing to a single color preserves the weather-map's depth
-# (gradient fill + darker rim) without making the regions feel flat.
+# Weather Report palette derived from canonical primary. `secondary` is +25-RGB
+# lifted for the gradient pair; `border` is -30-RGB darkened for the region
+# outline. Three-tone structure preserves the weather-map's depth (gradient fill
+# + darker rim) instead of collapsing to a single flat color.
 WEATHER_TOPIC_COLORS = {
-    'Anxiety & Mental Health':   {'primary': '#B23A48', 'secondary': '#CB5361', 'border': '#941C2A'},
-    'Awareness':                 {'primary': '#E8A93B', 'secondary': '#F4C05C', 'border': '#C3891F'},
-    'Buddhism & Spirituality':   {'primary': '#6B4F8F', 'secondary': '#8469A8', 'border': '#553C75'},
-    'Concentration & Flow':      {'primary': '#1F6F8B', 'secondary': '#3C8CA8', 'border': '#14576E'},
-    'Meditation & Mindfulness':  {'primary': '#4A7C59', 'secondary': '#699877', 'border': '#366343'},
-    'Practice, Retreat, & Meta': {'primary': '#8B6F47', 'secondary': '#A88960', 'border': '#6E5635'},
-    'Self-Regulation':           {'primary': '#D97757', 'secondary': '#E89174', 'border': '#B45C40'},
+    name: {
+        "primary": cfg["color"],
+        "secondary": _shift_rgb(cfg["color"], +25),
+        "border": _shift_rgb(cfg["color"], -30),
+    }
+    for name, cfg in TOPIC_MAPPING.items()
 }
 
 
