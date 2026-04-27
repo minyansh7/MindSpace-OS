@@ -898,10 +898,7 @@ def build_currents_payload(df_nodes: pd.DataFrame, df_edges: pd.DataFrame, quart
             'y': float(np.average(g['y_rot'], weights=g['scaled_size']))
         })
     ).reset_index()
-    # Spread labels around the full circle (was 1.2π, which packed 7 labels into 60% of the
-    # circle and let alphabetically-adjacent clusters like "Buddhism & Spirituality" and
-    # "Concentration & Flow" stack on top of each other). Full 2π + larger radius gives
-    # each label its own quadrant of clearance.
+    # Distribute labels around the full 2π so adjacent clusters don't stack.
     angle_offset = np.linspace(0, 2 * np.pi, len(centroids), endpoint=False)
     angle_offset += np.pi / len(centroids)
     radius_offset = 0.45
@@ -1218,10 +1215,6 @@ def build_inner_life_currents_html() -> str:
 # ----------------------------------------------------------------------------
 
 WEATHER_REGION_POSITIONS = {
-    # Adjusted 2026-04-26 — original positions clipped corner regions and the
-    # right-side regions overlapped the Weather Legend in the top-right.
-    # All satellites pulled inward; Buddhism & Spirituality moved left to clear
-    # the legend; Practice, Retreat, & Meta lifted slightly to clear the bottom.
     'Meditation & Mindfulness':  {'left': '42%', 'top': '52%'},
     'Self-Regulation':           {'left': '42%', 'top': '16%'},
     'Anxiety & Mental Health':   {'left': '16%', 'top': '32%'},
@@ -1267,13 +1260,6 @@ def _weather_type(s: float) -> str:
 
 _WEATHER_EMOJI = {t["type"]: t["emoji"] for t in WEATHER_TIERS}
 _WEATHER_DESC = {t["type"]: t["label_long"] for t in WEATHER_TIERS}
-
-
-def _trend_word(s: float) -> str:
-    if s > 0.5:   return 'Thriving'
-    if s > 0:     return 'Growing'
-    if s > -0.5:  return 'Stable'
-    return 'Needs'
 
 
 def process_weather_quarter(df_q: pd.DataFrame) -> list[dict]:
