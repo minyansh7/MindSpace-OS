@@ -76,3 +76,12 @@ test('no inline duplicate of archetype names in components', async () => {
   expect(file).not.toContain('"Melancholic Confusion"');
   expect(file).not.toContain('"Anxious Concern"');
 });
+
+test('no inline ARCHETYPE_COLORS dict in Python build scripts', async () => {
+  // ARCHETYPE_COLORS must be imported from scripts/_canonical.py so the Astro
+  // shell, Streamlit pages, and static chart bake share one palette source.
+  for (const file of ['../scripts/build_chart_figures.py', '../scripts/build_precomputed.py']) {
+    const content = await readFile(file, 'utf8');
+    expect(content).not.toMatch(/^ARCHETYPE_COLORS\s*=\s*{/m);
+  }
+});
