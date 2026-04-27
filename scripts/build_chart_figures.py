@@ -636,6 +636,17 @@ def build_community_dynamics_html() -> str:
     # clipped by the iframe edge.
     layout['margin'] = {'l': 10, 'r': 10, 't': 8, 'b': 80}
 
+    # Strip raw-count rows ("Posts: N", "Connected comments: N") from node hover
+    # tooltips. Keeps title + Global Share % + Top reply, drops the count noise.
+    drop_re = re.compile(r'^\s*(Posts|Connected comments)\s*:', re.IGNORECASE)
+    def _strip_counts(html: str) -> str:
+        parts = html.split('<br>')
+        kept = [p for p in parts if not drop_re.match(re.sub(r'<[^>]+>', '', p))]
+        return '<br>'.join(kept)
+    node = fig.get('data', [{}])[0].get('node', {})
+    if 'customdata' in node:
+        node['customdata'] = [_strip_counts(c) for c in node['customdata']]
+
     fig_json = json.dumps(fig)
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -2069,6 +2080,8 @@ def build_weather_report_html() -> str:
                 const clusterColor = tc.primary;
                 const clusterTint = hexToRgba(clusterColor, 0.14);
                 const sentimentLabel = (r.sentiment >= 0 ? '+' : '') + r.sentiment.toFixed(2);
+                const totalQV = d.total_volume || 1;
+                const volPct = ((r.volume / totalQV) * 100).toFixed(1);
 
                 return `
                     <div class="topic-card" style="--cluster-color: ${{clusterColor}}; --cluster-tint: ${{clusterTint}};">
@@ -2079,7 +2092,7 @@ def build_weather_report_html() -> str:
                         </div>
                         <div class="topic-meta">
                             <span class="meta-sentiment">${{sentimentLabel}}</span>
-                            <span class="meta-volume">vol<strong>${{r.volume.toLocaleString()}}</strong></span>
+                            <span class="meta-volume">vol<strong>${{volPct}}%</strong></span>
                             <span class="meta-weather-pill">${{r.weather_desc}}</span>
                         </div>
                         <div class="challenge-list">

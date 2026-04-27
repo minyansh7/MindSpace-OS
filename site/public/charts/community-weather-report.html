@@ -772,6 +772,8 @@
                 const clusterColor = tc.primary;
                 const clusterTint = hexToRgba(clusterColor, 0.14);
                 const sentimentLabel = (r.sentiment >= 0 ? '+' : '') + r.sentiment.toFixed(2);
+                const totalQV = d.total_volume || 1;
+                const volPct = ((r.volume / totalQV) * 100).toFixed(1);
 
                 return `
                     <div class="topic-card" style="--cluster-color: ${clusterColor}; --cluster-tint: ${clusterTint};">
@@ -782,7 +784,7 @@
                         </div>
                         <div class="topic-meta">
                             <span class="meta-sentiment">${sentimentLabel}</span>
-                            <span class="meta-volume">vol<strong>${r.volume.toLocaleString()}</strong></span>
+                            <span class="meta-volume">vol<strong>${volPct}%</strong></span>
                             <span class="meta-weather-pill">${r.weather_desc}</span>
                         </div>
                         <div class="challenge-list">
