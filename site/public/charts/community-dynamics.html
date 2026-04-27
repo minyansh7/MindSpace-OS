@@ -57,9 +57,9 @@
             padding: 6px 0;
             font-size: 13px; line-height: 1.5; color: #2c3e50;
             /* Reserve a fixed slot at the bottom of the iframe so the
-               readout never gets clipped when populated. ~3 lines of text
-               + padding = enough for any title + stats combination. */
-            min-height: 64px;
+               readout never gets clipped when populated. Worst case is
+               1 title + 3 share lines × ~20px line-height + padding. */
+            min-height: 100px;
             box-sizing: border-box;
         }
         .tap-readout.empty {
@@ -67,7 +67,7 @@
         }
         .tap-readout b { color: #2c3e50; }
         .tap-readout .tr-title { display: block; font-weight: 700; margin-bottom: 2px; }
-        .tap-readout .tr-stats { display: block; }
+        .tap-readout .tr-stat { display: block; }
         @media (hover: none) {
             .tap-readout { display: block; }
         }
@@ -201,13 +201,17 @@
             // Strip the outer <b>...</b> from the title segment so we wrap it
             // ourselves via .tr-title (consistent weight, no nested bold).
             const titleText = titleRaw.replace(/^<b>(.*?)<\/b>$/i, '$1');
-            // Drop the "Count: N" segment — raw count is redundant with the
-            // three normalized share views below it.
-            const statsLine = segs.slice(1)
-                .filter(s => !/^Count\s*:/i.test(s.replace(/<[^>]+>/g, '')))
-                .map(stripStyle).join(' / ');
+            // Drop raw-count segments (Count, Posts, Comments, Connected
+            // comments). The normalized share views (Global / Post / Comment)
+            // carry the same info in % form, which scales cleaner on mobile.
+            const dropRegex = /^(Count|Posts|Comments|Connected comments)\s*:/i;
+            const stats = segs.slice(1)
+                .filter(s => !dropRegex.test(s.replace(/<[^>]+>/g, '')))
+                .map(stripStyle);
+            // Each remaining segment renders on its own line for scannability.
+            const statsHtml = stats.map(s => `<span class="tr-stat">${s}</span>`).join('');
             readout.classList.remove('empty');
-            readout.innerHTML = `<span class="tr-title">${titleText}</span><span class="tr-stats">${statsLine}</span>`;
+            readout.innerHTML = `<span class="tr-title">${titleText}</span>${statsHtml}`;
         });
     });
     let resizeTimer = null;
