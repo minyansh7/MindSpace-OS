@@ -636,16 +636,21 @@ def build_community_dynamics_html() -> str:
     # clipped by the iframe edge.
     layout['margin'] = {'l': 10, 'r': 10, 't': 8, 'b': 80}
 
-    # Strip raw-count rows ("Posts: N", "Connected comments: N") from node hover
-    # tooltips. Keeps title + Global Share % + Top reply, drops the count noise.
-    drop_re = re.compile(r'^\s*(Posts|Connected comments)\s*:', re.IGNORECASE)
+    # Strip raw-count rows from hover tooltips. Node tooltips drop "Posts" and
+    # "Connected comments"; link (ribbon) tooltips drop "Count". The normalized
+    # share % rows (Global / Post / Comment Share) carry the same info.
+    drop_re = re.compile(r'^\s*(Posts|Connected comments|Count)\s*:', re.IGNORECASE)
     def _strip_counts(html: str) -> str:
         parts = html.split('<br>')
         kept = [p for p in parts if not drop_re.match(re.sub(r'<[^>]+>', '', p))]
         return '<br>'.join(kept)
-    node = fig.get('data', [{}])[0].get('node', {})
+    trace = fig.get('data', [{}])[0]
+    node = trace.get('node', {})
     if 'customdata' in node:
         node['customdata'] = [_strip_counts(c) for c in node['customdata']]
+    link = trace.get('link', {})
+    if 'customdata' in link:
+        link['customdata'] = [_strip_counts(c) for c in link['customdata']]
 
     fig_json = json.dumps(fig)
     return f"""<!DOCTYPE html>
