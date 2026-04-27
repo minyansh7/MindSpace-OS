@@ -19,6 +19,7 @@ scripts/build_precomputed.py.
 
 import json
 import pathlib
+import re
 from typing import Any
 
 import numpy as np
@@ -250,9 +251,17 @@ def build_emotion_pulse_payload() -> dict[str, Any]:
         seed_row = df[seed_mask].iloc[0]
         seed_radar_values = [float(seed_row[c]) for c in USER_RADAR_EMOTIONS]
         seed_archetype = str(seed_row["archetype_label"])
+        # Pull the "Top Emotions:" segment out of the seed's hover_text so
+        # the initial overlay can carry the same emotion-with-% breakdown
+        # the active-hover tooltip shows. Source has soft <br>-wraps inside
+        # the segment; collapse to one space-separated line.
+        ht = str(seed_row["hover_text"])
+        m = re.search(r"<b>Top Emotions:</b>(.*?)<b>Post/Comment:", ht, flags=re.DOTALL)
+        seed_top_emotions = re.sub(r"\s+", " ", m.group(1).replace("<br>", " ")).strip() if m else None
     else:
         seed_radar_values = None
         seed_archetype = None
+        seed_top_emotions = None
 
     return {
         "traces": traces,
@@ -262,6 +271,7 @@ def build_emotion_pulse_payload() -> dict[str, Any]:
         "theta_labels": RADAR_THETA_LABELS,
         "seed_radar_values": seed_radar_values,
         "seed_archetype": seed_archetype,
+        "seed_top_emotions": seed_top_emotions,
     }
 
 
@@ -372,11 +382,11 @@ def build_emotion_pulse_html() -> str:
             <div class="seed-content-mobile">
                 <b>Tender Uncertainty</b><br>
                 caring 75% &middot; annoying 71% &middot; desire 70%<br>
-                <span style="color: inherit; border-bottom: 3px solid #FFD700; font-weight: 700;">Tap a point</span> to update the radar.
+                <span style="color: inherit; border-bottom: 3px solid #FFD700; font-weight: 700;">Tab a dot</span> for details.
             </div>
             <div class="seed-content-tiny">
                 <b>Tender Uncertainty</b><br>
-                <span style="color: inherit; border-bottom: 2px solid #FFD700; font-weight: 700;">Tap</span> for radar.
+                <span style="color: inherit; border-bottom: 2px solid #FFD700; font-weight: 700;">Tab a dot</span> for details.
             </div>
         </div>
     </div>
@@ -458,8 +468,32 @@ def build_emotion_pulse_html() -> str:
     // 75 chars/line and lists 10 emotions + a 200-char post excerpt.
     // On phones that overflows the chart canvas: text gets cut off
     // ("exciteme...") and the tooltip covers the entire plot. On <=768px
-    // replace each marker trace's text with just the first line
-    // (archetype name) + a hint pointing to the radar for emotion detail.
+    // rewrite each marker trace's text to: archetype name + the Top
+    // Emotions segment with %s, dropping the Post/Comment quote and the
+    // prior "See radar →" affordance.
+    function compactHoverText(s) {{
+        const raw = String(s || '');
+        // Title: keep the archetype name as-is, just strip the inline <b>
+        // tags so we re-wrap with our own bold.
+        const title = raw.split('<br>')[0].replace(/<\/?b>/g, '').trim();
+        // Top Emotions: pulled out of the segment between its label and
+        // "Post/Comment:". Plotly hover renders SVG text with no auto-wrap;
+        // chunk pairs onto their own line so the tooltip fits a 360px
+        // viewport. Pair = "<emotion>: <pct>%".
+        const m = raw.match(/<b>Top Emotions:<\/b>([\s\S]*?)<b>Post\/Comment:/i);
+        let emotionsHtml = '';
+        if (m) {{
+            const flat = m[1].replace(/<br\s*\/?>/gi, ' ').replace(/\s+/g, ' ').trim();
+            const pairs = flat.match(/[a-z][a-z\- ]*?:\s*\d{{1,3}}%/gi) || [];
+            // 2 per row keeps each line ~22-26 chars (≤220px at 11px font).
+            const rows = [];
+            for (let i = 0; i < pairs.length; i += 2) {{
+                rows.push(pairs.slice(i, i + 2).join(' · '));
+            }}
+            emotionsHtml = rows.join('<br>');
+        }}
+        return `<b>${{title}}</b>${{emotionsHtml ? '<br>' + emotionsHtml : ''}}`;
+    }}
     function applyHoverContentMode() {{
         const w = window.innerWidth;
         const narrow = w <= 768;
@@ -469,14 +503,7 @@ def build_emotion_pulse_html() -> str:
         traces.forEach((t, i) => {{
             if (t.mode !== 'markers' || !Array.isArray(t.text) || t.hoverinfo === 'skip') return;
             indices.push(i);
-            if (narrow) {{
-                updates.text.push(t.text.map((s) => {{
-                    const first = String(s || '').split('<br>')[0];
-                    return first + '<br><i style="opacity:.7;font-size:.92em">See radar →</i>';
-                }}));
-            }} else {{
-                updates.text.push(t.text);
-            }}
+            updates.text.push(narrow ? t.text.map(compactHoverText) : t.text);
         }});
         if (indices.length) Plotly.restyle('umap-plot', updates, indices);
     }}
@@ -488,19 +515,36 @@ def build_emotion_pulse_html() -> str:
         resizeTimer = setTimeout(() => {{
             applyArchetypeLabelMode();
             applyHoverContentMode();
+            radarLayout = buildRadarLayout();
+            Plotly.react('radar-plot', currentRadar, radarLayout, radarConfig);
         }}, 150);
     }});
 
-    const radarLayout = {{
-        polar: {{
-            radialaxis: {{ visible: true, range: [0, 1], showticklabels: false, ticks: '', gridcolor: 'rgba(0,0,0,0.08)', linecolor: 'rgba(0,0,0,0.12)' }},
-            angularaxis: {{ tickfont: {{ size: 10, family: 'sans-serif', color: '#475569' }}, direction: 'clockwise', rotation: 90, gridcolor: 'rgba(0,0,0,0.06)', linecolor: 'rgba(0,0,0,0.12)' }},
-            bgcolor: 'rgba(255,255,255,0)'
-        }},
-        margin: {{ t: 36, r: 60, b: 32, l: 60 }},
-        showlegend: false,
-        paper_bgcolor: 'rgba(255,255,255,0)'
-    }};
+    // Radar layout — responsive so all 8 axes stay visible at phone widths.
+    // The fixed desktop margins (60/60 horizontal, 36/32 vertical) collapse
+    // the polar plot area to nothing inside the ≤360px 110×110 wrap, which
+    // is why the polygon rendered invisible. Scale margins + axis-label
+    // font size down with viewport width so the polygon fills the wrap.
+    function buildRadarLayout() {{
+        const w = window.innerWidth;
+        const tiny = w <= 360;
+        const narrow = w <= 768;
+        const margin = tiny
+            ? {{ t: 14, r: 18, b: 14, l: 18 }}
+            : (narrow ? {{ t: 22, r: 30, b: 22, l: 30 }} : {{ t: 36, r: 60, b: 32, l: 60 }});
+        const tickSize = tiny ? 7 : (narrow ? 8 : 10);
+        return {{
+            polar: {{
+                radialaxis: {{ visible: true, range: [0, 1], showticklabels: false, ticks: '', gridcolor: 'rgba(0,0,0,0.08)', linecolor: 'rgba(0,0,0,0.12)' }},
+                angularaxis: {{ tickfont: {{ size: tickSize, family: 'sans-serif', color: '#475569' }}, direction: 'clockwise', rotation: 90, gridcolor: 'rgba(0,0,0,0.06)', linecolor: 'rgba(0,0,0,0.12)' }},
+                bgcolor: 'rgba(255,255,255,0)'
+            }},
+            margin: margin,
+            showlegend: false,
+            paper_bgcolor: 'rgba(255,255,255,0)'
+        }};
+    }}
+    let radarLayout = buildRadarLayout();
     const emptyRadar = [{{
         type: 'scatterpolar', r: Array(THETA.length).fill(0), theta: THETA,
         mode: 'markers', marker: {{ size: 0, color: 'rgba(0,0,0,0)' }},
@@ -520,7 +564,8 @@ def build_emotion_pulse_html() -> str:
     const seedRadar = (PAYLOAD.seed_radar_values && PAYLOAD.seed_archetype)
         ? buildRadarTrace(PAYLOAD.seed_radar_values, PAYLOAD.seed_archetype)
         : emptyRadar;
-    Plotly.newPlot('radar-plot', seedRadar, radarLayout, radarConfig);
+    let currentRadar = seedRadar;
+    Plotly.newPlot('radar-plot', currentRadar, radarLayout, radarConfig);
 
     const umapDiv = document.getElementById('umap-plot');
     const seedBox = document.getElementById('initial-hover-box');
@@ -541,14 +586,14 @@ def build_emotion_pulse_html() -> str:
     umapDiv.on('plotly_hover', (evt) => {{
         const pt = evt.points[0];
         if (!pt || !pt.customdata) return;
-        const scores = pt.customdata;
-        const archetype = pt.data.name;
-        Plotly.react('radar-plot', buildRadarTrace(scores, archetype), radarLayout, radarConfig);
+        currentRadar = buildRadarTrace(pt.customdata, pt.data.name);
+        Plotly.react('radar-plot', currentRadar, radarLayout, radarConfig);
         dismissSeedBox();
     }});
     if (!isTouch) {{
         umapDiv.on('plotly_unhover', () => {{
-            Plotly.react('radar-plot', seedRadar, radarLayout, radarConfig);
+            currentRadar = seedRadar;
+            Plotly.react('radar-plot', currentRadar, radarLayout, radarConfig);
         }});
     }}
     // Plotly fires plotly_click reliably on tap. Belt-and-suspenders so
@@ -556,7 +601,8 @@ def build_emotion_pulse_html() -> str:
     umapDiv.on('plotly_click', (evt) => {{
         const pt = evt.points[0];
         if (!pt || !pt.customdata) return;
-        Plotly.react('radar-plot', buildRadarTrace(pt.customdata, pt.data.name), radarLayout, radarConfig);
+        currentRadar = buildRadarTrace(pt.customdata, pt.data.name);
+        Plotly.react('radar-plot', currentRadar, radarLayout, radarConfig);
         dismissSeedBox();
     }});
     </script>

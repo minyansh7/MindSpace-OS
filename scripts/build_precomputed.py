@@ -87,11 +87,18 @@ def _wrap_text_content(text: str, max_length: int = WRAP_WIDTH) -> list[str]:
 
 
 _EMOTION_PERCENT_RE = re.compile(r"(\w+:\s*\d+%)")
+# GoEmotions categories that carry no editorial signal in the Top Emotions
+# tooltip. "neutral" is the model's catch-all and frequently dominates the
+# top-N at scores like 71-76% on points whose actual emotional character
+# the user is trying to read; suppressing it keeps the tooltip focused
+# on the discriminating emotions both desktop and mobile show.
+_HIDDEN_EMOTIONS = {"neutral"}
 
 
 def _wrap_emotions_line(line: str) -> list[str]:
     line = " ".join(line.split())
     emotions = _EMOTION_PERCENT_RE.findall(line)
+    emotions = [em for em in emotions if em.split(":", 1)[0].strip().lower() not in _HIDDEN_EMOTIONS]
     if not emotions:
         return _wrap_text_content(line)
     out: list[str] = []
@@ -124,11 +131,34 @@ def wrap_hover_text(text: object) -> str:
         .replace("​", "")
     )
     text = " ".join(text.split())
+    # Drop the "Emotion Pulse:" label on the title line so the hover
+    # tooltip leads with just the archetype name (e.g. "<b>Reflective
+    # Caring</b>"). Source shape: "<b>Emotion Pulse:</b> Reflective
+    # Caring</b>" — the trailing </b> has no opener and would dangle if
+    # we only stripped the label, so re-wrap the captured archetype text
+    # in a fresh <b>...</b>. Both desktop (Streamlit) and mobile (static
+    # chart) render this column verbatim, so the strip lives here as the
+    # single source of truth.
+    text = re.sub(
+        r"<b>\s*Emotion Pulse:\s*</b>\s*([^<]+?)\s*</b>",
+        lambda m: f"<b>{m.group(1).strip()}</b>",
+        text,
+    )
     wrapped: list[str] = []
     for line in text.split("<br>"):
         line = line.strip()
         if not line:
             continue
+        # Drop hidden emotions (e.g. "neutral: 76%") in-place on the line
+        # before the existing wrap path runs. Source line shape is
+        # "<b>Top Emotions:</b> caring: 92% neutral: 76% ..."; the original
+        # wrap path preserves the <b> tags via _wrap_text_content, so we
+        # only mutate the emotion pairs and let it run unchanged.
+        if "Top Emotions:" in line:
+            for em in _EMOTION_PERCENT_RE.findall(line):
+                if em.split(":", 1)[0].strip().lower() in _HIDDEN_EMOTIONS:
+                    line = line.replace(em, "").replace("  ", " ")
+            line = line.strip()
         if line.startswith("Top Emotions:"):
             if len(line) <= WRAP_WIDTH:
                 wrapped.append(line)
