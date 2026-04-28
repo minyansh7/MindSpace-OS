@@ -55,6 +55,7 @@ const otherPages = pages.filter((p) => p.slug !== page.slug);
       height={page.desktop_height}
       mobileHeight={page.mobile_height}
       title={`${page.title} — interactive chart`}
+      responsiveDesktop={page.slug === 'emotion-pulse'}
     />
     <p class="footnote mt-4 max-w-3xl">
       Based on {data.post_count_canonical.toLocaleString()} posts and comments of meditation on <a href="https://www.reddit.com/" target="_blank" rel="noopener">Reddit</a>,
