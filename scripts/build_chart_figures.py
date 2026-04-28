@@ -817,9 +817,10 @@ def build_community_dynamics_html() -> str:
             // ourselves via .tr-title (consistent weight, no nested bold).
             const titleText = titleRaw.replace(/^<b>(.*?)<\/b>$/i, '$1');
             // Drop raw-count segments (Count, Posts, Comments, Connected
-            // comments). The normalized share views (Global / Post / Comment)
-            // carry the same info in % form, which scales cleaner on mobile.
-            const dropRegex = /^(Count|Posts|Comments|Connected comments)\s*:/i;
+            // comments, Replies, Responding to). The normalized share views
+            // (Global / Post / Comment) carry the same info in % form, which
+            // scales cleaner on mobile.
+            const dropRegex = /^(Count|Posts|Comments|Connected comments|Replies|Responding to)\s*:/i;
             const stats = segs.slice(1)
                 .filter(s => !dropRegex.test(s.replace(/<[^>]+>/g, '')))
                 .map(stripStyle);
