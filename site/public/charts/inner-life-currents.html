@@ -210,10 +210,14 @@
     function getResponsiveLayout() {
         const w = window.innerWidth;
         let leftMargin, rightMargin, plotHeight, labelFontSize, hoverFontSize;
-        if (w <= 480)      { leftMargin = rightMargin = 20;  plotHeight = Math.max(380, window.innerHeight * 0.78); labelFontSize = 10; hoverFontSize = 10; }
-        else if (w <= 768) { leftMargin = rightMargin = 50;  plotHeight = Math.max(455, window.innerHeight * 0.78); labelFontSize = 10; hoverFontSize = 11; }
-        else if (w <= 1024){ leftMargin = rightMargin = 100; plotHeight = Math.max(524, window.innerHeight * 0.78); labelFontSize = 14; hoverFontSize = 12; }
-        else               { leftMargin = rightMargin = 200; plotHeight = Math.max(524, window.innerHeight * 0.78); labelFontSize = 14; hoverFontSize = 12; }
+        // Margins kept slim across all breakpoints so the polar circle uses
+        // the iframe's full width. Plot height now uses the full container
+        // (no 0.78 multiplier) — the iframe already reserves 220px above the
+        // plot for controls + stats, so the plot can claim the remainder.
+        if (w <= 480)      { leftMargin = rightMargin = 20; plotHeight = Math.max(380, window.innerHeight); labelFontSize = 10; hoverFontSize = 10; }
+        else if (w <= 768) { leftMargin = rightMargin = 30; plotHeight = Math.max(455, window.innerHeight); labelFontSize = 11; hoverFontSize = 11; }
+        else if (w <= 1024){ leftMargin = rightMargin = 40; plotHeight = Math.max(524, window.innerHeight); labelFontSize = 15; hoverFontSize = 12; }
+        else               { leftMargin = rightMargin = 50; plotHeight = Math.max(524, window.innerHeight); labelFontSize = 16; hoverFontSize = 13; }
         return {
             plot_bgcolor: 'white', paper_bgcolor: 'white',
             font: { color: 'black' },
