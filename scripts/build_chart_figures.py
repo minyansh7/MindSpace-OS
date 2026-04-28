@@ -171,7 +171,9 @@ ARCHETYPE_SYMBOLS = {
 }
 CENTROID_OFFSETS = {
     "Reflective Caring": (3.9, 1.2),
-    "Soothing Empathy": (-3.0, 3.0),
+    # Soothing Empathy: push further left (-3.0 -> -4.5) so the label clears
+    # the data points to its right at desktop widths. y unchanged.
+    "Soothing Empathy": (-4.5, 3.0),
     "Tender Uncertainty": (-4.1, -2.5),
     "Melancholic Confusion": (0.5, -1.5),
     "Anxious Concern": (2.4, -0.3),
