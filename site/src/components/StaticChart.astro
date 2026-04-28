@@ -26,9 +26,18 @@ interface Props {
   mobileHeight?: number;
   /** accessible title for screen readers */
   title: string;
+  /**
+   * If true, desktop iframe height becomes clamp(520px, 70vh, height) instead
+   * of a fixed pixel value. Modern editorial-fold-fit pattern (NYT Upshot,
+   * Pudding, FT). Mobile already uses clamp regardless.
+   * Opt-in per chart because the Sankey, weather-report, and currents pages
+   * have layout-specific tall heights tuned to fit their multi-section
+   * content; shrinking those would clip content inside the iframe.
+   */
+  responsiveDesktop?: boolean;
 }
 
-const { src, height, mobileHeight, title } = Astro.props;
+const { src, height, mobileHeight, title, responsiveDesktop = false } = Astro.props;
 /* Chart HTMLs change only when the bake script re-runs, which is part of
    the deploy. CF Pages assigns a fresh deployment URL per build, so no
    per-component cachebuster is needed — the underlying file's path is
@@ -42,7 +51,7 @@ const slug = src.replace(/\.html$/, '');
 const baseSrc = `/charts/${slug}`;
 const mobileH = mobileHeight ?? Math.max(600, Math.round(height * 0.7));
 ---
-<figure class="w-full static-chart" data-static-chart>
+<figure class="w-full static-chart" data-static-chart data-responsive-desktop={responsiveDesktop ? '' : undefined}>
   <div class="static-chart-frame w-full rounded-xl overflow-hidden border border-[var(--color-hairline)]">
     <iframe
       data-base-src={baseSrc}
@@ -75,8 +84,26 @@ const mobileH = mobileHeight ?? Math.max(600, Math.round(height * 0.7));
     height: clamp(560px, 82vh, var(--mobileHeight));
     background: transparent;
   }
+  /* Desktop default: fixed height per canonical.json. Used by Sankey,
+     weather-report, and currents — their multi-section layouts are
+     tuned for specific pixel heights. */
   @media (min-width: 1024px) {
     .static-chart-frame { min-height: var(--desktopHeight); }
     .static-chart-iframe { height: var(--desktopHeight); }
+  }
+  /* Desktop with responsiveDesktop opt-in: vh-based clamp matching the
+     mobile pattern. 70vh is the editorial median (NYT Upshot, Pudding,
+     FT) for inline analytical charts: chart + 1-2 lines of context fit
+     one viewport on any common laptop. Floor 520px keeps clusters
+     legible on the smallest laptops; cap var(--desktopHeight) treats
+     canonical.json's desktop_height as the upper bound on ultra-tall
+     monitors. */
+  @media (min-width: 1024px) {
+    .static-chart[data-responsive-desktop] .static-chart-frame {
+      min-height: clamp(520px, 70vh, var(--desktopHeight));
+    }
+    .static-chart[data-responsive-desktop] .static-chart-iframe {
+      height: clamp(520px, 70vh, var(--desktopHeight));
+    }
   }
 </style>
