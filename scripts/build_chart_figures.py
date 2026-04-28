@@ -684,10 +684,11 @@ def build_community_dynamics_html() -> str:
     # clipped by the iframe edge.
     layout['margin'] = {'l': 10, 'r': 10, 't': 8, 'b': 80}
 
-    # Strip raw-count rows from hover tooltips. Node tooltips drop "Posts" and
-    # "Connected comments"; link (ribbon) tooltips drop "Count". The normalized
-    # share % rows (Global / Post / Comment Share) carry the same info.
-    drop_re = re.compile(r'^\s*(Posts|Connected comments|Count)\s*:', re.IGNORECASE)
+    # Strip raw-count rows from hover tooltips. Node tooltips drop "Posts",
+    # "Connected comments", "Replies", "Responding to"; link (ribbon)
+    # tooltips drop "Count". The normalized share % rows (Global / Post /
+    # Comment Share) carry the same info.
+    drop_re = re.compile(r'^\s*(Posts|Connected comments|Count|Replies|Responding to)\s*:', re.IGNORECASE)
     def _strip_counts(html: str) -> str:
         parts = html.split('<br>')
         kept = [p for p in parts if not drop_re.match(re.sub(r'<[^>]+>', '', p))]
