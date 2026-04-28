@@ -297,8 +297,15 @@ def build_emotion_pulse_shell() -> str:
     <title>Emotion Pulse — MindSpace OS</title>
     <script src="{PLOTLY_CDN_URL}"></script>
     <style>
+        /* Phase 3a fit-iframe: html/body/.plot-wrap fill the iframe (sized
+           via StaticChart.astro to var(--desktopHeight)) instead of being
+           pinned at 1080px. Without this the chart was rendering at a
+           hardcoded 1080px regardless of the iframe's actual height,
+           which made the UMAP visibly oversized on viewports where the
+           iframe ended up shorter than 1080. */
+        html, body {{ height: 100%; }}
         body {{ margin: 0; padding: 0; font-family: Arial, sans-serif; background: white; }}
-        .plot-wrap {{ position: relative; width: 100%; height: 1080px; }}
+        .plot-wrap {{ position: relative; width: 100%; height: 100%; min-height: 600px; }}
         #umap-plot {{ width: 100%; height: 100%; }}
         #radar-wrap {{
             position: absolute;
@@ -453,7 +460,14 @@ def build_emotion_pulse_shell() -> str:
         margin: {{ t: 60, b: 10, l: 40, r: 40 }}
     }};
     const umapConfig = {{ displayModeBar: false, displaylogo: false, scrollZoom: false, doubleClick: false, responsive: true }};
-    Plotly.newPlot('umap-plot', PAYLOAD.traces, umapLayout, umapConfig);
+    Plotly.newPlot('umap-plot', PAYLOAD.traces, umapLayout, umapConfig).then(function () {{
+        // Phase 3a fit-iframe: force Plotly to re-measure the now-100%-height
+        // container after the skeleton was just removed and after init() wins
+        // a layout pass. Without this the chart can render at its initial
+        // measurement (taken before skeleton removal) which on some
+        // viewports is too tall and overflows the iframe.
+        Plotly.Plots.resize('umap-plot');
+    }});
 
     // Viewport-aware archetype label sizing + positioning. Three things
     // scale with viewport width across the 320px → 1280px range:
