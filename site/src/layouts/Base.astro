@@ -13,6 +13,15 @@ import { project } from '../lib/canonical.ts';
 import { identity } from '../data/identity';
 import JsonLd from '../components/JsonLd.astro';
 
+// Preload the two above-the-fold woff2 files (Inter 700 for H1, Inter 500
+// for nav links + hero thesis). The @fontsource CSS gets inlined into the
+// head bundle so the browser already knows the @font-face references after
+// CSS parse, but a <link rel="preload"> in <head> kicks off the font
+// fetch *during* HTML parse — typically 50-100ms earlier on cold-load.
+// ?url returns the Vite-resolved hashed path (/_astro/inter-...woff2).
+import inter700Url from '@fontsource/inter/files/inter-latin-700-normal.woff2?url';
+import inter500Url from '@fontsource/inter/files/inter-latin-500-normal.woff2?url';
+
 interface Props {
   title?: string;
   description?: string;
@@ -36,6 +45,11 @@ const ogUrl = new URL(ogImage, project.domain).toString();
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {/* Above-the-fold font preloads. Inter 700 paints H1; Inter 500 paints
+        nav + hero thesis. Both are fontsource latin-only woff2 files served
+        from /_astro/ with immutable cache. */}
+    <link rel="preload" as="font" type="font/woff2" crossorigin href={inter700Url} />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href={inter500Url} />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
