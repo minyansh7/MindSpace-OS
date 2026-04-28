@@ -170,29 +170,31 @@ ARCHETYPE_SYMBOLS = {
     "Anxious Concern": ("star-triangle-up", 8),
 }
 CENTROID_OFFSETS = {
-    # dx values are smaller here than the post-#85/#86 bumps -- with the
-    # canvas-aspect fix in #88 the data fills the canvas naturally
-    # (instead of cramming into a vertical column), so labels don't need
-    # extreme offsets to clear the data spread. The textposition values
-    # below anchor each label's text on the side facing the chart center,
-    # so text extends INWARD rather than outward past the canvas edge.
-    "Reflective Caring": (3.5, 1.2),
-    "Soothing Empathy": (-3.5, 3.0),
-    "Tender Uncertainty": (-3.0, -2.5),
+    # dx values place the label anchor AT the data edge (just outside the
+    # data spread). Combined with the textposition values below pointing
+    # OUTWARD, the actual text occupies the empty margin between data
+    # edge and canvas edge -- close to the cluster, not overlapping data,
+    # not clipping at canvas. Data x-extent is roughly [5.94, 14.00] and
+    # cluster centroids sit between 9.4 and 12.4, so the dx values below
+    # land each anchor right at the relevant data boundary.
+    "Reflective Caring": (3.6, 1.2),    # right edge: 10.37 + 3.6 = 13.97
+    "Soothing Empathy": (-3.5, 3.0),    # left edge:  9.41 - 3.5 = 5.91
+    "Tender Uncertainty": (-4.2, -2.5), # left edge: 10.14 - 4.2 = 5.94
     "Melancholic Confusion": (0.5, -1.5),
-    "Anxious Concern": (2.5, -0.3),
+    "Anxious Concern": (1.6, -0.3),     # right edge: 12.44 + 1.6 = 14.04
 }
-# Plotly textposition per archetype: text extends from the anchor toward
-# the chart center, preventing edge clipping when labels sit near the
-# canvas boundary. "middle right" means text starts AT the anchor and
-# extends RIGHT; "middle left" means text ends AT the anchor and extends
-# LEFT. Used at trace-construction time below.
+# Plotly textposition per archetype: text extends from the anchor AWAY
+# from the chart center, into the label-margin area outside data extent.
+# "middle right" means text extends RIGHT from the anchor; "middle left"
+# means text extends LEFT from the anchor. With anchors positioned at the
+# data edge, text sits entirely in the margin -- no overlap with data,
+# no clipping at canvas edge.
 ARCHETYPE_TEXTPOS = {
-    "Reflective Caring": "middle left",   # right-side cluster, text extends leftward
-    "Soothing Empathy":  "middle right",  # left-side cluster, text extends rightward
-    "Tender Uncertainty": "middle right", # left-side cluster
+    "Reflective Caring":  "middle right",  # right-side anchor, text extends rightward into margin
+    "Soothing Empathy":   "middle left",   # left-side anchor, text extends leftward into margin
+    "Tender Uncertainty": "middle left",   # left-side anchor
     "Melancholic Confusion": "middle center",  # center-bottom
-    "Anxious Concern":   "middle left",   # right-side cluster
+    "Anxious Concern":    "middle right",  # right-side anchor
 }
 
 
