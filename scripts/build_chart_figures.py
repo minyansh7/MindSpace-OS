@@ -255,6 +255,15 @@ def build_emotion_pulse_payload() -> dict[str, Any]:
     y_range_pad_top = 0.13 * (y_max - y_min)
     y_range_pad_bot = 0.01 * (y_max - y_min)
 
+    # X range with extra padding for archetype labels.
+    # Without scaleanchor (which was forcing 1:1 aspect and causing the
+    # data to cram into a narrow vertical column on wide canvases), x is
+    # explicitly framed: data extent + ~40% headroom on each side so the
+    # labels at +/-4-5 UMAP units from centroids land in the chart's
+    # outer breathing room rather than overlapping the data points or
+    # clipping at the canvas edge.
+    x_range_pad = 0.40 * (x_max - x_min)
+
     seed_mask = df["hover_text"].str.contains("Insight Timer used to be amazing", na=False)
     if seed_mask.any():
         seed_row = df[seed_mask].iloc[0]
@@ -274,6 +283,7 @@ def build_emotion_pulse_payload() -> dict[str, Any]:
 
     return {
         "traces": traces,
+        "x_range": [x_min - x_range_pad, x_max + x_range_pad],
         "y_range": [y_min - y_range_pad_bot, y_max + y_range_pad_top],
         "archetype_colors": ARCHETYPE_COLORS,
         "short_labels": ARCHETYPE_SHORT_LABELS,
@@ -460,7 +470,13 @@ def build_emotion_pulse_shell() -> str:
     const umapLayout = {{
         plot_bgcolor: 'white', paper_bgcolor: 'white', font: {{ color: 'black' }},
         showlegend: false,
-        xaxis: {{ showgrid: false, zeroline: false, showticklabels: false, ticks: '', scaleanchor: 'y', scaleratio: 1, fixedrange: true }},
+        // No scaleanchor: on wide-short canvases (laptop landscape, 2:1
+        // aspect) the 1:1 lock was extending x range to ~3x the data
+        // extent, cramming all 2,899 points into a narrow vertical
+        // column. Without it, data fills the canvas naturally; UMAP
+        // distances appear stretched horizontally but the 5 archetype
+        // neighborhoods stay distinct (already a 2D projection of 27D).
+        xaxis: {{ showgrid: false, zeroline: false, showticklabels: false, ticks: '', range: PAYLOAD.x_range, fixedrange: true }},
         yaxis: {{ showgrid: false, zeroline: false, showticklabels: false, ticks: '', range: PAYLOAD.y_range, fixedrange: true }},
         hovermode: 'closest', autosize: true,
         margin: {{ t: 60, b: 10, l: 40, r: 40 }}
