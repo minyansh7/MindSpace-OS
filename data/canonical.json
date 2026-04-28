@@ -118,7 +118,7 @@
       "intro": "A UMAP map of every post, colored by its dominant emotion (GoEmotions, 27 categories). Posts using similar emotional language sit close together. Five recurring archetypes emerge as distinct neighborhoods: Reflective Caring, Soothing Empathy, Tender Uncertainty, Melancholic Confusion, Anxious Concern.",
       "callout": "Joy ranks 25th of 28 emotions. Amusement is dead last.",
       "screenshot": "/screenshots/emotion-pulse.svg",
-      "desktop_height": 1100,
+      "desktop_height": 700,
       "mobile_height": 640,
       "footnote_variant": "goemotions"
     },
