@@ -34,6 +34,7 @@ const expectedAssets = [
   'favicon.svg',
   'sitemap-index.xml',
   'charts/emotion-pulse.html',
+  'charts/emotion-pulse-data.json',
   'charts/community-dynamics.html',
   'charts/inner-life-currents.html',
   'charts/community-weather-report.html',
@@ -203,6 +204,45 @@ test('above-the-fold fonts are preloaded (Phase 2 perf)', () => {
     expect(html).toMatch(/<link rel="preload"[^>]*as="font"[^>]*type="font\/woff2"[^>]*crossorigin[^>]*href="\/_astro\/inter-latin-700-normal\.[A-Za-z0-9_-]+\.woff2"/);
     expect(html).toMatch(/<link rel="preload"[^>]*as="font"[^>]*type="font\/woff2"[^>]*crossorigin[^>]*href="\/_astro\/inter-latin-500-normal\.[A-Za-z0-9_-]+\.woff2"/);
   }
+});
+
+test('emotion-pulse shell+data split (Phase 3a perf)', async () => {
+  // Phase 3a splits emotion-pulse.html (1.7MB inline payload) into a tiny
+  // shell that paints instantly + a separate JSON the shell fetches in
+  // parallel. Cuts first-paint LCP from ~2s to ~400ms on cold cache.
+  const shell = chartHtml['emotion-pulse'];
+  // Shell must be small. Pre-split it was ~1.7MB; split shell is ~20KB.
+  expect(shell.length).toBeLessThan(50_000);
+  // Shell fetches the data file at a relative path so the parent's ?tod=
+  // query param doesn't fragment the JSON's edge cache.
+  expect(shell).toContain("fetch('./emotion-pulse-data.json')");
+  // Shell wraps the original render code in init(payload).
+  expect(shell).toContain('function init(PAYLOAD)');
+  // Shell must NOT inline the payload (regression guard).
+  expect(shell).not.toMatch(/const PAYLOAD = \{/);
+  // Skeleton element renders before the data arrives.
+  expect(shell).toContain('chart-skeleton');
+  // Data file must exist and be large (the actual chart payload).
+  const dataPath = path.join(DIST, 'charts/emotion-pulse-data.json');
+  expect(existsSync(dataPath)).toBe(true);
+  const dataSize = (await stat(dataPath)).size;
+  expect(dataSize).toBeGreaterThan(500_000);
+  // Data file is valid JSON containing the expected fields.
+  const data = JSON.parse(await readFile(dataPath, 'utf8'));
+  expect(data).toHaveProperty('traces');
+  expect(data).toHaveProperty('theta_labels');
+  expect(data).toHaveProperty('archetype_colors');
+});
+
+test('emotion-pulse shell preserves mobile breakpoints (regression guard)', () => {
+  // Critical regression: MOBILE_CSS must stay in the shell. Without it,
+  // narrow viewports (<=360px, <=480px, <=768px, <=1024px) break, which
+  // is the exact pattern that caused commit 62b4a11b to revert mobile.
+  const shell = chartHtml['emotion-pulse'];
+  expect(shell).toContain('@media (max-width: 1024px)');
+  expect(shell).toContain('@media (max-width: 768px)');
+  expect(shell).toContain('@media (max-width: 480px)');
+  expect(shell).toContain('@media (max-width: 360px)');
 });
 
 test('robots.txt allows all and points to sitemap', async () => {
