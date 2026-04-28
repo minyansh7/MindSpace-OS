@@ -170,17 +170,29 @@ ARCHETYPE_SYMBOLS = {
     "Anxious Concern": ("star-triangle-up", 8),
 }
 CENTROID_OFFSETS = {
-    # Reflective Caring: push further right (3.9 -> 5.4) so the label clears
-    # the data points to its left at desktop widths. y unchanged.
-    "Reflective Caring": (5.4, 1.2),
-    # Soothing Empathy: push further left (-3.0 -> -4.5) so the label clears
-    # the data points to its right at desktop widths. y unchanged.
-    "Soothing Empathy": (-4.5, 3.0),
-    "Tender Uncertainty": (-4.1, -2.5),
+    # dx values are smaller here than the post-#85/#86 bumps -- with the
+    # canvas-aspect fix in #88 the data fills the canvas naturally
+    # (instead of cramming into a vertical column), so labels don't need
+    # extreme offsets to clear the data spread. The textposition values
+    # below anchor each label's text on the side facing the chart center,
+    # so text extends INWARD rather than outward past the canvas edge.
+    "Reflective Caring": (3.5, 1.2),
+    "Soothing Empathy": (-3.5, 3.0),
+    "Tender Uncertainty": (-3.0, -2.5),
     "Melancholic Confusion": (0.5, -1.5),
-    # Anxious Concern: push further right (2.4 -> 3.9) so the label clears
-    # the data points to its left at desktop widths. y unchanged.
-    "Anxious Concern": (3.9, -0.3),
+    "Anxious Concern": (2.5, -0.3),
+}
+# Plotly textposition per archetype: text extends from the anchor toward
+# the chart center, preventing edge clipping when labels sit near the
+# canvas boundary. "middle right" means text starts AT the anchor and
+# extends RIGHT; "middle left" means text ends AT the anchor and extends
+# LEFT. Used at trace-construction time below.
+ARCHETYPE_TEXTPOS = {
+    "Reflective Caring": "middle left",   # right-side cluster, text extends leftward
+    "Soothing Empathy":  "middle right",  # left-side cluster, text extends rightward
+    "Tender Uncertainty": "middle right", # left-side cluster
+    "Melancholic Confusion": "middle center",  # center-bottom
+    "Anxious Concern":   "middle left",   # right-side cluster
 }
 
 
@@ -244,6 +256,7 @@ def build_emotion_pulse_payload() -> dict[str, Any]:
             "x": [float(cx + dx)], "y": [float(cy + dy)],
             "mode": "text",
             "text": [f"<b>{archetype}</b>"],
+            "textposition": ARCHETYPE_TEXTPOS.get(archetype, "middle center"),
             "textfont": {"size": 20, "color": ARCHETYPE_COLORS[archetype], "family": "sans-serif"},
             "hoverinfo": "skip",
             "showlegend": False,
