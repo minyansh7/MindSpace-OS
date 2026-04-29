@@ -8,12 +8,16 @@ export const identity = {
     name: 'Minyan Shi',
     pronoun: 'she/her',
     title: 'Founder, Minyan Labs',
+    title_canonical: 'Founder, Minyan Labs · ex-Publicis',
     location: 'Sydney, Australia',
+    location_display: 'Sydney, Australia / Remote',
     email: 'minyanshi@proton.me',
+    bio_micro:
+      'Founder of Minyan Labs. Building in generative AI search optimisation. Decade of audience strategy at Publicis and Didi spanning US, Australia and China.',
     bio_short:
-      'Minyan Shi is the founder of Minyan Labs, a one-person studio doing editorial data storytelling and AI work. Available for select 2026 consulting engagements.',
+      "Minyan Shi is founder of Minyan Labs and is building in generative intelligence search optimisation. With a decade of data and audience strategy at Publicis and Didi — across McDonald's, Pfizer, Adobe, Audi, and Tourism Australia — she's worked across the US, Australia, and China. Winner of SXSW Sydney AI 2024 and the 2023 GPT Hackathon. Harvard Business School Data Privacy and Technology certificate (2024).",
     bio_long:
-      "Minyan Shi (she/her) is the founder of Minyan Labs, a one-person studio doing editorial data storytelling and AI work, based in Sydney. A decade of audience and data strategy across McDonald's, Pfizer, Adobe, Audi, and Didi at Digitas (Publicis Group), Didi Beijing, and Newmark Knight Frank Chicago. Won SXSW Sydney AI 2024 (Build Club × National AI Centre) and the 2023 GPT Hackathon. Harvard Business School Data Privacy and Technology certificate (2024).",
+      "Minyan Shi founded Minyan Labs to solve one of generative AI's most urgent problems: how brands get found in an era where search is being rewritten from scratch. She brings a decade of audience and data strategy to that question — built across McDonald's, Pfizer, Adobe, Audi, and Tourism Australia at Publicis and Didi, spanning the US, Australia, and China. A data storyteller by instinct, Minyan and her team took first place at SXSW Sydney AI 2024 (Build Club × National AI Centre) and won the 2023 GPT Hackathon. She holds a Harvard Business School certificate in Data Privacy and Technology (2024).",
     awards: [
       'SXSW Sydney AI 2024 winner (Build Club × National AI Centre)',
       '2023 GPT Hackathon Winner — GPT-based sentiment model for ASX stock prediction',
@@ -28,13 +32,16 @@ export const identity = {
     name: 'Minyan Labs',
     legal_name: 'Minyan Labs',
     tagline: 'Maps turned metrics. Data, strategy, and AI built in Sydney.',
+    short_description:
+      'A one-person studio doing editorial data storytelling and generative-AI search optimization, based in Sydney.',
     founded: 2026,
     location: 'Sydney, Australia',
   },
   links: {
-    resume: 'https://minyanlabs.com', // post-DNS-cutover; pre-cutover use resume_fallback
-    resume_fallback: 'https://minyan-personal-site.shminyan.workers.dev',
-    project_mindspaceos: 'https://mindspaceos.com', // post-DNS-cutover
+    // resume: workers.dev is the canonical resume URL (custom minyanlabs.com dropped from v1 per IDENTITY_SOT 2026-04-28)
+    resume: 'https://minyan-personal-site.shminyan.workers.dev',
+    resume_legacy: 'https://minyanlabs.com', // dropped from v1, kept for if/when reactivated
+    project_mindspaceos: 'https://mindspaceos.com', // live since 2026-04-26
     project_mindspaceos_fallback: 'https://minyansh7-mindspace-os-publi-xcqs.mindspace-os.pages.dev',
     substack: 'https://minyansh.substack.com',
     linkedin: 'https://www.linkedin.com/in/minyanshi/',

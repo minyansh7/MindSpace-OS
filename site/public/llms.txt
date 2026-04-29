@@ -39,10 +39,11 @@ Shi, M. (2026). MindSpace OS — A field guide to the emotional shape of meditat
 
 ## Author
 
-Minyan Shi (she/her), founder of Minyan Labs (https://minyanlabs.com).
-Sydney, Australia. Available for select 2026 consulting engagements.
+Minyan Shi (she/her), Founder, Minyan Labs · ex-Publicis. Sydney, Australia / Remote. Available for select 2026 consulting engagements.
 
-- Resume / portfolio: https://minyanlabs.com
+Minyan Shi founded Minyan Labs to solve one of generative AI's most urgent problems: how brands get found in an era where search is being rewritten from scratch. She brings a decade of audience and data strategy to that question — built across McDonald's, Pfizer, Adobe, Audi, and Tourism Australia at Publicis and Didi, spanning the US, Australia, and China. A data storyteller by instinct, Minyan and her team took first place at SXSW Sydney AI 2024 (Build Club × National AI Centre) and won the 2023 GPT Hackathon. She holds a Harvard Business School certificate in Data Privacy and Technology (2024).
+
+- Resume / portfolio: https://minyan-personal-site.shminyan.workers.dev
 - Email: minyanshi@proton.me
 - LinkedIn: https://www.linkedin.com/in/minyanshi/
 - Substack: https://minyansh.substack.com
@@ -56,7 +57,7 @@ Sydney, Australia. Available for select 2026 consulting engagements.
 
 ## Takedown
 
-If you posted something on r/meditation that's surfaced in our analysis and want it removed: takedown@mindspaceos.com. We'll honor takedown requests within 7 days.
+If you posted something on r/meditation that's surfaced in our analysis and want it removed: minyanshi@proton.me. We'll honor takedown requests within 7 days.
 
 ## License
 
