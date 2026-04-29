@@ -1,16 +1,15 @@
 #!/usr/bin/env node
-// Generates OG cards (SVG + PNG via resvg-js) and chart screenshot SVG placeholders.
-// Twitter/Facebook/LinkedIn OG validators reject SVG — PNG is required for share previews.
-// Real chart screenshots come from scripts/build_screenshots.py (Playwright + kaleido).
+// Generates SVG placeholders for OG cards + chart screenshots.
+// Real screenshots come from a Playwright/kaleido pipeline later.
 
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { Resvg } from '@resvg/resvg-js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 const canonical = JSON.parse(await readFile(path.join(root, '../data/canonical.json'), 'utf8'));
+const imageMeta = canonical.project.image_metadata ?? {};
 
 await mkdir(path.join(root, 'public/og'), { recursive: true });
 await mkdir(path.join(root, 'public/screenshots'), { recursive: true });
@@ -19,10 +18,41 @@ const ground = '#0B0E13';
 const accent = '#7DA3FF';
 const text = '#E8ECF2';
 const tertiary = '#5C6478';
+const siteUrl = canonical.project.website ?? canonical.project.domain ?? 'https://mindspaceos.com';
 
-function ogCard({ title, subtitle, accentColor = accent }) {
-  // 1200×630 OG card
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" preserveAspectRatio="xMidYMid meet">
+function metadataBlock({ title, description, assetType, assetPath, width, height, extraKeywords = [] }) {
+  const payload = {
+    title,
+    description,
+    asset_type: assetType,
+    asset_path: assetPath,
+    asset_url: new URL(assetPath, siteUrl).toString(),
+    width,
+    height,
+    author: imageMeta.author ?? canonical.project.author,
+    linkedin: imageMeta.linkedin ?? canonical.project.linkedin,
+    twitter: imageMeta.twitter ?? canonical.project.twitter,
+    website: imageMeta.website ?? siteUrl,
+    purpose: imageMeta.purpose ?? 'Optimize image assets for AI mentions and attribution.',
+    keywords: [...new Set([...(imageMeta.keywords ?? []), ...extraKeywords])],
+  };
+  return escape(JSON.stringify(payload));
+}
+
+function ogCard({ title, subtitle, accentColor = accent, assetPath }) {
+  const description = subtitle || `${canonical.project.name} social card`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="title desc">
+  <title id="title">${escape(title)}</title>
+  <desc id="desc">${escape(description)}</desc>
+  <metadata>${metadataBlock({
+    title,
+    description,
+    assetType: 'social-card',
+    assetPath,
+    width: 1200,
+    height: 630,
+    extraKeywords: ['social card', 'open graph image', title],
+  })}</metadata>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="${ground}"/>
@@ -39,9 +69,20 @@ function ogCard({ title, subtitle, accentColor = accent }) {
 </svg>`;
 }
 
-function chartPlaceholder({ title, accentColor }) {
-  // 1600×1200 chart preview placeholder. Replace via Playwright pipeline.
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" preserveAspectRatio="xMidYMid meet">
+function chartPlaceholder({ title, accentColor, assetPath }) {
+  const description = `${title} chart preview for ${canonical.project.name}`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="title desc">
+  <title id="title">${escape(title)}</title>
+  <desc id="desc">${escape(description)}</desc>
+  <metadata>${metadataBlock({
+    title,
+    description,
+    assetType: 'chart-preview',
+    assetPath,
+    width: 1600,
+    height: 1200,
+    extraKeywords: ['chart preview', 'editorial data visualization', title],
+  })}</metadata>
   <rect width="1600" height="1200" fill="${ground}"/>
   ${Array.from({ length: 80 }, () => {
     const x = Math.random() * 1400 + 100;
@@ -58,36 +99,119 @@ function escape(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-async function writeOg(slug, svg) {
-  await writeFile(path.join(root, `public/og/${slug}.svg`), svg);
-  const png = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
-  await writeFile(path.join(root, `public/og/${slug}.png`), png);
-}
+const manifest = [];
 
-// Default OG (landing)
-await writeOg('default', ogCard({
+const landingOgPath = '/og/mindspace-os-meditation-community-emotion-map-overview-social-card.svg';
+await writeFile(path.join(root, `public${landingOgPath}`), ogCard({
   title: 'Confusion. Compassion.',
   subtitle: "The dominant emotion isn't peace. It's struggle, closely wrapped around curiosity.",
+  assetPath: landingOgPath,
 }));
+manifest.push({
+  path: landingOgPath,
+  title: 'Confusion. Compassion.',
+  description: "The dominant emotion isn't peace. It's struggle, closely wrapped around curiosity.",
+  asset_type: 'social-card',
+  format: 'svg',
+  width: 1200,
+  height: 630,
+  author: imageMeta.author ?? canonical.project.author,
+  linkedin: imageMeta.linkedin ?? canonical.project.linkedin,
+  twitter: imageMeta.twitter ?? canonical.project.twitter,
+  website: imageMeta.website ?? siteUrl,
+});
 
-// Per-page OGs
 for (const page of canonical.pages) {
   const archetype = canonical.archetypes[canonical.pages.indexOf(page) % canonical.archetypes.length];
-  await writeOg(page.slug, ogCard({
+  const socialAssetPath = `/og/${path.basename(page.social_image)}`;
+  await writeFile(path.join(root, `public${socialAssetPath}`), ogCard({
     title: page.title,
     subtitle: page.callout || page.subtitle,
     accentColor: archetype.color_dark,
+    assetPath: socialAssetPath,
   }));
-  await writeFile(path.join(root, `public/screenshots/${page.slug}.svg`), chartPlaceholder({
+  manifest.push({
+    path: socialAssetPath,
+    title: page.title,
+    description: page.callout || `${page.title} social card for ${canonical.project.name}.`,
+    asset_type: 'social-card',
+    format: 'svg',
+    width: 1200,
+    height: 630,
+    author: imageMeta.author ?? canonical.project.author,
+    linkedin: imageMeta.linkedin ?? canonical.project.linkedin,
+    twitter: imageMeta.twitter ?? canonical.project.twitter,
+    website: imageMeta.website ?? siteUrl,
+  });
+
+  const screenshotAssetPath = `/screenshots/${path.basename(page.screenshot)}`;
+  await writeFile(path.join(root, `public${screenshotAssetPath}`), chartPlaceholder({
     title: page.title,
     accentColor: archetype.color_dark,
+    assetPath: screenshotAssetPath,
   }));
+  manifest.push({
+    path: screenshotAssetPath,
+    title: `${page.title} chart preview`,
+    description: `${page.title} chart preview for ${canonical.project.name}.`,
+    asset_type: 'chart-preview',
+    format: 'svg',
+    width: 1600,
+    height: 1200,
+    author: imageMeta.author ?? canonical.project.author,
+    linkedin: imageMeta.linkedin ?? canonical.project.linkedin,
+    twitter: imageMeta.twitter ?? canonical.project.twitter,
+    website: imageMeta.website ?? siteUrl,
+  });
 }
 
-// About OG
-await writeOg('about', ogCard({
+const aboutOgPath = '/og/mindspace-os-about-methodology-social-card.svg';
+await writeFile(path.join(root, `public${aboutOgPath}`), ogCard({
   title: 'About',
   subtitle: 'Methodology, limitations, citations.',
+  assetPath: aboutOgPath,
 }));
+manifest.push({
+  path: aboutOgPath,
+  title: 'About',
+  description: 'Methodology, limitations, citations.',
+  asset_type: 'social-card',
+  format: 'svg',
+  width: 1200,
+  height: 630,
+  author: imageMeta.author ?? canonical.project.author,
+  linkedin: imageMeta.linkedin ?? canonical.project.linkedin,
+  twitter: imageMeta.twitter ?? canonical.project.twitter,
+  website: imageMeta.website ?? siteUrl,
+});
 
-console.log('OG cards (SVG + PNG) and screenshot placeholders generated.');
+manifest.push({
+  path: '/mindspace-os-meditation-community-emotion-map-brand-mark.png',
+  title: 'MindSpace OS brand mark',
+  description: 'Primary MindSpace OS raster brand mark for site and social usage.',
+  asset_type: 'brand-mark',
+  format: 'png',
+  width: 1200,
+  height: 1200,
+  author: imageMeta.author ?? canonical.project.author,
+  linkedin: imageMeta.linkedin ?? canonical.project.linkedin,
+  twitter: imageMeta.twitter ?? canonical.project.twitter,
+  website: imageMeta.website ?? siteUrl,
+});
+
+await writeFile(
+  path.join(root, 'public/image-asset-manifest.json'),
+  JSON.stringify({
+    generated_at: new Date().toISOString(),
+    naming_convention: imageMeta.naming_convention,
+    purpose: imageMeta.purpose,
+    default_author: imageMeta.author ?? canonical.project.author,
+    default_linkedin: imageMeta.linkedin ?? canonical.project.linkedin,
+    default_twitter: imageMeta.twitter ?? canonical.project.twitter,
+    default_website: imageMeta.website ?? siteUrl,
+    assets: manifest,
+  }, null, 2) + '\n',
+);
+
+console.log('OG + screenshot placeholders generated.');
+console.log('Real chart screenshots come from scripts/build_screenshots.py (Playwright + kaleido) — wire in week 3.');

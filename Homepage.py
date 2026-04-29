@@ -17,7 +17,7 @@ def get_base64_image(image_path):
 st.set_page_config(
     page_title="MindSpace OS",
     layout="wide",
-    page_icon="assets/narrative_web_clean.png",
+    page_icon="assets/mindspace-os-meditation-community-emotion-map-brand-mark.png",
     initial_sidebar_state="collapsed"
 )
 
@@ -70,7 +70,7 @@ def get_time_colors(hour):
 colors = get_time_colors(current_time)
 
 # Get base64 encoded image
-image_base64 = get_base64_image("assets/narrative_web_clean.png")
+image_base64 = get_base64_image("assets/mindspace-os-meditation-community-emotion-map-brand-mark.png")
 
 # Inject CSS
 st.markdown(f"""

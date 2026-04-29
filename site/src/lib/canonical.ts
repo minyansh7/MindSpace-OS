@@ -21,6 +21,8 @@ export type Page = {
   desktop_height: number;
   mobile_height: number;
   footnote_variant: 'goemotions' | 'weather' | 'currents';
+  streamlit_path?: string;
+  social_image?: string;
 };
 
 export type Essay = {

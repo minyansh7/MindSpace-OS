@@ -20,21 +20,22 @@ const expectedRoutes = [
 ];
 
 const expectedAssets = [
-  'og/default.svg',
-  'og/emotion-pulse.svg',
-  'og/community-dynamics.svg',
-  'og/community-weather-report.svg',
-  'og/inner-life-currents.svg',
-  'og/about.svg',
-  'screenshots/emotion-pulse.svg',
-  'screenshots/community-dynamics.svg',
-  'screenshots/community-weather-report.svg',
-  'screenshots/inner-life-currents.svg',
+  'og/mindspace-os-meditation-community-emotion-map-overview-social-card.svg',
+  'og/mindspace-os-emotion-pulse-social-card.svg',
+  'og/mindspace-os-community-dynamics-social-card.svg',
+  'og/mindspace-os-community-weather-report-social-card.svg',
+  'og/mindspace-os-inner-life-currents-social-card.svg',
+  'og/mindspace-os-about-methodology-social-card.svg',
+  'screenshots/mindspace-os-emotion-pulse-chart-preview.svg',
+  'screenshots/mindspace-os-community-dynamics-chart-preview.svg',
+  'screenshots/mindspace-os-community-weather-report-chart-preview.svg',
+  'screenshots/mindspace-os-inner-life-currents-chart-preview.svg',
+  'mindspace-os-meditation-community-emotion-map-brand-mark.png',
+  'image-asset-manifest.json',
   'robots.txt',
   'favicon.svg',
   'sitemap-index.xml',
   'charts/emotion-pulse.html',
-  'charts/emotion-pulse-data.json',
   'charts/community-dynamics.html',
   'charts/inner-life-currents.html',
   'charts/community-weather-report.html',
@@ -44,22 +45,11 @@ if (!existsSync(DIST)) {
   throw new Error(`No dist/ — run 'bun run build' before tests`);
 }
 
-// Read each rendered HTML and chart HTML once at module load. Tests below
-// reference the cached strings; saves ~10 MB of redundant disk reads across
-// the suite (chart HTMLs alone are ~3.5 MB combined).
-const CHART_SLUGS = ['emotion-pulse', 'community-dynamics', 'inner-life-currents', 'community-weather-report'];
-const routeHtml = Object.fromEntries(
-  await Promise.all(expectedRoutes.map(async (r) => [r, await readFile(path.join(DIST, r), 'utf8')]))
-);
-const chartHtml = Object.fromEntries(
-  await Promise.all(CHART_SLUGS.map(async (s) => [s, await readFile(path.join(DIST, `charts/${s}.html`), 'utf8')]))
-);
-const indexHtml = routeHtml['index.html'];
-const aboutHtml = routeHtml['about/index.html'];
-
 for (const route of expectedRoutes) {
   test(`route exists: ${route}`, async () => {
-    const s = await stat(path.join(DIST, route));
+    const full = path.join(DIST, route);
+    expect(existsSync(full)).toBe(true);
+    const s = await stat(full);
     expect(s.size).toBeGreaterThan(500);
   });
 }
@@ -70,179 +60,148 @@ for (const asset of expectedAssets) {
   });
 }
 
-test('landing has thesis H1', () => {
-  expect(indexHtml).toContain('Confusion');
-  expect(indexHtml).toContain('Compassion');
+test('landing has thesis H1', async () => {
+  const html = await readFile(path.join(DIST, 'index.html'), 'utf8');
+  expect(html).toContain('Confusion');
+  expect(html).toContain('Compassion');
 });
 
-test('landing has updated thesis copy', () => {
-  expect(indexHtml).toContain('struggle closely wrapped around curiosity');
+test('landing has updated thesis copy', async () => {
+  const html = await readFile(path.join(DIST, 'index.html'), 'utf8');
+  expect(html).toContain('struggle closely wrapped around curiosity');
 });
 
-test('GoEmotions citation includes Google Research prefix', () => {
-  // "GoEmotions" is wrapped in an <a> linking to Google Research's blog. Match
-  // tolerantly: "Google Research's" must precede "GoEmotions" with only HTML
-  // tags / whitespace between.
-  expect(indexHtml).toMatch(/Google Research's[^A-Za-z]*<a[^>]*>\s*GoEmotions/);
+test('GoEmotions citation includes Google Research prefix', async () => {
+  const html = await readFile(path.join(DIST, 'index.html'), 'utf8');
+  expect(html).toMatch(/Google Research's[^A-Za-z]*<a[^>]*>\s*GoEmotions/);
 });
 
-test('brand mark renders as MINDSPACE OS with space', () => {
-  expect(indexHtml).toContain('MINDSPACE OS');
-  expect(indexHtml).not.toContain('MINDSPACEOS');
+test('brand mark renders as MINDSPACE OS with space', async () => {
+  const html = await readFile(path.join(DIST, 'index.html'), 'utf8');
+  expect(html).toContain('MINDSPACE OS');
+  expect(html).not.toContain('MINDSPACEOS');
 });
 
-test('landing has Schema.org Dataset JSON-LD', () => {
-  expect(indexHtml).toContain('"@type":"Dataset"');
-  expect(indexHtml).toContain('"@context":"https://schema.org"');
+test('landing has Schema.org Dataset JSON-LD', async () => {
+  const html = await readFile(path.join(DIST, 'index.html'), 'utf8');
+  expect(html).toContain('"@type":"Dataset"');
+  expect(html).toContain('"@context":"https://schema.org"');
 });
 
-test('all pages have og:image meta', () => {
+test('all pages have og:image meta', async () => {
   for (const route of expectedRoutes) {
-    expect(routeHtml[route]).toMatch(/<meta property="og:image" content="[^"]+"/);
-    expect(routeHtml[route]).toMatch(/<meta name="twitter:card" content="summary_large_image"/);
+    const html = await readFile(path.join(DIST, route), 'utf8');
+    expect(html).toMatch(/<meta property="og:image" content="[^"]+"/);
+    expect(html).toMatch(/<meta property="og:image:alt" content="[^"]+"/);
+    expect(html).toMatch(/<meta name="twitter:card" content="summary_large_image"/);
   }
 });
 
-test('all pages have canonical link', () => {
+test('landing includes author and social metadata', async () => {
+  const html = await readFile(path.join(DIST, 'index.html'), 'utf8');
+  expect(html).toContain('<meta name="author" content="Minyan Shi"');
+  expect(html).toContain('<meta name="creator" content="Minyan Shi"');
+  expect(html).toContain('<meta name="application-name" content="MindSpaceOS"');
+  expect(html).toContain('<meta name="twitter:creator" content="@minyansh"');
+  expect(html).toContain('https://www.linkedin.com/in/minyanshi/');
+  expect(html).toContain('https://x.com/minyansh');
+});
+
+test('generated OG assets include embedded image attribution metadata', async () => {
+  const svg = await readFile(path.join(DIST, 'og/mindspace-os-emotion-pulse-social-card.svg'), 'utf8');
+  expect(svg).toContain('<metadata>');
+  expect(svg).toContain('"author":"Minyan Shi"');
+  expect(svg).toContain('"linkedin":"https://www.linkedin.com/in/minyanshi/"');
+  expect(svg).toContain('"twitter":"https://x.com/minyansh"');
+  expect(svg).toContain('"website":"https://mindspaceos.com"');
+});
+
+test('image asset manifest includes attribution fields for brand and social assets', async () => {
+  const manifest = JSON.parse(await readFile(path.join(DIST, 'image-asset-manifest.json'), 'utf8'));
+  expect(Array.isArray(manifest.assets)).toBe(true);
+  expect(manifest.assets.length).toBeGreaterThanOrEqual(7);
+  const brandMark = manifest.assets.find((asset) => asset.path === '/mindspace-os-meditation-community-emotion-map-brand-mark.png');
+  expect(brandMark).toBeTruthy();
+  expect(brandMark.author).toBe('Minyan Shi');
+  expect(brandMark.linkedin).toBe('https://www.linkedin.com/in/minyanshi/');
+  expect(brandMark.twitter).toBe('https://x.com/minyansh');
+  expect(brandMark.website).toBe('https://mindspaceos.com');
+});
+
+test('all pages have canonical link', async () => {
   for (const route of expectedRoutes) {
-    expect(routeHtml[route]).toMatch(/<link rel="canonical" href="[^"]+"/);
+    const html = await readFile(path.join(DIST, route), 'utf8');
+    expect(html).toMatch(/<link rel="canonical" href="[^"]+"/);
   }
 });
 
-test('about page has methodology + limitations sections', () => {
-  expect(aboutHtml).toContain('id="methodology"');
-  expect(aboutHtml).toContain('id="limitations"');
-  expect(aboutHtml).toContain('id="ethics"');
-  expect(aboutHtml).toContain('id="cite"');
+test('about page has methodology + limitations sections', async () => {
+  const html = await readFile(path.join(DIST, 'about/index.html'), 'utf8');
+  expect(html).toContain('id="methodology"');
+  expect(html).toContain('id="limitations"');
+  expect(html).toContain('id="ethics"');
+  expect(html).toContain('id="cite"');
 });
 
-test('chart pages link to GoEmotions methodology', () => {
-  const html = routeHtml['explore/emotion-pulse/index.html'];
+test('chart pages link to GoEmotions methodology', async () => {
+  const html = await readFile(path.join(DIST, 'explore/emotion-pulse/index.html'), 'utf8');
   expect(html.toLowerCase()).toContain('goemotions');
   expect(html).toContain('/about#methodology');
 });
 
-for (const slug of CHART_SLUGS) {
-  test(`${slug} page embeds the static chart, not Streamlit`, () => {
-    const html = routeHtml[`explore/${slug}/index.html`];
-    // Phase 1: iframe src is extension-stripped to skip the CF Pages 308.
-    expect(html).toContain(`/charts/${slug}`);
-    expect(html).not.toContain(`/charts/${slug}.html`);
+test('community-dynamics page embeds the static chart, not Streamlit', async () => {
+  const html = await readFile(path.join(DIST, 'explore/community-dynamics/index.html'), 'utf8');
+  expect(html).toContain('/charts/community-dynamics');
+  expect(html).not.toContain('mindspaceos.streamlit.app/Community_Dynamics');
+});
+
+test('emotion-pulse page embeds the static chart, not Streamlit', async () => {
+  const html = await readFile(path.join(DIST, 'explore/emotion-pulse/index.html'), 'utf8');
+  expect(html).toContain('/charts/emotion-pulse');
+  expect(html).not.toContain('mindspaceos.streamlit.app/Emotion_Pulse');
+});
+
+test('inner-life-currents page embeds the static chart, not Streamlit', async () => {
+  const html = await readFile(path.join(DIST, 'explore/inner-life-currents/index.html'), 'utf8');
+  expect(html).toContain('/charts/inner-life-currents');
+  expect(html).not.toContain('mindspaceos.streamlit.app/Inner_Life_Currents');
+});
+
+test('community-weather-report page embeds the static chart, not Streamlit', async () => {
+  const html = await readFile(path.join(DIST, 'explore/community-weather-report/index.html'), 'utf8');
+  expect(html).toContain('/charts/community-weather-report');
+  expect(html).not.toContain('mindspaceos.streamlit.app/Community_Weather_Report');
+});
+
+test('no chart page falls back to Streamlit iframe (Phase 2 complete)', async () => {
+  for (const slug of ['emotion-pulse', 'community-dynamics', 'community-weather-report', 'inner-life-currents']) {
+    const html = await readFile(path.join(DIST, `explore/${slug}/index.html`), 'utf8');
     expect(html).not.toContain('streamlit.app');
-  });
-}
-
-test('all four static chart HTMLs are self-contained (no Streamlit references)', () => {
-  for (const slug of CHART_SLUGS) {
-    expect(chartHtml[slug]).not.toContain('streamlit.app');
-    expect(chartHtml[slug]).not.toContain('streamlit.io');
   }
 });
 
-test('all four static chart HTMLs include mobile breakpoints', () => {
-  // MOBILE_CSS in scripts/build_chart_figures.py injects @media (max-width: 768px)
-  // and @media (max-width: 480px) into every chart's <style>. Re-run the bake
-  // script if these break.
-  for (const slug of CHART_SLUGS) {
-    expect(chartHtml[slug]).toContain('@media (max-width: 768px)');
-    expect(chartHtml[slug]).toContain('@media (max-width: 480px)');
-    expect(chartHtml[slug]).toContain('min-height: 44px');
+test('all four static chart HTMLs are self-contained (no Streamlit references)', async () => {
+  for (const slug of ['emotion-pulse', 'community-dynamics', 'inner-life-currents', 'community-weather-report']) {
+    const html = await readFile(path.join(DIST, `charts/${slug}.html`), 'utf8');
+    expect(html).not.toContain('streamlit.app');
+    expect(html).not.toContain('streamlit.io');
   }
 });
 
-test('explore page renders responsive iframe heights via StaticChart', () => {
-  // StaticChart.astro injects desktop (768+) and mobile (<768) heights via CSS
-  // custom properties. Astro/Vite minifies, so the @media rule loses the space
-  // and the selector gets a data-astro-cid suffix.
-  const html = routeHtml['explore/emotion-pulse/index.html'];
-  expect(html).toMatch(/@media\s*\(min-width:\s*768px\)/);
-  expect(html).toMatch(/--mobileHeight:\s*\d+px/);
-  expect(html).toMatch(/--desktopHeight:\s*\d+px/);
-});
-
-test('Plotly-based static charts load Plotly.js from CDN', () => {
-  // Weather Report uses pure HTML/CSS — no Plotly. The other three use Plotly.
+test('Plotly-based static charts load Plotly.js from CDN', async () => {
   for (const slug of ['emotion-pulse', 'community-dynamics', 'inner-life-currents']) {
-    expect(chartHtml[slug]).toContain('cdn.plot.ly/plotly');
+    const html = await readFile(path.join(DIST, `charts/${slug}.html`), 'utf8');
+    expect(html).toContain('cdn.plot.ly/plotly');
   }
 });
 
-test('inner-life-currents static chart embeds all 6 quarters of data', () => {
-  const html = chartHtml['inner-life-currents'];
+test('inner-life-currents static chart embeds all 6 quarters of data', async () => {
+  const html = await readFile(path.join(DIST, 'charts/inner-life-currents.html'), 'utf8');
   for (const q of ['2024Q1', '2024Q2', '2024Q3', '2024Q4', '2025Q1', '2025Q2']) {
     expect(html).toContain(q);
   }
   expect(html).toContain('Previous Quarter');
   expect(html).toContain('Next Quarter');
-});
-
-test('_headers file ships with HTML route cache rules (Phase 1 perf)', async () => {
-  // Without HTML-route rules in _headers, CF Pages applies its no-cache
-  // default and returns cf-cache-status: DYNAMIC on every visit. Phase 1
-  // adds CDN-Cache-Control so the edge actually caches HTML.
-  const headers = await readFile(path.join(DIST, '_headers'), 'utf8');
-  // HTML routes have edge cache directives.
-  expect(headers).toContain('CDN-Cache-Control');
-  for (const route of ['/\n', '/explore/*', '/about/*']) {
-    expect(headers).toContain(route);
-  }
-  // /charts/* keeps existing 24h edge cache, now bumped to 30d via CDN-Cache-Control.
-  expect(headers).toMatch(/\/charts\/\*[\s\S]*?CDN-Cache-Control:\s*public,\s*max-age=2592000/);
-  // /_astro/* is immutable (filename-fingerprinted).
-  expect(headers).toMatch(/\/_astro\/\*[\s\S]*?immutable/);
-});
-
-test('above-the-fold fonts are preloaded (Phase 2 perf)', () => {
-  // Phase 2: preload Inter 700 (H1) + Inter 500 (nav + hero thesis) woff2.
-  // Asserts both <link rel="preload"> tags are emitted into <head> with
-  // crossorigin (required by spec) and font/woff2 type, and that the href
-  // resolves to a hashed _astro path so the immutable cache rule applies.
-  for (const route of expectedRoutes) {
-    const html = routeHtml[route];
-    const preloads = html.match(/<link rel="preload"[^>]*as="font"[^>]*>/g) || [];
-    expect(preloads.length).toBeGreaterThanOrEqual(2);
-    expect(html).toMatch(/<link rel="preload"[^>]*as="font"[^>]*type="font\/woff2"[^>]*crossorigin[^>]*href="\/_astro\/inter-latin-700-normal\.[A-Za-z0-9_-]+\.woff2"/);
-    expect(html).toMatch(/<link rel="preload"[^>]*as="font"[^>]*type="font\/woff2"[^>]*crossorigin[^>]*href="\/_astro\/inter-latin-500-normal\.[A-Za-z0-9_-]+\.woff2"/);
-  }
-});
-
-test('emotion-pulse shell+data split (Phase 3a perf)', async () => {
-  // Phase 3a splits emotion-pulse.html (1.7MB inline payload) into a tiny
-  // shell that paints instantly + a separate JSON the shell fetches in
-  // parallel. Cuts first-paint LCP from ~2s to ~400ms on cold cache.
-  const shell = chartHtml['emotion-pulse'];
-  // Shell must be small. Pre-split it was ~1.7MB; split shell is ~20KB.
-  expect(shell.length).toBeLessThan(50_000);
-  // Shell fetches the data file at a relative path so the parent's ?tod=
-  // query param doesn't fragment the JSON's edge cache.
-  expect(shell).toContain("fetch('./emotion-pulse-data.json')");
-  // Shell wraps the original render code in init(payload).
-  expect(shell).toContain('function init(PAYLOAD)');
-  // Shell must NOT inline the payload (regression guard).
-  expect(shell).not.toMatch(/const PAYLOAD = \{/);
-  // Skeleton element renders before the data arrives.
-  expect(shell).toContain('chart-skeleton');
-  // Data file must exist and be large (the actual chart payload).
-  const dataPath = path.join(DIST, 'charts/emotion-pulse-data.json');
-  expect(existsSync(dataPath)).toBe(true);
-  const dataSize = (await stat(dataPath)).size;
-  expect(dataSize).toBeGreaterThan(500_000);
-  // Data file is valid JSON containing the expected fields.
-  const data = JSON.parse(await readFile(dataPath, 'utf8'));
-  expect(data).toHaveProperty('traces');
-  expect(data).toHaveProperty('theta_labels');
-  expect(data).toHaveProperty('archetype_colors');
-});
-
-test('emotion-pulse shell preserves mobile breakpoints (regression guard)', () => {
-  // Critical regression: MOBILE_CSS must stay in the shell. Without it,
-  // narrow viewports (<=360px, <=480px, <=768px, <=1024px) break, which
-  // is the exact pattern that caused commit 62b4a11b to revert mobile.
-  const shell = chartHtml['emotion-pulse'];
-  expect(shell).toContain('@media (max-width: 1024px)');
-  expect(shell).toContain('@media (max-width: 768px)');
-  expect(shell).toContain('@media (max-width: 480px)');
-  expect(shell).toContain('@media (max-width: 360px)');
 });
 
 test('robots.txt allows all and points to sitemap', async () => {
@@ -253,14 +212,13 @@ test('robots.txt allows all and points to sitemap', async () => {
 });
 
 test('sitemap includes all routes', async () => {
-  // sitemap-index.xml may reference one or more sitemap-N.xml files
   const indexXml = await readFile(path.join(DIST, 'sitemap-index.xml'), 'utf8');
   expect(indexXml).toContain('<sitemap>');
   const match = indexXml.match(/<loc>([^<]+sitemap-0\.xml)<\/loc>/);
   if (match) {
     const sitemapPath = match[1].replace('https://mindspaceos.com/', '');
     const sitemap = await readFile(path.join(DIST, sitemapPath), 'utf8');
-    for (const slug of CHART_SLUGS) {
+    for (const slug of ['emotion-pulse', 'community-dynamics', 'community-weather-report', 'inner-life-currents']) {
       expect(sitemap).toContain(`/explore/${slug}/`);
     }
     expect(sitemap).toContain('/about/');

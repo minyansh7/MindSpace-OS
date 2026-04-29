@@ -26,18 +26,29 @@ interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
+  ogImageAlt?: string;
   pathname?: string;
 }
 
 const {
   title = project.name + ' — ' + project.tagline,
   description = project.thesis,
-  ogImage = '/og/default.png',
+  ogImage = '/og/mindspace-os-meditation-community-emotion-map-overview-social-card.svg',
+  ogImageAlt = `${project.name} social preview card for ${project.tagline}`,
   pathname = '/',
 } = Astro.props;
 
 const canonicalUrl = new URL(pathname, project.domain).toString();
 const ogUrl = new URL(ogImage, project.domain).toString();
+const keywords = [
+  project.name,
+  project.alternate_name,
+  'meditation data visualization',
+  'emotion map',
+  'reddit meditation analysis',
+  'online community emotions',
+  project.author,
+].filter(Boolean).join(', ');
 ---
 <!doctype html>
 <html lang="en">
@@ -52,6 +63,11 @@ const ogUrl = new URL(ogImage, project.domain).toString();
     <link rel="preload" as="font" type="font/woff2" crossorigin href={inter500Url} />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="keywords" content={keywords} />
+    <meta name="author" content={project.author} />
+    <meta name="creator" content={project.author} />
+    <meta name="publisher" content={project.made_by} />
+    <meta name="application-name" content={project.alternate_name ?? project.name} />
     <meta name="generator" content={Astro.generator} />
     <link rel="canonical" href={canonicalUrl} />
 
@@ -60,6 +76,7 @@ const ogUrl = new URL(ogImage, project.domain).toString();
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={ogUrl} />
+    <meta property="og:image:alt" content={ogImageAlt} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:site_name" content={project.name} />
@@ -68,9 +85,9 @@ const ogUrl = new URL(ogImage, project.domain).toString();
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogUrl} />
-    <meta name="twitter:creator" content="@MinyanLabs" />
-
-    <meta name="author" content={identity.person.name} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
+    {project.twitter_handle && <meta name="twitter:site" content={project.twitter_handle} />}
+    {project.twitter_handle && <meta name="twitter:creator" content={project.twitter_handle} />}
     <link rel="author" href={identity.links.resume} />
 
     <JsonLd type="WebSite" />

@@ -18,7 +18,8 @@ const otherPages = pages.filter((p) => p.slug !== page.slug);
 <Base
   title={`${page.title} — ${project.name}`}
   description={page.subtitle}
-  ogImage={`/og/${page.slug}.png`}
+  ogImage={page.social_image ?? '/og/mindspace-os-meditation-community-emotion-map-overview-social-card.svg'}
+  ogImageAlt={`${project.name} ${page.title} social preview`}
   pathname={`/explore/${page.slug}/`}
 >
   <JsonLd

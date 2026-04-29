@@ -10,7 +10,8 @@ const goEmotions = citations.find((c) => c.id === 'goemotions')!;
 <Base
   title={`About — ${project.name}`}
   description="How this project was built, what the data can and can't tell you, and how to cite it."
-  ogImage="/og/about.png"
+  ogImage="/og/mindspace-os-about-methodology-social-card.svg"
+  ogImageAlt="MindSpace OS about page social card covering methodology, limitations, and citations"
   pathname="/about/"
 >
   <JsonLd
@@ -128,8 +129,10 @@ const goEmotions = citations.find((c) => c.id === 'goemotions')!;
       </p>
       <p>
         <strong>Available for select 2026 consulting engagements.</strong>
-        Subscribe to the <a href={identity.links.substack} target="_blank" rel="noopener">Substack</a> for new work.
-        Reach out at <a href={`mailto:${identity.person.email}`}>{identity.person.email}</a>.
+        Find me on <a href={project.linkedin} target="_blank" rel="noopener">LinkedIn</a> and
+        <a href={project.twitter} target="_blank" rel="noopener"> X</a>, subscribe to the
+        <a href={identity.links.substack} target="_blank" rel="noopener"> Substack</a> for new work,
+        and reach out at <a href={`mailto:${identity.person.email}`}>{identity.person.email}</a>.
       </p>
     </div>
   </article>

@@ -2,18 +2,42 @@
   "$comment": "Single source of truth for the MindSpace OS site. Imported by both Python (Streamlit) and JS/TS (Astro shell). Do not duplicate these values inline; add a CI test that asserts no inline duplicates.",
   "project": {
     "name": "MindSpace OS",
+    "alternate_name": "MindSpaceOS",
     "tagline": "The emotional shape of meditation communities online",
     "thesis": "The dominant emotion isn't peace. It's struggle closely wrapped around curiosity.",
+    "author": "Minyan Shi",
+    "made_by": "Minyan Shi",
     "anchor_quotes": [
       "The vocabulary that dominates is 'I'm trying again.'",
       "Comments pull people inward toward intimacy rather than amplification."
     ],
+    "website": "https://mindspaceos.com",
     "domain": "https://mindspaceos.com",
     "essays_subdomain": "https://essays.mindspaceos.com",
     "github": "https://github.com/minyansh7/MindSpace-OS",
     "substack_pub": "https://minyansh.substack.com",
-    "twitter": null,
+    "twitter": "https://x.com/minyansh",
+    "twitter_handle": "@minyansh",
     "linkedin": "https://www.linkedin.com/in/minyanshi/",
+    "linkedin_handle": "minyanshi",
+    "image_metadata": {
+      "author": "Minyan Shi",
+      "linkedin": "https://www.linkedin.com/in/minyanshi/",
+      "twitter": "https://x.com/minyansh",
+      "website": "https://mindspaceos.com",
+      "purpose": "Optimize MindSpace OS image assets for AI mentions, attribution, and brand association.",
+      "naming_convention": "Use lowercase kebab-case filenames prefixed with mindspace-os-, followed by the subject, context, and output role.",
+      "keywords": [
+        "MindSpace OS",
+        "MindSpaceOS",
+        "meditation community emotion map",
+        "meditation data visualization",
+        "reddit meditation analysis",
+        "emotion archetypes",
+        "community dynamics",
+        "MindSpace OS social card"
+      ]
+    },
     "contact": "minyanshi@proton.me",
     "takedown": "minyanshi@proton.me"
   },
@@ -117,21 +141,25 @@
       "subtitle": "Where the conversation's emotional vocabulary lands",
       "intro": "A UMAP map of every post, colored by its dominant emotion (GoEmotions, 27 categories). Posts using similar emotional language sit close together. Five recurring archetypes emerge as distinct neighborhoods: Reflective Caring, Soothing Empathy, Tender Uncertainty, Melancholic Confusion, Anxious Concern.",
       "callout": "Joy ranks 25th of 28 emotions. Amusement is dead last.",
-      "screenshot": "/screenshots/emotion-pulse.svg",
+      "streamlit_path": "/Emotion_Pulse",
+      "screenshot": "/screenshots/mindspace-os-emotion-pulse-chart-preview.svg",
       "desktop_height": 800,
       "mobile_height": 640,
-      "footnote_variant": "goemotions"
+      "footnote_variant": "goemotions",
+      "social_image": "/og/mindspace-os-emotion-pulse-social-card.svg"
     },
     {
       "slug": "community-dynamics",
       "title": "Community dynamics",
       "subtitle": "Who responds to whom, emotionally",
-      "intro": "Each ribbon shows how a post's emotional tone flows into its reply's tone. Grief gets mirrored: about 1 in 4 people reply with grief themselves. Anxiety doesn't \u2014 only 7 out of 100 reply with anxiety; more than half offer warm reassurance instead. The community has unwritten response rules.",
+      "intro": "Each ribbon shows how a poster's emotional tone flows into the commenter's tone. Grief gets mirrored: about 1 in 4 people reply with grief themselves. Anxiety doesn't \u2014 only 7 out of 100 reply with anxiety; more than half offer warm reassurance instead. The community has unwritten response rules.",
       "callout": "Grief gets mirrored. Anxiety gets reassurance. Soothing Empathy leads in the replies.",
-      "screenshot": "/screenshots/community-dynamics.svg",
+      "streamlit_path": "/Community_Dynamics",
+      "screenshot": "/screenshots/mindspace-os-community-dynamics-chart-preview.svg",
       "desktop_height": 1000,
       "mobile_height": 860,
-      "footnote_variant": "goemotions"
+      "footnote_variant": "goemotions",
+      "social_image": "/og/mindspace-os-community-dynamics-social-card.svg"
     },
     {
       "slug": "community-weather-report",
@@ -139,10 +167,12 @@
       "subtitle": "How the community mood shifts over time",
       "intro": "Each region is one of seven topic clusters across six quarters of meditation discourse, January 2024 through June 2025. The cluster's mean sentiment score is bucketed into five bands \u2014 sunny, clearing up, cloudy, light showers, storm warning \u2014 luckily, nothing stormy. The breakdown underneath surfaces the top three pain points within each topic.",
       "callout": "",
-      "screenshot": "/screenshots/community-weather-report.svg",
+      "streamlit_path": "/Community_Weather_Report",
+      "screenshot": "/screenshots/mindspace-os-community-weather-report-chart-preview.svg",
       "desktop_height": 1200,
       "mobile_height": 1800,
-      "footnote_variant": "weather"
+      "footnote_variant": "weather",
+      "social_image": "/og/mindspace-os-community-weather-report-social-card.svg"
     },
     {
       "slug": "inner-life-currents",
@@ -150,10 +180,12 @@
       "subtitle": "How theme connections shift over time",
       "intro": "Theme co-occurrences within the most active threads, quarter by quarter.",
       "callout": "",
-      "screenshot": "/screenshots/inner-life-currents.svg",
+      "streamlit_path": "/Inner_Life_Currents",
+      "screenshot": "/screenshots/mindspace-os-inner-life-currents-chart-preview.svg",
       "desktop_height": 1400,
       "mobile_height": 760,
-      "footnote_variant": "currents"
+      "footnote_variant": "currents",
+      "social_image": "/og/mindspace-os-inner-life-currents-social-card.svg"
     }
   ],
   "essays": [
@@ -200,9 +232,10 @@
     }
   ],
   "limitations": [
-    "Sample bias: posters are self-selected into the platform; they're not 'all meditators.'",
-    "Self-selection: the people who post are not the people who don't. People who never post are invisible to this dataset.",
+    "Sample bias: r/meditation posters self-select into the platform; they're not 'all meditators.'",
+    "Self-selection: the people who post are not the people who don't. Lurkers are invisible to this dataset.",
     "Time window: 18 months covers a single annual cycle; longer-period seasonal effects are not visible.",
-    "English only."
+    "English only.",
+    "GoEmotions circularity: the classifier was trained on Reddit comments, so applying it back onto Reddit is useful for comparison within the platform but not a claim of universal emotional ground truth."
   ]
 }
