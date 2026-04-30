@@ -10,6 +10,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 const canonical = JSON.parse(await readFile(path.join(root, '../data/canonical.json'), 'utf8'));
 const imageMeta = canonical.project.image_metadata ?? {};
+const baseOgPng = await readFile(path.join(root, 'public/og/default.png'));
+const baseOgDataUrl = `data:image/png;base64,${baseOgPng.toString('base64')}`;
 
 await mkdir(path.join(root, 'public/og'), { recursive: true });
 await mkdir(path.join(root, 'public/screenshots'), { recursive: true });
@@ -18,6 +20,8 @@ const ground = '#0B0E13';
 const accent = '#7DA3FF';
 const text = '#E8ECF2';
 const tertiary = '#5C6478';
+const coral = '#FF7467';
+const warmWhite = '#FFF7F1';
 const siteUrl = canonical.project.website ?? canonical.project.domain ?? 'https://mindspaceos.com';
 
 function metadataBlock({ title, description, assetType, assetPath, width, height, extraKeywords = [] }) {
@@ -41,6 +45,13 @@ function metadataBlock({ title, description, assetType, assetPath, width, height
 
 function ogCard({ title, subtitle, accentColor = accent, assetPath }) {
   const description = subtitle || `${canonical.project.name} social card`;
+  const lines = splitTitle(title);
+  const fontSize = lines.length >= 3 ? 72 : 82;
+  const lineHeight = lines.length >= 3 ? 82 : 92;
+  const kicker = (subtitle || canonical.project.tagline).toUpperCase();
+  const kickerLines = wrapText(kicker, 54);
+  const footer = subtitle || canonical.project.tagline;
+  const titleStartY = 460 - ((lines.length - 1) * lineHeight) / 2;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="title desc">
   <title id="title">${escape(title)}</title>
   <desc id="desc">${escape(description)}</desc>
@@ -53,19 +64,18 @@ function ogCard({ title, subtitle, accentColor = accent, assetPath }) {
     height: 630,
     extraKeywords: ['social card', 'open graph image', title],
   })}</metadata>
+  <image href="${baseOgDataUrl}" x="0" y="0" width="1200" height="630" preserveAspectRatio="xMidYMid slice"/>
+  <rect x="16" y="332" width="860" height="286" rx="18" fill="${coral}" fill-opacity="0.96"/>
+  <rect x="16" y="332" width="860" height="286" rx="18" fill="url(#panelFade)"/>
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${ground}"/>
-      <stop offset="1" stop-color="#141821"/>
+    <linearGradient id="panelFade" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="${coral}" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="${accentColor}" stop-opacity="0.14"/>
     </linearGradient>
   </defs>
-  <rect width="1200" height="630" fill="url(#bg)"/>
-  <text x="80" y="100" fill="${tertiary}" font-family="ui-monospace, Menlo, monospace" font-size="20" letter-spacing="2" text-transform="uppercase">MINDSPACE OS</text>
-  <text x="80" y="280" fill="${text}" font-family="Inter, system-ui, sans-serif" font-size="72" font-weight="700" letter-spacing="-2">${escape(title.slice(0, 50))}</text>
-  ${title.length > 50 ? `<text x="80" y="360" fill="${text}" font-family="Inter, system-ui, sans-serif" font-size="72" font-weight="700" letter-spacing="-2">${escape(title.slice(50, 100))}</text>` : ''}
-  <text x="80" y="${title.length > 50 ? 460 : 380}" fill="${tertiary}" font-family="Source Serif 4, Georgia, serif" font-style="italic" font-size="32">${escape(subtitle)}</text>
-  <line x1="80" y1="540" x2="1120" y2="540" stroke="${accentColor}" stroke-width="2"/>
-  <text x="80" y="580" fill="${tertiary}" font-family="Inter, system-ui, sans-serif" font-size="20">mindspaceos.com · A field guide to the emotional shape of meditation online communities</text>
+  ${kickerLines.map((line, index) => `<text x="32" y="${366 + index * 24}" fill="${warmWhite}" font-family="ui-monospace, Menlo, monospace" font-size="14" letter-spacing="3.4">${escape(line)}</text>`).join('\n  ')}
+  ${lines.map((line, index) => `<text x="32" y="${titleStartY + index * lineHeight}" fill="${warmWhite}" font-family="Arial, Helvetica, sans-serif" font-size="${fontSize}" font-weight="700" letter-spacing="-3.2">${escape(line)}</text>`).join('\n  ')}
+  <text x="32" y="607" fill="${warmWhite}" font-family="Arial, Helvetica, sans-serif" font-size="24" letter-spacing="-0.4">${escape(footer)}</text>
 </svg>`;
 }
 
@@ -97,6 +107,50 @@ function chartPlaceholder({ title, accentColor, assetPath }) {
 
 function escape(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function splitTitle(title) {
+  const words = title.trim().split(/\s+/);
+  const maxLines = words.length >= 4 ? 3 : 2;
+  const maxChars = maxLines === 3 ? 14 : 16;
+  return wrapWords(words, maxLines, maxChars).map((line, index, arr) =>
+    index === arr.length - 1 ? `${line}.` : line
+  );
+}
+
+function wrapText(textValue, maxChars) {
+  return wrapWords(textValue.trim().split(/\s+/), 2, maxChars);
+}
+
+function wrapWords(words, maxLines, maxChars) {
+  const lines = [];
+  let current = '';
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length <= maxChars || !current) {
+      current = candidate;
+      continue;
+    }
+    lines.push(current);
+    current = word;
+  }
+  if (current) lines.push(current);
+  if (lines.length <= maxLines) return lines;
+
+  const compact = [];
+  for (const word of words) {
+    if (!compact.length) {
+      compact.push(word);
+      continue;
+    }
+    const last = compact[compact.length - 1];
+    if (last.length + word.length + 1 <= maxChars || compact.length === maxLines) {
+      compact[compact.length - 1] = `${last} ${word}`;
+    } else {
+      compact.push(word);
+    }
+  }
+  return compact.slice(0, maxLines);
 }
 
 const manifest = [];
