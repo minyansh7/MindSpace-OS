@@ -11,7 +11,6 @@
       <stop offset="1" stop-color="#8C7DE0" stop-opacity="0.14"/>
     </linearGradient>
   </defs>
-  <text x="32" y="366" fill="#FFF7F1" font-family="ui-monospace, Menlo, monospace" font-size="14" letter-spacing="3.4">HOW THE COMMUNITY MOOD SHIFTS OVER TIME</text>
   <text x="32" y="414" fill="#FFF7F1" font-family="Arial, Helvetica, sans-serif" font-size="82" font-weight="700" letter-spacing="-3.2">Community</text>
   <text x="32" y="506" fill="#FFF7F1" font-family="Arial, Helvetica, sans-serif" font-size="82" font-weight="700" letter-spacing="-3.2">weather report.</text>
   <text x="32" y="607" fill="#FFF7F1" font-family="Arial, Helvetica, sans-serif" font-size="24" letter-spacing="-0.4">How the community mood shifts over time</text>

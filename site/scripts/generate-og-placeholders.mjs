@@ -48,8 +48,6 @@ function ogCard({ title, subtitle, accentColor = accent, assetPath }) {
   const lines = splitTitle(title);
   const fontSize = lines.length >= 3 ? 72 : 82;
   const lineHeight = lines.length >= 3 ? 82 : 92;
-  const kicker = (subtitle || canonical.project.tagline).toUpperCase();
-  const kickerLines = wrapText(kicker, 54);
   const footer = subtitle || canonical.project.tagline;
   const titleStartY = 460 - ((lines.length - 1) * lineHeight) / 2;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="title desc">
@@ -73,7 +71,6 @@ function ogCard({ title, subtitle, accentColor = accent, assetPath }) {
       <stop offset="1" stop-color="${accentColor}" stop-opacity="0.14"/>
     </linearGradient>
   </defs>
-  ${kickerLines.map((line, index) => `<text x="32" y="${366 + index * 24}" fill="${warmWhite}" font-family="ui-monospace, Menlo, monospace" font-size="14" letter-spacing="3.4">${escape(line)}</text>`).join('\n  ')}
   ${lines.map((line, index) => `<text x="32" y="${titleStartY + index * lineHeight}" fill="${warmWhite}" font-family="Arial, Helvetica, sans-serif" font-size="${fontSize}" font-weight="700" letter-spacing="-3.2">${escape(line)}</text>`).join('\n  ')}
   <text x="32" y="607" fill="${warmWhite}" font-family="Arial, Helvetica, sans-serif" font-size="24" letter-spacing="-0.4">${escape(footer)}</text>
 </svg>`;
@@ -116,10 +113,6 @@ function splitTitle(title) {
   return wrapWords(words, maxLines, maxChars).map((line, index, arr) =>
     index === arr.length - 1 ? `${line}.` : line
   );
-}
-
-function wrapText(textValue, maxChars) {
-  return wrapWords(textValue.trim().split(/\s+/), 2, maxChars);
 }
 
 function wrapWords(words, maxLines, maxChars) {
